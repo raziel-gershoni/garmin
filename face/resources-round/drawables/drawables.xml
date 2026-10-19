@@ -1,0 +1,15 @@
+<drawables>
+    <!-- Material Design Icons (tools/build-icons.mjs, tools/LICENSE-mdi.txt), white on transparent, tinted when drawn -->
+    <bitmap id="IconHeart" filename="icon_heart.png" automaticPalette="false"/>
+    <bitmap id="IconBattery" filename="icon_battery.png" automaticPalette="false"/>
+    <bitmap id="IconBattery80" filename="icon_battery80.png" automaticPalette="false"/>
+    <bitmap id="IconBattery50" filename="icon_battery50.png" automaticPalette="false"/>
+    <bitmap id="IconBattery20" filename="icon_battery20.png" automaticPalette="false"/>
+    <bitmap id="IconSteps" filename="icon_steps.png" automaticPalette="false"/>
+    <bitmap id="IconAltitude" filename="icon_altitude.png" automaticPalette="false"/>
+    <bitmap id="IconSunrise" filename="icon_sunrise.png" automaticPalette="false"/>
+    <bitmap id="IconSunset" filename="icon_sunset.png" automaticPalette="false"/>
+    <bitmap id="IconBodyBattery" filename="icon_bodybattery.png" automaticPalette="false"/>
+    <bitmap id="IconNotifications" filename="icon_notifications.png" automaticPalette="false"/>
+    <bitmap id="IconCalories" filename="icon_calories.png" automaticPalette="false"/>
+</drawables>

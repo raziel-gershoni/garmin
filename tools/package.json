@@ -4,6 +4,9 @@
   "type": "module",
   "description": "Test oracles and fixture generators for the Hebrew Face Connect IQ apps",
   "dependencies": {
-    "@hebcal/core": "^6.14.5"
+    "@hebcal/core": "^6.14.5",
+    "@mdi/svg": "^7.4.47",
+    "@resvg/resvg-js": "^2.6.2",
+    "pngjs": "^7.0.0"
   }
 }
