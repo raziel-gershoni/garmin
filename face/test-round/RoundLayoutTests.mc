@@ -207,3 +207,18 @@ function fullProgressDrawsACircle(logger as Logger) as Boolean {
     return !Rings.isFull(0.0) && !Rings.isFull(0.5) && !Rings.isFull(0.99)
         && Rings.isFull(0.999) && Rings.isFull(1.0);
 }
+
+// Holding a ring targets its complication; an empty slot or the centre targets nothing.
+(:test)
+function holdOnRingTargetsItsComplication(logger as Logger) as Boolean {
+    var w = System.getDeviceSettings().screenWidth;
+    var before = Slots.typeOf(1);
+    var p = Rings.centre(1, w);
+    Slots.setType(1, Slots.HEART_RATE);
+    var ok = RingPressDelegate.target(p[0], p[1], w) == Complications.COMPLICATION_TYPE_HEART_RATE;
+    Slots.setType(1, Slots.NONE);
+    ok = ok && RingPressDelegate.target(p[0], p[1], w) == -1;
+    ok = ok && RingPressDelegate.target(w / 2, w / 2, w) == -1;
+    Slots.setType(1, before);
+    return ok;
+}
