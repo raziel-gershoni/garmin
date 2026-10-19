@@ -1,5 +1,4 @@
 import Toybox.Application;
-import Toybox.Complications;
 import Toybox.Graphics;
 import Toybox.Lang;
 import Toybox.Math;
@@ -48,12 +47,10 @@ class HebrewFaceView extends WatchUi.WatchFace {
         dc.setColor(fg, bg);
         dc.clear();
 
-        var now = Time.now();
-        var t = Gregorian.info(now, Time.FORMAT_SHORT);
-        var civilRd = HebrewCalendar.fixedFromGregorian(t.year as Number, t.month as Number, t.day as Number);
-        var sun = SunTimes.today(civilRd, sunFromWatch());
-        var secs = (t.hour as Number) * 3600 + (t.min as Number) * 60 + (t.sec as Number);
-        var hebrewRd = civilRd + ((sun != null && secs >= sun[1]) ? 1 : 0);
+        var day = Today.at(Time.now(), WatchSun.get());
+        var t = day[0] as Gregorian.Info;
+        var sun = day[2] as Array<Number>?;
+        var hebrewRd = day[3] as Number;
         if (hebrewRd != _hebrewRd) {
             if (_hebrewRd == -1) {
                 var stats = System.getSystemStats();
@@ -117,24 +114,6 @@ class HebrewFaceView extends WatchUi.WatchFace {
         var c = Math.cos(angle);
         dc.drawLine(_clockX + (s * r0).toNumber(), _clockY - (c * r0).toNumber(),
                     _clockX + (s * r1).toNumber(), _clockY - (c * r1).toNumber());
-    }
-
-    // The watch's own sunrise/sunset (GPS-based), when it publishes them.
-    function sunFromWatch() as Array? {
-        if (!(Toybox has :Complications)) {
-            return null;
-        }
-        return [complicationValue(Complications.COMPLICATION_TYPE_SUNRISE),
-                complicationValue(Complications.COMPLICATION_TYPE_SUNSET)];
-    }
-
-    function complicationValue(type as Complications.Type) as Number? {
-        try {
-            var value = Complications.getComplication(new Complications.Id(type)).value;
-            return value instanceof Number ? value : null;
-        } catch (e) {
-            return null;
-        }
     }
 
     function onExitSleep() as Void {

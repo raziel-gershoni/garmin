@@ -2,7 +2,6 @@ import Toybox.Graphics;
 import Toybox.Lang;
 import Toybox.System;
 import Toybox.Time;
-import Toybox.Time.Gregorian;
 
 // Today's Hebrew date (rolled over at sunset), shared by the glance and the detail view, and the
 // glance's text fitting.
@@ -11,12 +10,8 @@ module HebrewDay {
 
     // [hebrewDate, hebrewRd, sun] where sun is [sunrise, sunset] seconds or null.
     function now() as Array {
-        var t = Gregorian.info(Time.now(), Time.FORMAT_SHORT);
-        var civilRd = HebrewCalendar.fixedFromGregorian(t.year as Number, t.month as Number, t.day as Number);
-        var sun = SunTimes.today(civilRd, null);
-        var secs = (t.hour as Number) * 3600 + (t.min as Number) * 60 + (t.sec as Number);
-        var hebrewRd = civilRd + ((sun != null && secs >= sun[1]) ? 1 : 0);
-        return [HebrewCalendar.fromFixed(hebrewRd), hebrewRd, sun];
+        var day = Today.at(Time.now(), null);
+        return [HebrewCalendar.fromFixed(day[3] as Number), day[3], day[2]];
     }
 
     // First [text, font] pair whose width fits maxWidth; otherwise the last one.

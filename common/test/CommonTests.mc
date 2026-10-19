@@ -98,3 +98,12 @@ function parashaLookupPrefersParashaThenHoliday(logger as Logger) as Boolean {
 function weekdayLetters(logger as Logger) as Boolean {
     return HebrewFormat.weekday(1).equals("א׳") && HebrewFormat.weekday(6).equals("ו׳") && HebrewFormat.weekday(7).equals("ש׳");
 }
+
+// After sunset the Hebrew date is the next day's; without sun times it never rolls over.
+(:test)
+function todayRollsOverAtSunset(logger as Logger) as Boolean {
+    var sun = [6 * 3600, 17 * 3600];
+    return Today.hebrewRd(1000, 12 * 3600, sun) == 1000
+        && Today.hebrewRd(1000, 17 * 3600, sun) == 1001
+        && Today.hebrewRd(1000, 23 * 3600, null) == 1000;
+}
