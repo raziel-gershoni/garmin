@@ -8,32 +8,33 @@ Builds on the Instinct 3 face (`2026-10-18-hebrew-face-design.md`). The data is 
 
 ```
           ⌒ ח׳ חשון תשפ״ז ⌒          full Hebrew date curved along the top rim
-        (♥)     ב׳ 19.10     (▮)      Gregorian in Hebrew under 12
-        68                    88%
-    (👣)           ●           (▲)    six ring subdials, three per side
-    5123                       42m    hands pivot in the centre
-        (☀↑)                (☀↓)
-        06:44               18:03
+       ( ♥ )    ב׳ 19.10    ( ▮ )     Gregorian in Hebrew under 12
+        68                    3d      four ring subdials, two per side
+     ( 👣 )                ( ▲ )      capsule hands, no hub
+      5123                  42m
+              ( ☀↓ 18:03 )            next sunrise or sunset above 6
           ⌣  פרשת לך־לך  ⌣            parasha / holiday curved along the bottom rim
+                   ▴                  orange seconds pointer on the rim
 ```
+Revised 2026-10-19 after the user compared it with the Venu's own faces: capsule hands like the native numbered face, the seconds as a pointer on the rim, sunrise/sunset merged into one ring above 6, and the four remaining rings larger and thicker.
 
 - **Dial:** 60 grey minute ticks; 12 white hour marks, 4 px wide.
 - **Top rim:** the full Hebrew date ("ח׳ חשון תשפ״ז"), white, in the Noto Sans Hebrew Bold vector font (~32 px). It is drawn with `drawRadialText` clockwise, centred on 12 o'clock, at radius `r − 44`.
 - **Bottom rim:** the parasha or holiday, orange, same font. It is drawn counter-clockwise, centred on 6 o'clock, so it reads upright. If the title is too long for the arc, "פרשת " is dropped first, then the font steps down.
 - **Curved text order:** on the Venu 4 itself, curved text is laid out right-to-left like straight text, so rim strings stay in logical order. The simulator does not reorder curved text and shows rim lines backwards; an earlier build reversed them to suit the simulator, which made them read backwards on the watch (found on the user's Venu, 2026-10-19).
 - **Under 12:** "ב׳ 19.10", grey, drawn as two pieces as on the Instinct: the Hebrew weekday in Noto Sans Hebrew, the digits in Roboto. Straight text does get right-to-left reordering.
-- **Ring subdials** (slots 1–6):
-  - **Layout:** radius 38. Centres on a circle of radius 134 at −37°, 0° and +37° from 9 o'clock (slots 1, 3, 5) and from 3 o'clock (slots 2, 4, 6). So rows pair up as on the Instinct: 1–2, 3–4, 5–6.
-  - **Contents:** a 4 px dark-grey track, with a 28 px icon at the top and the value under it in Roboto Condensed Bold 24.
+- **Ring subdials** (slots 1–4):
+  - **Layout:** radius 50. Centres on a circle of radius 130 at +28° and −22° from 9 o'clock (slots 1, 3) and from 3 o'clock (slots 2, 4), so rows pair up 1–2 and 3–4.
+  - **Contents:** a 7 px dark-grey track, with a 34 px icon at the top and the value under it in Roboto Condensed Bold, up to 30.
+- **Sun ring** above 6: radius 42, 76 px below the centre. It shows the next sunrise or sunset: sunset with its arc filling from sunrise to sunset through the day, sunrise with its arc filling through the night (taken at today's times). Holding it opens that native view.
   - **Gauge arc:** gauge slots get a coloured progress arc from 12 o'clock clockwise: battery %, Body Battery, and steps against the daily step goal.
 - **Icons:** Material Design Icons, rendered by a tools script into white anti-aliased PNGs and drawn with `drawBitmap2` plus `:tintColor`. Bitmaps need `automaticPalette="false"`, or the tint throws. Their edges came out smoother than the icon-font route in the A/B test.
   - Colours: heart rate red, battery green, steps blue, altitude grey, sunrise yellow, sunset orange.
   - The battery icon shows its level (20/50/80/full) and turns red at ≤ 20%.
-- **Hands:**
-  - Shape: tapered polygons with a short tail, anti-aliased. The hour hand is 52% of the radius and the minute hand 80%.
-  - Each hand is drawn white over a slightly larger black copy, a 3 px outline, so it stays distinct over the subdials.
-  - Hub: orange with a black centre.
-- **Seconds hand, awake only:** a thin orange hand matching the hub, with a short tail. The awake face redraws every second for the ~10 s after a wrist raise. In always-on there is no seconds hand: Garmin allows AMOLED faces only one redraw a minute there (the user chose this on 2026-10-19).
+- **Hands**, after the Venu's own numbered face:
+  - Hour: a solid capsule 13 px wide from 10% to 56% of the radius. Minute: a hollow capsule 9 px wide (2.5 px walls, black inside) from 6% to 90%. Neither reaches the centre, and there is no hub.
+  - Each hand is one anti-aliased polygon with its round ends built in, over a 2 px black outline. Separate end circles drifted up to a pixel off the hand and looked detached (seen on the watch).
+- **Seconds, awake only:** an orange triangle on the rim pointing in at the second. The awake face redraws every second for the ~10 s after a wrist raise. In always-on there are no seconds: Garmin allows AMOLED faces only one redraw a minute there (the user chose this on 2026-10-19).
 
 ## Look: always-on (low power)
 
@@ -41,8 +42,8 @@ Same layout, dimmed. The user wants everything kept in this view.
 
 - Hour marks only, dim grey. No minute ticks.
 - Rim texts in Noto Sans Hebrew Regular, the thinner weight: date grey `#9A9A9A`, parasha dim orange `#9A7A30`. Gregorian date in dim grey.
-- Rings: 2 px tracks in `#262626`. Arcs and icons at 45% of their colour. Values in Roboto Regular, grey `#8C8C8C`.
-- Hands are outlines only (2 px light grey) over a black outline; the hub is a 2 px ring.
+- Rings: 3 px tracks in `#262626`. Arcs and icons at 45% of their colour. Values in Roboto Regular, grey `#8C8C8C`.
+- Hands: the same capsules in dim grey `#7A7A7A`, the minute hand still hollow.
 - **Burn-in protection:** the whole drawing shifts by up to ±3 px, cycling every minute.
 - **Brightness budget:** measured from a simulator screenshot, about 3% mean luminance against Garmin's 10% limit. Lit pixels came to about 11%, inflated by screenshot blur. If the simulator's always-on checker flags pixel count, drop the ring tracks in low power (saves about 2.5%).
 - **Switching:** chosen by `System.getDisplayMode() == DISPLAY_MODE_LOW_POWER` or `onEnterSleep`/`onExitSleep`. Low power redraws once a minute.
@@ -50,10 +51,10 @@ Same layout, dimmed. The user wants everything kept in this view.
 ## Data
 
 - **Slot values:** from the Complications API where the type exists. The Venu simulator publishes all 42 types with values, including HR, steps, battery, Body Battery, altitude, sunrise, sunset, notifications and calories. Fallback is the existing `Slots` code (ActivityMonitor / SensorHistory).
-- **Slot options:** the Instinct list minus Solar (no solar on the Venu). Defaults: 1 HR, 2 battery, 3 steps, 4 altitude, 5 sunrise, 6 sunset.
+- **Slot options:** the Instinct list minus Solar (no solar on the Venu), for slots 1–4 (`FaceSlots.COUNT`). Defaults: 1 HR, 2 battery, 3 steps, 4 altitude. Slots 5–6 exist in the settings store but the Venu does not show them; the sun ring replaces them.
 - **Hebrew date, parasha and sunset rollover:** the shared `common/` code, unchanged. Sunrise/sunset come from complications, then NOAA, then Jerusalem.
 - **Hold-to-open:** touch-and-hold on a ring opens the matching native view via `WatchFaceDelegate.onPress` + `Complications.exitTo`, where the type supports it. Faces get no plain taps.
-- **Settings:** the same on-watch Menu2 for the six slots. The light theme is not offered on the Venu: AMOLED faces should stay black.
+- **Settings:** the same on-watch Menu2, listing the four ring slots. The light theme is not offered on the Venu: AMOLED faces should stay black.
 
 ## Glance app
 

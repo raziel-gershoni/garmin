@@ -9,7 +9,7 @@ import path from 'node:path';
 const here = path.dirname(new URL(import.meta.url).pathname);
 const svgDir = path.join(here, 'node_modules/@mdi/svg/svg');
 const out = path.join(here, '../face/resources-round/drawables');
-const SIZE = 28; // Venu 4 41 mm; the 45 mm would use 32
+const SIZE = 34; // Venu 4 41 mm rings (radius 50); the 45 mm would use 38
 // file name -> MDI icon
 const ICONS = {
   icon_heart: 'heart',

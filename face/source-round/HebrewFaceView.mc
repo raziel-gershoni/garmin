@@ -6,8 +6,9 @@ import Toybox.Time.Gregorian;
 import Toybox.WatchUi;
 
 // Venu face: analog dial, the full Hebrew date along the top rim, the parasha (or holiday) along
-// the bottom rim, the Gregorian date in Hebrew under 12 and six ring subdials. Always-on draws the
-// same layout thin and dim, shifted a few pixels each minute against burn-in.
+// the bottom rim, the Gregorian date in Hebrew under 12, four ring subdials, the next sunrise or
+// sunset above 6 and an orange seconds pointer on the rim while awake. Always-on draws the same
+// layout thin and dim, without seconds, shifted a few pixels each minute against burn-in.
 class HebrewFaceView extends WatchUi.WatchFace {
 
     var _asleep = false;
@@ -46,8 +47,11 @@ class HebrewFaceView extends WatchUi.WatchFace {
             RoundText.drawRim(dc, cx, cy, w, _parashaLine as Array, false);
         }
         RoundText.drawGregorian(dc, t, cx, cy, w, low);
-        drawRings(dc, sun, w, off, low);
-        Dial.drawHands(dc, cx, cy, r, t.hour as Number, t.min as Number, low ? null : t.sec as Number, low);
+        drawRings(dc, sun, (t.hour as Number) * 3600 + (t.min as Number) * 60 + (t.sec as Number), w, off, low);
+        if (!low) {
+            Dial.drawSecondsPointer(dc, cx, cy, r, t.sec as Number);
+        }
+        Dial.drawHands(dc, cx, cy, r, t.hour as Number, t.min as Number, low);
 
         if (!_loggedMemory) {
             var stats = System.getSystemStats();
@@ -88,8 +92,10 @@ class HebrewFaceView extends WatchUi.WatchFace {
         Parasha.changed = false;
     }
 
-    function drawRings(dc as Dc, sun as Array<Number>?, w as Number, off as Array<Number>, low as Boolean) as Void {
-        for (var slot = 1; slot <= Slots.SLOT_COUNT; slot++) {
+    // The slot rings, then the sun ring with the next sunrise or sunset (now: seconds after
+    // midnight).
+    function drawRings(dc as Dc, sun as Array<Number>?, now as Number, w as Number, off as Array<Number>, low as Boolean) as Void {
+        for (var slot = 1; slot <= FaceSlots.COUNT; slot++) {
             var type = Slots.typeOf(slot);
             var iconId = RingData.icon(type);
             if (type == Slots.NONE || iconId == null) {
@@ -98,6 +104,10 @@ class HebrewFaceView extends WatchUi.WatchFace {
             Rings.draw(dc, slot, w, off,
                 [bitmap(iconId as ResourceId), RingData.color(type), RingData.value(type, sun), RingData.progress(type)], low);
         }
+        var next = RingData.nextSun(sun, now);
+        var type = next[0] as Number;
+        Rings.draw(dc, Rings.SUN, w, off,
+            [bitmap(RingData.icon(type) as ResourceId), RingData.color(type), RingData.value(type, sun), next[1]], low);
     }
 
     function bitmap(id as ResourceId) as BitmapResource {

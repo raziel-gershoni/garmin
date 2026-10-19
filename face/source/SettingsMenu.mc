@@ -12,7 +12,7 @@ module SettingsMenu {
         var titles = [Rez.Strings.Slot1Title, Rez.Strings.Slot2Title, Rez.Strings.Slot3Title,
                       Rez.Strings.Slot4Title, Rez.Strings.Slot5Title, Rez.Strings.Slot6Title];
         var names = Slots.names();
-        for (var slot = 1; slot <= Slots.SLOT_COUNT; slot++) {
+        for (var slot = 1; slot <= FaceSlots.COUNT; slot++) {
             menu.addItem(new WatchUi.MenuItem(titles[slot - 1], names[Slots.typeOf(slot)], slot, null));
         }
         if (!amoled()) {

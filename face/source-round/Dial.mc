@@ -2,12 +2,21 @@ import Toybox.Graphics;
 import Toybox.Lang;
 import Toybox.Math;
 
-// The analog dial on the round screen: ticks, hands and hub, awake and always-on.
+// The analog dial on the round screen: ticks, hands and the seconds pointer, awake and always-on.
 // Lengths are for a 195 px radius (Venu 4 41 mm) and scale with r.
 module Dial {
 
     const ACCENT = 0xFFAA00;
-    const HANDS_LOW = 0x7A7A7A;   // always-on hands: filled, a step dimmer than the brighter hour marks
+    const HANDS_LOW = 0x7A7A7A;   // always-on hands, a step dimmer than the brighter hour marks
+    // Hands after the Venu's own numbered face: a short thick solid hour capsule and a long
+    // hollow minute capsule, neither reaching the centre. [start, end] as fractions of r, then the
+    // width in px at r = 195; the minute hand's wall is MINUTE_WALL px. Each hand is one polygon
+    // with its round ends built in (ARC_STEPS segments per end), over a black outline.
+    const HOUR_HAND = [0.10, 0.56, 13.0];
+    const MINUTE_HAND = [0.06, 0.90, 9.0];
+    const MINUTE_WALL = 2.5;
+    const OUTLINE = 2.0;
+    const ARC_STEPS = 6;
     // Always-on burn-in shift, one step per minute, at most 2 px from centre.
     const SHIFTS = [[0, 0], [2, 0], [2, 2], [0, 2], [-2, 2], [-2, 0], [-2, -2], [0, -2], [2, -2]];
 
@@ -37,58 +46,68 @@ module Dial {
         dc.setPenWidth(1);
     }
 
-    // Awake: white hands over a black outline, an orange seconds hand (sec != null) and an orange
-    // hub. Always-on: the same hands filled in dim grey over black, a grey hub, no seconds.
+    // White hands awake, dim grey always-on; the minute hand is drawn last, on top.
     function drawHands(dc as Dc, cx as Number, cy as Number, r as Number, hour as Number, min as Number,
-                       sec as Number?, low as Boolean) as Void {
+                       low as Boolean) as Void {
         var s = r / 195.0;
+        var color = low ? HANDS_LOW : Graphics.COLOR_WHITE;
+        var o = (OUTLINE * s).toFloat();
         var ha = (((hour % 12) * 60 + min) * Math.PI / 360).toFloat();
         var ma = (min * Math.PI / 30).toFloat();
-        var hl = r * 0.52;
-        var ml = r * 0.80;
-        fill(dc, cx, cy, ha, hl + 3, 18 * s, 18 * s, Graphics.COLOR_BLACK);
-        fill(dc, cx, cy, ma, ml + 3, 14 * s, 18 * s, Graphics.COLOR_BLACK);
-        var color = low ? HANDS_LOW : Graphics.COLOR_WHITE;
-        fill(dc, cx, cy, ha, hl, 12 * s, 18 * s, color);
-        fill(dc, cx, cy, ma, ml, 8 * s, 18 * s, color);
-        if (low) {
-            dc.setColor(HANDS_LOW, Graphics.COLOR_TRANSPARENT);
-            dc.fillCircle(cx, cy, (6 * s).toNumber());
-            dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_TRANSPARENT);
-            dc.fillCircle(cx, cy, (2 * s).toNumber());
-            return;
-        }
-        if (sec != null) {
-            fill(dc, cx, cy, (sec * Math.PI / 30).toFloat(), r * 0.86, 3 * s, 24 * s, ACCENT);
-        }
+        capsule(dc, cx, cy, ha, HOUR_HAND[0] * r - o, HOUR_HAND[1] * r + o, HOUR_HAND[2] * s + 2 * o, Graphics.COLOR_BLACK);
+        capsule(dc, cx, cy, ha, HOUR_HAND[0] * r, HOUR_HAND[1] * r, HOUR_HAND[2] * s, color);
+        capsule(dc, cx, cy, ma, MINUTE_HAND[0] * r - o, MINUTE_HAND[1] * r + o, MINUTE_HAND[2] * s + 2 * o, Graphics.COLOR_BLACK);
+        capsule(dc, cx, cy, ma, MINUTE_HAND[0] * r, MINUTE_HAND[1] * r, MINUTE_HAND[2] * s, color);
+        var wall = MINUTE_WALL * s;
+        capsule(dc, cx, cy, ma, MINUTE_HAND[0] * r + wall, MINUTE_HAND[1] * r - wall, MINUTE_HAND[2] * s - 2 * wall,
+            Graphics.COLOR_BLACK);
+    }
+
+    // The seconds as an orange pointer running round the rim, awake only.
+    function drawSecondsPointer(dc as Dc, cx as Number, cy as Number, r as Number, sec as Number) as Void {
         dc.setColor(ACCENT, Graphics.COLOR_TRANSPARENT);
-        dc.fillCircle(cx, cy, (9 * s).toNumber());
-        dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_TRANSPARENT);
-        dc.fillCircle(cx, cy, (3 * s).toNumber());
+        dc.fillPolygon(secondsPointer(cx, cy, r, sec));
     }
 
-    // Tapered hand from tail to tip along a clock angle (0 = 12 o'clock, clockwise): the
-    // corners [tail left, tail right, tip right, tip left].
-    function points(cx as Numeric, cy as Numeric, angle as Float, length as Float, width as Float, tail as Float) as Array<Array> {
-        var sn = Math.sin(angle);
-        var cs = Math.cos(angle);
-        return [
-            [cx - cs * width / 2 - sn * tail, cy - sn * width / 2 + cs * tail],
-            [cx + cs * width / 2 - sn * tail, cy + sn * width / 2 + cs * tail],
-            [cx + cs * width / 4 + sn * length, cy + sn * width / 4 - cs * length],
-            [cx - cs * width / 4 + sn * length, cy - sn * width / 4 - cs * length]
-        ];
+    // A small triangle at the rim pointing in at the second's tick: [left, right, tip].
+    function secondsPointer(cx as Numeric, cy as Numeric, r as Number, sec as Number) as Array<Array> {
+        var s = r / 195.0;
+        var a = (sec * Math.PI / 30).toFloat();
+        var outer = r - 1 * s;
+        var inner = r - 15 * s;
+        var half = 5 * s;
+        return [at(cx, cy, a, outer, -half), at(cx, cy, a, outer, half), at(cx, cy, a, inner, 0)];
     }
 
-    // Filled tapered hand with round ends: a circle at the tip and at the tail, each as wide as
-    // the hand there.
-    function fill(dc as Dc, cx as Number, cy as Number, angle as Float, length as Float, width as Float,
-                  tail as Float, color as Number) as Void {
-        var sn = Math.sin(angle);
-        var cs = Math.cos(angle);
+    function capsule(dc as Dc, cx as Number, cy as Number, angle as Float, from as Float, to as Float,
+                     width as Float, color as Number) as Void {
         dc.setColor(color, Graphics.COLOR_TRANSPARENT);
-        dc.fillPolygon(points(cx, cy, angle, length, width, tail));
-        dc.fillCircle((cx + sn * length).toNumber(), (cy - cs * length).toNumber(), (width / 4).toNumber());
-        dc.fillCircle((cx - sn * tail).toNumber(), (cy + cs * tail).toNumber(), (width / 2).toNumber());
+        dc.fillPolygon(capsulePoints(cx, cy, angle, from, to, width));
+    }
+
+    // Outline of a capsule along a clock angle (0 = 12 o'clock, clockwise), from `from` to `to`
+    // pixels out from the centre, width wide: round the far end from the hand's left side to its
+    // right, then round the near end back.
+    function capsulePoints(cx as Numeric, cy as Numeric, angle as Float, from as Float, to as Float,
+                           width as Float) as Array<Array> {
+        var half = width / 2;
+        var points = [];
+        for (var i = 0; i <= ARC_STEPS; i++) {
+            var t = Math.PI * i / ARC_STEPS;
+            points.add(at(cx, cy, angle, to + half * Math.sin(t), -half * Math.cos(t)));
+        }
+        for (var i = 0; i <= ARC_STEPS; i++) {
+            var t = Math.PI * i / ARC_STEPS;
+            points.add(at(cx, cy, angle, from - half * Math.sin(t), half * Math.cos(t)));
+        }
+        return points;
+    }
+
+    // The point `along` pixels out from the centre along a clock angle and `across` pixels to the
+    // right of that line.
+    function at(cx as Numeric, cy as Numeric, angle as Float, along as Numeric, across as Numeric) as Array {
+        var sn = Math.sin(angle);
+        var cs = Math.cos(angle);
+        return [cx + sn * along + cs * across, cy - cs * along + sn * across];
     }
 }

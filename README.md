@@ -20,9 +20,9 @@ Two Connect IQ apps for the Instinct 3 (Tactical) Solar (`instinct3solar45mm`) a
   - Six swappable data slots: heart rate, battery, steps, altitude, sunrise, sunset, Body Battery, solar, notifications, calories.
   - **Venu 4 (41 mm):** an analog dial with a different look, built from the same project.
     - The full Hebrew date curves along the top rim and the parasha or holiday along the bottom rim; the Gregorian date ("ב׳ 19.10") sits under 12.
-    - Six ring subdials with Material Design icons hold the same six slots (no Solar slot, no light theme).
-    - White hands with a black outline, plus an orange seconds hand while the watch is awake.
-    - The always-on view is dim, with filled grey hands, and shifts a few pixels each minute against burn-in.
+    - Four ring subdials with Material Design icons hold slots 1–4 (no Solar slot, no light theme); a fifth ring above 6 shows the next sunrise or sunset.
+    - Capsule hands like the Venu's own numbered face (a solid hour hand, a hollow minute hand), plus an orange seconds pointer on the rim while the watch is awake.
+    - The always-on view is dim, with grey hands, and shifts a few pixels each minute against burn-in.
     - Touch-and-hold on a ring opens the matching native Garmin view (heart rate, steps, battery, sunrise/sunset and so on); checked on the watch.
 - **Hebrew Date** (`glance/`): a glance with the Hebrew date and parasha, for use with any watch face. Opening it shows both dates, the parasha, sunrise and sunset, laid out like the face. On the Venu the detail view is round, with the dates on the rim, the Gregorian date under 12 and "זריחה"/"שקיעה" times in the middle.
 
@@ -42,7 +42,7 @@ Design: `docs/superpowers/specs/2026-10-18-hebrew-face-design.md`.
 6. Instinct: add the glance with hold **MENU** › Appearance › Glances › Add › **Hebrew Date**.
 7. Instinct: settings (slots, dark/light): hold **MENU** › Watch Face, then choose Hebrew Face's settings entry.
 
-Venu 4: copy `HebrewFace-venu.prg` and `HebrewDate-venu.prg` the same way (steps 3-4), then choose the face from the watch-face list on the watch. The exact on-watch menu paths (face, glance, settings) still need confirming on the Venu. Its settings offer the six slots only; dark/light is Instinct-only.
+Venu 4: copy `HebrewFace-venu.prg` and `HebrewDate-venu.prg` the same way (steps 3-4), then choose the face from the watch-face list on the watch. The exact on-watch menu paths (face, glance, settings) still need confirming on the Venu. Its settings offer the four ring slots only; dark/light is Instinct-only.
 
 The parasha line fills in after the first background sync, which runs right after the face first starts with the phone connected (retries are hourly). To read logs, create an empty `/GARMIN/APPS/LOGS/HEBREWFACE.TXT` (or `HEBREWDATE.TXT`); crashes go to `/GARMIN/APPS/LOGS/CIQ_LOG.YAML`.
 

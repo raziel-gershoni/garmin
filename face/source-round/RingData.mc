@@ -78,6 +78,22 @@ module RingData {
         return null;
     }
 
+    // The sun ring: [Slots.SUNSET or SUNRISE, progress] for the next of the two, with how far
+    // the day (sunrise to sunset) or the night (sunset to the next sunrise, taken at today's
+    // times) has run. sun is [sunrise, sunset] in seconds after midnight, either way round past
+    // midnight; without it, sunrise and no gauge.
+    function nextSun(sun as Array<Number>?, now as Number) as Array {
+        if (sun == null) {
+            return [Slots.SUNRISE, -1.0];
+        }
+        var day = (sun[1] - sun[0] + 86400) % 86400;
+        var sinceRise = (now - sun[0] + 86400) % 86400;
+        if (sinceRise < day) {
+            return [Slots.SUNSET, sinceRise.toFloat() / day];
+        }
+        return [Slots.SUNRISE, (sinceRise - day).toFloat() / (86400 - day)];
+    }
+
     function color(type as Number) as Number {
         return type == Slots.BATTERY ? batteryColor(System.getSystemStats().battery) : COLORS[type] as Number;
     }
