@@ -1,3 +1,5 @@
 <fonts>
     <font id="Icons" filename="icons.fnt" antialias="false"/>
+    <!-- Seven-segment digits for the time line (tools/make_assets.py) -->
+    <font id="Time" filename="time.fnt" filter="0123456789:" antialias="false"/>
 </fonts>

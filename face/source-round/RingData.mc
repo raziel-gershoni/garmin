@@ -1,4 +1,3 @@
-import Toybox.ActivityMonitor;
 import Toybox.Complications;
 import Toybox.Lang;
 import Toybox.System;
@@ -63,29 +62,10 @@ module RingData {
         return Slots.value(type, sun);
     }
 
-    // 0..1 for gauge types (battery, Body Battery, steps against the daily goal); -1 otherwise
-    // or without a reading.
+    // 0..1 for gauge types (Slots.progress), with Body Battery from its complication where it has one.
     function progress(type as Number) as Float {
-        if (type == Slots.BATTERY) {
-            return clamp(System.getSystemStats().battery / 100.0);
-        }
-        if (type == Slots.BODY_BATTERY) {
-            var v = complicationValue(type);
-            if (!(v instanceof Number)) {
-                v = Slots.latestSample(:getBodyBatteryHistory);
-            }
-            return v == null ? -1.0 : clamp(v.toFloat() / 100.0);
-        }
-        if (type == Slots.STEPS) {
-            var info = ActivityMonitor.getInfo();
-            var goal = info.stepGoal;
-            return (info.steps == null || goal == null || goal <= 0) ? -1.0 : clamp((info.steps as Number).toFloat() / goal);
-        }
-        return -1.0;
-    }
-
-    function clamp(p as Float) as Float {
-        return p < 0.0 ? 0.0 : (p > 1.0 ? 1.0 : p);
+        var v = type == Slots.BODY_BATTERY ? complicationValue(type) : null;
+        return Slots.progress(type, v instanceof Number ? v : null);
     }
 
     // Icon for a slot type; the battery icon follows the charge. Null for types without one

@@ -1,5 +1,5 @@
-"""Generates the 1-bit assets: the slot icon font (BMFont .fnt + .png), launcher icons and the
-dithered grey of the date band.
+"""Generates the 1-bit assets: the slot icon font and the seven-segment time font (BMFont .fnt +
+.png), launcher icons and the dithered grey of the date band.
 
 Icons are a font so they draw in whatever colour the face uses (dark or light theme).
 No dependencies; run with:  python3 tools/make_assets.py
@@ -170,28 +170,89 @@ def write_png(path, width, height, rows, color_type):
     path.write_bytes(png)
 
 
-def icon_font(out_dir):
-    glyphs = {ch: [line for line in art.strip("\n").splitlines()] for ch, art in ICONS.items()}
-    width = ADVANCE * len(glyphs)
-    pixels = [[0] * width for _ in range(SIZE)]
+def bitmap_font(out_dir, name, face, glyphs, height):
+    """Writes name.fnt and name.png (BMFont text format, one strip of white glyphs on black).
+    glyphs: character -> (rows of '#'/'.', all `height` tall, xadvance)."""
+    width = sum(advance for _, advance in glyphs.values())
+    pixels = [[0] * width for _ in range(height)]
     lines = []
-    for i, (ch, art) in enumerate(glyphs.items()):
-        assert len(art) == SIZE and all(len(row) == SIZE for row in art), ch
+    left = 0
+    for ch, (art, advance) in glyphs.items():
+        assert len(art) == height and len({len(row) for row in art}) == 1 and len(art[0]) <= advance, ch
         for y, row in enumerate(art):
             for x, c in enumerate(row):
                 if c == "#":
-                    pixels[y][i * ADVANCE + x] = 255  # white glyph on black
-        lines.append(f"char id={ord(ch)} x={i * ADVANCE} y=0 width={SIZE} height={SIZE} "
-                     f"xoffset=0 yoffset=0 xadvance={ADVANCE} page=0 chnl=15")
-    write_png(out_dir / "icons.png", width, SIZE, [bytes(r) for r in pixels], 0)
+                    pixels[y][left + x] = 255
+        lines.append(f"char id={ord(ch)} x={left} y=0 width={len(art[0])} height={height} "
+                     f"xoffset=0 yoffset=0 xadvance={advance} page=0 chnl=15")
+        left += advance
+    write_png(out_dir / f"{name}.png", width, height, [bytes(r) for r in pixels], 0)
     fnt = [
-        f'info face="HebrewFaceIcons" size={SIZE} bold=0 italic=0 charset="" unicode=1 stretchH=100 smooth=0 aa=1 padding=0,0,0,0 spacing=0,0',
-        f"common lineHeight={SIZE} base={SIZE} scaleW={width} scaleH={SIZE} pages=1 packed=0",
-        'page id=0 file="icons.png"',
+        f'info face="{face}" size={height} bold=0 italic=0 charset="" unicode=1 stretchH=100 smooth=0 aa=1 padding=0,0,0,0 spacing=0,0',
+        f"common lineHeight={height} base={height} scaleW={width} scaleH={height} pages=1 packed=0",
+        f'page id=0 file="{name}.png"',
         f"chars count={len(lines)}",
         *lines,
     ]
-    (out_dir / "icons.fnt").write_text("\n".join(fnt) + "\n")
+    (out_dir / f"{name}.fnt").write_text("\n".join(fnt) + "\n")
+
+
+def icon_font(out_dir):
+    glyphs = {ch: (art.strip("\n").splitlines(), ADVANCE) for ch, art in ICONS.items()}
+    bitmap_font(out_dir, "icons", "HebrewFaceIcons", glyphs, SIZE)
+
+
+# Lit segments per digit: a top, b top right, c bottom right, d bottom, e bottom left, f top left,
+# g middle.
+SEGMENTS = {"0": "abcdef", "1": "bc", "2": "abged", "3": "abgcd", "4": "fgbc", "5": "afgcd",
+            "6": "afgedc", "7": "abc", "8": "abcdefg", "9": "abcdfg"}
+
+
+def segment(x, y, w, h, t):
+    """What lights the pixel at (x, y) in a w x h digit with t-thick strokes: a list of segment
+    sets, any one of them fully lit lights it. Strokes meet on 45-degree mitres, so a stroke whose
+    neighbour is unlit ends in a point; where both are lit they join solid."""
+    r = w - 1 - x
+    b = h - 1 - y
+    mid = (h - 1) / 2
+    m = abs(y - mid)
+    left, right, top, bottom, middle = x < t, r < t, y < t, b < t, m < t / 2
+    side = "f" if y < mid else "e"
+    pair = "fe"
+    if right:
+        side = "b" if y < mid else "c"
+        pair = "bc"
+    if (top or bottom) and (left or right):
+        d = x if left else r
+        edge = y if top else b
+        across = "a" if top else "d"
+        if d == edge:
+            return [{across, side}]
+        return [{across if edge < d else side}]
+    if middle and (left or right):
+        d = x if left else r
+        if abs(m - d) < 0.75:
+            return [{"g", side}, set(pair)]
+        return [{"g"}, set(pair)] if m < d else [{side}]
+    if top:
+        return [{"a"}]
+    if bottom:
+        return [{"d"}]
+    if middle:
+        return [{"g"}]
+    return [{side}] if left or right else []
+
+
+def time_font(out_dir, w=12, h=21, t=3, gap=2):
+    """Seven-segment digits and a colon for the time line: w x h digits with t-thick strokes, gap
+    pixels apart. Every digit has the same advance, so the time never shifts sideways."""
+    glyphs = {}
+    for ch, lit in SEGMENTS.items():
+        glyphs[ch] = (["".join("#" if any(s <= set(lit) for s in segment(x, y, w, h, t)) else "."
+                               for x in range(w)) for y in range(h)], w + gap)
+    dots = {round((t + h / 2) / 2 - t / 2), round(h - (t + h / 2) / 2 - t / 2)}
+    glyphs[":"] = (["#" * t if any(d <= y < d + t for d in dots) else "." * t for y in range(h)], t + gap)
+    bitmap_font(out_dir, "time", "HebrewFaceTime", glyphs, h)
 
 
 def launcher_icon(path, crescent, n=62):
@@ -223,6 +284,7 @@ def band(path, width=176, height=49):
 
 if __name__ == "__main__":
     icon_font(ROOT / "face" / "resources-instinct" / "fonts")
+    time_font(ROOT / "face" / "resources-instinct" / "fonts")
     launcher_icon(ROOT / "face" / "resources" / "drawables" / "launcher_icon.png", True)
     launcher_icon(ROOT / "glance" / "resources" / "drawables" / "launcher_icon.png", False)
     launcher_icon(ROOT / "face" / "resources-round" / "drawables" / "launcher_icon.png", True, 54)

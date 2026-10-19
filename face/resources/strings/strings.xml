@@ -1,12 +1,12 @@
 <strings>
     <string id="AppName">Hebrew Face</string>
     <string id="SettingsTitle">Hebrew Face</string>
-    <string id="Slot1Title">Slot 1 (by clock, upper)</string>
-    <string id="Slot2Title">Slot 2 (by clock, lower)</string>
-    <string id="Slot3Title">Slot 3 (bottom, upper left)</string>
-    <string id="Slot4Title">Slot 4 (bottom, upper right)</string>
-    <string id="Slot5Title">Slot 5 (bottom, lower left)</string>
-    <string id="Slot6Title">Slot 6 (bottom, lower right)</string>
+    <string id="Slot1Title">Slot 1 (top left)</string>
+    <string id="Slot2Title">Slot 2 (top right)</string>
+    <string id="Slot3Title">Slot 3 (round window)</string>
+    <string id="Slot4Title">Slot 4 (under slots 1-2)</string>
+    <string id="Slot5Title">Slot 5 (bottom left)</string>
+    <string id="Slot6Title">Slot 6 (bottom right)</string>
     <string id="ThemeTitle">Background</string>
     <string id="ThemeDark">Dark</string>
     <string id="ThemeLight">Light</string>

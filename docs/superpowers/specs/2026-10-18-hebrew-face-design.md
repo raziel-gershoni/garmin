@@ -20,10 +20,24 @@ Native Garmin faces cannot display third-party data (verified), so this is our o
    [3] steps    [4] altitude m
    [5] sunrise  [6] sunset
    ```
+   Revised again 2026-10-19 (digital time). The subscreen became a gauge for slot 3, slot 4 moved into the column, and the time moved under the band as a seven-segment line with seconds:
+   ```
+   ב׳ 19.10            ( steps  )
+   [1] HR  [2] battery ( gauge  )
+   [4] altitude m
+   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+   ░░░░░░ ח׳ חשון תשפ״ז ░░░░░░░░░░
+   ░░░░░░░ פרשת לך־לך ░░░░░░░░░░░░
+   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+             6:54:55
+   [5] sunrise  [6] sunset
+   ```
    - The Gregorian date is in Hebrew: weekday letter (א׳ … ו׳, ש׳) and day.month.
-   - The full Hebrew date takes the largest font that fits the band; only some leap-year Adar dates drop the month's geresh (אדר א) when nothing else fits.
-   - The analog clock in the subscreen is the only time display (hour + minute hands, no seconds).
-   - Slots 1–6 can each show: heart rate, battery %, steps, altitude (m), sunrise, sunset, Body Battery, solar intensity, notifications, calories, or nothing.
+   - The full Hebrew date takes the largest font that fits the band; only some leap-year Adar dates drop the month's geresh (אדר א) when nothing else fits. The parasha steps down a font, then drops "פרשת"; nothing is abbreviated.
+   - Time: hours, minutes and seconds in a seven-segment font drawn by `tools/make_assets.py` (21 px, solid strokes, every digit one width). The hour follows the watch's 12/24-hour setting; the line is laid out as `00:00:00`, so a one-digit hour leaves its first digit blank and nothing moves.
+   - Slot 3 fills the round subscreen as a gauge: a 270° track with a progress arc for steps (against the daily goal), battery or Body Battery, the value in the middle and the icon in the gap.
+   - Slots 1–2 share a line (largest font that fits, else XTINY) and slot 4 has the line under them.
+   - Slots 1–6 can each show: heart rate, battery (days left where the watch estimates them, else %), steps, altitude (m), sunrise, sunset, Body Battery, solar intensity, notifications, calories, or nothing.
    - Settings are on the watch (`getSettingsView` → Menu2): slot choices and a light/dark background. They are also declared as properties/settings so phone settings work if the app is later published as a beta.
 2. **Glance app** (`glance/`) — a watch-app with `getGlanceView()`. The glance shows the Hebrew date and parasha/holiday. Opening it shows a detail view laid out like the face: both dates, parasha, sunrise (זריחה) and sunset (שקיעה).
 
@@ -46,7 +60,7 @@ Native Garmin faces cannot display third-party data (verified), so this is our o
 Hebrew letters, no niqqud. Gematria uses geresh/gershayim (ט״ו/ט״ז). The year has no thousands digit (תשפ״ז). Leap-year months are אדר א׳ / אדר ב׳. Month spellings follow Hebcal (חשון).
 
 ## Battery
-- `onUpdate` once a minute; no `onPartialUpdate`, no seconds.
+- `onUpdate` once a minute. In low power, `onPartialUpdate` redraws only the seconds' two digits each second; if the watch reports the face over its power budget (`WatchFaceDelegate.onPowerBudgetExceeded`), partial updates stop and the time shows hours and minutes while the watch is asleep.
 - At most one Hebcal request a day, plus hourly wake-ups that end immediately.
 - No GPS start; location reads are throttled to every 15 min.
 
@@ -58,4 +72,4 @@ Hebrew letters, no niqqud. Gematria uses geresh/gershayim (ט״ו/ט״ז). The y
 - **On the watch (user):** Hebrew glyph order, sunrise/sunset source, settings menu location, battery.
 
 ## Out of scope (for now)
-Venu 4 build, zmanim beyond sunrise/sunset, holidays on non-Shabbat days, phone-app settings.
+Zmanim beyond sunrise/sunset, holidays on non-Shabbat days, phone-app settings. The Venu 4 face has its own design (`2026-10-19-venu-face-design.md`).

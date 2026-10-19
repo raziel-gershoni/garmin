@@ -184,7 +184,7 @@ function batteryIconAndColorFollowLevel(logger as Logger) as Boolean {
 (:test)
 function progressIsClamped(logger as Logger) as Boolean {
     var p = RingData.progress(Slots.STEPS);
-    return RingData.clamp(1.7) == 1.0 && RingData.clamp(-0.2) == 0.0 && RingData.clamp(0.5) == 0.5
+    return Slots.clamp(1.7) == 1.0 && Slots.clamp(-0.2) == 0.0 && Slots.clamp(0.5) == 0.5
         && (p == -1.0 || (p >= 0.0 && p <= 1.0))
         && RingData.progress(Slots.HEART_RATE) == -1.0;
 }

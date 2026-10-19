@@ -1,22 +1,30 @@
 import Toybox.Application;
 import Toybox.Graphics;
 import Toybox.Lang;
-import Toybox.Math;
 import Toybox.System;
 import Toybox.Time;
 import Toybox.Time.Gregorian;
 import Toybox.WatchUi;
 
-// Gregorian date and two slots left of the round subscreen (analog clock), then a grey band with
-// the full Hebrew date and the parasha (or holiday), then a 2x2 grid of slots. All six slots are
-// swappable. Positions and font choices live in Layout.mc and common/source/DateBand.mc.
+// The Instinct face, top to bottom: the Gregorian date, slots 1-2 and slot 4 in the column left
+// of the subscreen, with slot 3 as a gauge in the subscreen; a grey band with the full Hebrew date
+// and the parasha (or holiday); the time with seconds; slots 5-6. All six slots are swappable.
+// Positions and fonts live in Layout.mc, Window.mc and common/source-instinct/DateBand.mc.
+// In low power the seconds tick through onPartialUpdate until the watch reports the face over
+// its power budget (BudgetDelegate); after that the time shows hours and minutes only while the
+// watch is asleep.
 class HebrewFaceView extends WatchUi.WatchFace {
 
+    var partialUpdates = true;
+    var _awake = true;
     var _iconFont as FontResource?;
+    var _timeFont as FontResource?;
     var _band as BitmapResource?;
-    var _clockX = 144;
-    var _clockY = 31;
-    var _clockR = 31;
+    var _windowX = 144;
+    var _windowY = 31;
+    var _windowR = 31;
+    var _fg = Graphics.COLOR_WHITE;
+    var _bg = Graphics.COLOR_BLACK;
 
     var _hebrewRd = -1;
     var _hebrewLine = null as Array?;
@@ -29,22 +37,23 @@ class HebrewFaceView extends WatchUi.WatchFace {
 
     function onLayout(dc as Dc) as Void {
         _iconFont = WatchUi.loadResource(Rez.Fonts.Icons) as FontResource;
+        _timeFont = WatchUi.loadResource(Rez.Fonts.Time) as FontResource;
         _band = WatchUi.loadResource(Rez.Drawables.Band) as BitmapResource;
         if (WatchUi has :getSubscreen) {
             var box = WatchUi.getSubscreen();
             if (box != null) {
-                _clockR = box.width / 2;
-                _clockX = box.x + _clockR;
-                _clockY = box.y + box.height / 2;
+                _windowR = box.width / 2;
+                _windowX = box.x + _windowR;
+                _windowY = box.y + box.height / 2;
             }
         }
     }
 
     function onUpdate(dc as Dc) as Void {
         var light = SettingsMenu.isLight();
-        var fg = light ? Graphics.COLOR_BLACK : Graphics.COLOR_WHITE;
-        var bg = light ? Graphics.COLOR_WHITE : Graphics.COLOR_BLACK;
-        dc.setColor(fg, bg);
+        _fg = light ? Graphics.COLOR_BLACK : Graphics.COLOR_WHITE;
+        _bg = light ? Graphics.COLOR_WHITE : Graphics.COLOR_BLACK;
+        dc.setColor(_fg, _bg);
         dc.clear();
 
         var day = Today.at(Time.now(), WatchSun.get());
@@ -68,59 +77,92 @@ class HebrewFaceView extends WatchUi.WatchFace {
         }
 
         DateBand.drawGregorian(dc, t);
-        DateBand.drawBand(dc, _band, _hebrewLine as Array, _parashaLine, fg, bg);
-        drawSlots(dc, fg, sun);
-        drawClock(dc, fg, bg, t.hour as Number, t.min as Number);
+        DateBand.drawBand(dc, _band, _hebrewLine as Array, _parashaLine, _fg, _bg);
+        drawSlots(dc, sun);
+        drawTime(dc, t.hour as Number, t.min as Number, _awake || partialUpdates ? t.sec as Number : null);
+        drawWindow(dc, sun);
     }
 
-    // Transparent text background: a filled one would cut into the band above the grid.
-    function drawSlots(dc as Dc, fg as Number, sun as Array<Number>?) as Void {
-        dc.setColor(fg, Graphics.COLOR_TRANSPARENT);
-        for (var slot = 1; slot <= Slots.SLOT_COUNT; slot++) {
-            var type = Slots.typeOf(slot);
-            if (type == Slots.NONE) {
-                continue;
+    // Seconds only, over their own two digits.
+    function onPartialUpdate(dc as Dc) as Void {
+        if (!partialUpdates) {
+            return;
+        }
+        var box = Layout.secondsBox(dc, _timeFont as FontResource);
+        dc.setClip(box[0], box[1], box[2], box[3]);
+        dc.setColor(_bg, _bg);
+        dc.fillRectangle(box[0], box[1], box[2], box[3]);
+        drawSeconds(dc, System.getClockTime().sec);
+        dc.clearClip();
+    }
+
+    // Slots 1-2 and 4 in the column and 5-6 along the bottom, with a transparent text background
+    // so they never cut into their neighbours.
+    function drawSlots(dc as Dc, sun as Array<Number>?) as Void {
+        var types = [Slots.typeOf(1), Slots.typeOf(2), Slots.typeOf(4), Slots.typeOf(5), Slots.typeOf(6)];
+        var texts = [null, null, null, null, null] as Array<String?>;
+        for (var i = 0; i < types.size(); i++) {
+            texts[i] = types[i] == Slots.NONE ? null : Slots.value(types[i], sun);
+        }
+        dc.setColor(_fg, Graphics.COLOR_TRANSPARENT);
+        var pair = Layout.line(dc, Layout.PAIR_Y, texts[0], texts[1]);
+        drawItem(dc, pair[0], types[0], texts[0]);
+        drawItem(dc, pair[1], types[1], texts[1]);
+        drawItem(dc, Layout.line(dc, Layout.SLOT4_Y, texts[2], null)[0], types[2], texts[2]);
+        for (var i = 3; i < 5; i++) {
+            if (texts[i] != null) {
+                drawItem(dc, Layout.bottomSlot(dc, i == 3, texts[i] as String), types[i], texts[i]);
             }
-            var text = Slots.value(type, sun);
-            var place = Layout.slot(dc, slot, text);
-            dc.drawText(place[0], place[4], _iconFont as FontResource, Slots.ICONS[type], Graphics.TEXT_JUSTIFY_LEFT);
-            dc.drawText(place[0] + Layout.ICON_W, place[1], place[2], text, Graphics.TEXT_JUSTIFY_LEFT);
         }
     }
 
-    // Filled disk in the foreground colour with the dial drawn in the background colour.
-    function drawClock(dc as Dc, fg as Number, bg as Number, hour as Number, min as Number) as Void {
-        dc.setColor(fg, bg);
-        dc.fillCircle(_clockX, _clockY, _clockR);
-        dc.setColor(bg, fg);
-        for (var i = 0; i < 12; i++) {
-            var quarter = i % 3 == 0;
-            dc.setPenWidth(quarter ? 3 : 1);
-            drawRadial(dc, i * Math.PI / 6, _clockR - (quarter ? 9 : 6), _clockR - 2);
+    // Icon and value at a place from Layout ([x, y, font, iconY]); nothing for an empty slot.
+    function drawItem(dc as Dc, place as Array?, type as Number, text as String?) as Void {
+        if (place == null || text == null) {
+            return;
         }
-        dc.setPenWidth(5);
-        drawRadial(dc, ((hour % 12) * 60 + min) * Math.PI / 360, 0, _clockR * 50 / 100);
-        dc.setPenWidth(3);
-        drawRadial(dc, min * Math.PI / 30, 0, _clockR * 80 / 100);
-        dc.fillCircle(_clockX, _clockY, 4);
-        dc.setColor(fg, bg);
-        dc.fillCircle(_clockX, _clockY, 1);
-        dc.setPenWidth(1);
+        dc.drawText(place[0], place[3], _iconFont as FontResource, Slots.ICONS[type], Graphics.TEXT_JUSTIFY_LEFT);
+        dc.drawText(place[0] + Layout.ICON_W, place[1], place[2], text, Graphics.TEXT_JUSTIFY_LEFT);
     }
 
-    // Line along a clock angle (0 = 12 o'clock, clockwise) between two radii.
-    function drawRadial(dc as Dc, angle as Numeric, r0 as Number, r1 as Number) as Void {
-        var s = Math.sin(angle);
-        var c = Math.cos(angle);
-        dc.drawLine(_clockX + (s * r0).toNumber(), _clockY - (c * r0).toNumber(),
-                    _clockX + (s * r1).toNumber(), _clockY - (c * r1).toNumber());
+    // Hours follow the watch's 12/24-hour setting; 24-hour time keeps the leading zero. Without
+    // seconds (sec null) the hours and minutes stay where they are.
+    function drawTime(dc as Dc, hour as Number, min as Number, sec as Number?) as Void {
+        var h24 = System.getDeviceSettings().is24Hour;
+        var text = (h24 ? hour.format("%02d") : (hour % 12 == 0 ? 12 : hour % 12).toString()) + ":" + min.format("%02d");
+        var font = _timeFont as FontResource;
+        var right = Layout.timeRight(dc, font);
+        if (sec == null) {
+            right -= dc.getTextWidthInPixels(":00", font);
+        } else {
+            text += ":" + sec.format("%02d");
+        }
+        dc.setColor(_fg, Graphics.COLOR_TRANSPARENT);
+        dc.drawText(right, Layout.TIME_Y, font, text, Graphics.TEXT_JUSTIFY_RIGHT);
+    }
+
+    function drawSeconds(dc as Dc, sec as Number) as Void {
+        var font = _timeFont as FontResource;
+        dc.setColor(_fg, Graphics.COLOR_TRANSPARENT);
+        dc.drawText(Layout.timeRight(dc, font), Layout.TIME_Y, font, sec.format("%02d"), Graphics.TEXT_JUSTIFY_RIGHT);
+    }
+
+    // Slot 3 in the subscreen; an empty slot leaves it dark.
+    function drawWindow(dc as Dc, sun as Array<Number>?) as Void {
+        var type = Slots.typeOf(3);
+        if (type != Slots.NONE) {
+            Window.draw(dc, _windowX, _windowY, _windowR, type, Slots.value(type, sun), Slots.progress(type, null),
+                _iconFont as FontResource, _fg, _bg);
+        }
     }
 
     function onExitSleep() as Void {
+        _awake = true;
         WatchUi.requestUpdate();
     }
 
     function onEnterSleep() as Void {
+        _awake = false;
         WatchUi.requestUpdate();
     }
 }

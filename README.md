@@ -4,18 +4,19 @@ Two Connect IQ apps for the Instinct 3 (Tactical) Solar (`instinct3solar45mm`) a
 
 - **Hebrew Face** (`face/`): a watch face.
   ```
-   ב׳ 19.10          (analog clock)
-   ♥ 80              ← slot 1
-   ▭ 50%             ← slot 2
+   ב׳ 19.10          (steps gauge) ← slot 3 in the round window
+   ♥ 80  ▭ 5d        ← slots 1–2
+   ▲ -17m            ← slot 4
    ░░░░░░░░░░░░░░░░░
    ░░ ח׳ חשון תשפ״ז ░ ← grey band
    ░░░ פרשת לך־לך ░░░ ← or the holiday when that Shabbat has none
    ░░░░░░░░░░░░░░░░░
-   👣 0     ▲ -17m   ← slots 3–4
+       6:54:55       ← seven-segment time with seconds
    ☀ 06:44  ☀ 18:03  ← slots 5–6
   ```
-  - Gregorian date in Hebrew (weekday letter, day.month) beside the clock in the round window.
-  - Full Hebrew date and the week's parasha on a grey band below the window, like the native faces' time band; long dates and titles step down a font size.
+  - Gregorian date in Hebrew (weekday letter, day.month) beside the round window, which shows slot 3 as a gauge (steps against the daily goal, battery or Body Battery).
+  - Full Hebrew date and the week's parasha on a grey band, like the native faces' time band; long dates and titles step down a font size, and nothing is abbreviated.
+  - The time follows the watch's 12/24-hour setting and never shifts sideways; the seconds keep ticking in low power unless the watch finds that over its power budget.
   - Six swappable data slots: heart rate, battery, steps, altitude, sunrise, sunset, Body Battery, solar, notifications, calories.
   - **Venu 4 (41 mm):** an analog dial with a different look, built from the same project.
     - The full Hebrew date curves along the top rim and the parasha or holiday along the bottom rim; the Gregorian date ("ב׳ 19.10") sits under 12.
@@ -76,5 +77,5 @@ The test fixtures come from `@hebcal/core` (`cd tools && npm install`):
 - `node hebcal-oracle.mjs` checks a line-by-line JS copy of the calendar code against Hebcal for every day from 1900 to 2100, then writes the date fixtures.
 - `node sun-oracle.mjs` writes the sunrise/sunset fixtures.
 - `node titles-oracle.mjs` writes the parasha/holiday title fixtures used by the layout tests.
-- `python3 tools/make_assets.py` regenerates the icon font, launcher icons and the band's dither bitmap.
+- `python3 tools/make_assets.py` regenerates the icon font, the seven-segment time font, launcher icons and the band's dither bitmap.
 - `node build-icons.mjs` (in `tools/`) regenerates the Venu icons from Material Design Icons (licence in `tools/LICENSE-mdi.txt`).

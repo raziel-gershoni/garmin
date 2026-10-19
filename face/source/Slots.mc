@@ -87,6 +87,28 @@ module Slots {
         return v == null ? "--" : v.format("%d");
     }
 
+    // 0..1 for gauge types (battery, Body Battery, steps against the daily goal); -1 otherwise
+    // or without a reading. bodyBattery overrides the sensor history's reading when not null.
+    function progress(type as Number, bodyBattery as Numeric?) as Float {
+        if (type == BATTERY) {
+            return clamp(System.getSystemStats().battery / 100.0);
+        }
+        if (type == BODY_BATTERY) {
+            var v = bodyBattery != null ? bodyBattery : latestSample(:getBodyBatteryHistory);
+            return v == null ? -1.0 : clamp(v.toFloat() / 100.0);
+        }
+        if (type == STEPS) {
+            var info = ActivityMonitor.getInfo();
+            var goal = info.stepGoal;
+            return (info.steps == null || goal == null || goal <= 0) ? -1.0 : clamp((info.steps as Number).toFloat() / goal);
+        }
+        return -1.0;
+    }
+
+    function clamp(p as Float) as Float {
+        return p < 0.0 ? 0.0 : (p > 1.0 ? 1.0 : p);
+    }
+
     // Battery as days left where the watch estimates them (like the native faces), else percent.
     function battery() as String {
         var stats = System.getSystemStats();
