@@ -83,3 +83,13 @@ function themeOnlyWithoutAmoled(logger as Logger) as Boolean {
     var menu = SettingsMenu.build()[0] as WatchUi.Menu2;
     return (menu.findItemById(:theme) == -1) == SettingsMenu.amoled();
 }
+
+// Battery shows days left where the watch estimates them, like the native faces; percent otherwise.
+(:test)
+function batteryShowsDaysWhenKnown(logger as Logger) as Boolean {
+    var stats = System.getSystemStats();
+    var days = (stats has :batteryInDays) && stats.batteryInDays != null;
+    var v = Slots.value(Slots.BATTERY, null);
+    logger.debug("battery slot: " + v);
+    return v.substring(v.length() - 1, v.length()).equals(days ? "d" : "%");
+}

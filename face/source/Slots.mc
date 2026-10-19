@@ -58,7 +58,7 @@ module Slots {
                 v = heartRate();
                 break;
             case BATTERY:
-                return System.getSystemStats().battery.format("%d") + "%";
+                return battery();
             case STEPS:
                 v = ActivityMonitor.getInfo().steps;
                 break;
@@ -85,6 +85,15 @@ module Slots {
                 return "";
         }
         return v == null ? "--" : v.format("%d");
+    }
+
+    // Battery as days left where the watch estimates them (like the native faces), else percent.
+    function battery() as String {
+        var stats = System.getSystemStats();
+        if ((stats has :batteryInDays) && stats.batteryInDays != null) {
+            return stats.batteryInDays.format("%d") + "d";
+        }
+        return stats.battery.format("%d") + "%";
     }
 
     function heartRate() as Number? {

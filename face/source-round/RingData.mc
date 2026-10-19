@@ -44,9 +44,10 @@ module RingData {
     }
 
     // Ring text; "--" when the watch has no reading. Sunrise/sunset come from the view's sun
-    // times, which already prefer the watch's own.
+    // times, which already prefer the watch's own; battery shows days left (Slots.battery), while
+    // its ring and icon follow the charge.
     function value(type as Number, sun as Array<Number>?) as String {
-        if (type != Slots.SUNRISE && type != Slots.SUNSET) {
+        if (type != Slots.SUNRISE && type != Slots.SUNSET && type != Slots.BATTERY) {
             var v = complicationValue(type);
             if (v instanceof Number || v instanceof Float || v instanceof Long || v instanceof Double) {
                 var n = v.toNumber();
