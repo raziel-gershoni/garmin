@@ -86,3 +86,5 @@ Same layout, dimmed. The user wants everything kept in this view.
 
 - The 45 mm Venu 4 (`venu445mm`). The layout is in proportions of the radius, so adding it later is mostly a resource folder and a check.
 - Zmanim, candle lighting, Omer and Shabbat mode (discussed as options; not requested).
+
+Implemented: see plan 2026-10-19-venu-face-plan.md

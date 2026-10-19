@@ -1,6 +1,6 @@
 # Hebrew Face for Garmin Instinct 3
 
-Two Connect IQ apps for the Instinct 3 (Tactical) Solar (`instinct3solar45mm`):
+Two Connect IQ apps for the Instinct 3 (Tactical) Solar (`instinct3solar45mm`) and the Venu 4 41 mm (`venu441mm`). Unless a section says Venu, the text below describes the Instinct:
 
 - **Hebrew Face** (`face/`): a watch face.
   ```
@@ -17,7 +17,13 @@ Two Connect IQ apps for the Instinct 3 (Tactical) Solar (`instinct3solar45mm`):
   - Gregorian date in Hebrew (weekday letter, day.month) beside the clock in the round window.
   - Full Hebrew date and the week's parasha on a grey band below the window, like the native faces' time band; long dates and titles step down a font size.
   - Six swappable data slots: heart rate, battery, steps, altitude, sunrise, sunset, Body Battery, solar, notifications, calories.
-- **Hebrew Date** (`glance/`): a glance with the Hebrew date and parasha, for use with any watch face. Opening it shows both dates, the parasha, sunrise and sunset, laid out like the face.
+  - **Venu 4 (41 mm):** an analog dial with a different look, built from the same project.
+    - The full Hebrew date curves along the top rim and the parasha or holiday along the bottom rim; the Gregorian date ("ב׳ 19.10") sits under 12.
+    - Six ring subdials with Material Design icons hold the same six slots (no Solar slot, no light theme).
+    - White hands with a black outline, plus an orange seconds hand while the watch is awake.
+    - The always-on view is dim and shifts a few pixels each minute against burn-in. Its brightness and hold-to-open have not been tested on a real watch yet.
+    - Touch-and-hold on a ring is meant to open the matching native Garmin view.
+- **Hebrew Date** (`glance/`): a glance with the Hebrew date and parasha, for use with any watch face. Opening it shows both dates, the parasha, sunrise and sunset, laid out like the face. On the Venu the detail view is round, with the dates on the rim, the Gregorian date under 12 and "זריחה"/"שקיעה" times in the middle.
 
 How it works:
 - **Hebrew date:** calculated on the watch, so it works offline. It changes at sunset, using the watch's own sunset when available. Otherwise it calculates sunset from the last known GPS position, or Jerusalem if there's none.
@@ -27,7 +33,7 @@ Design: `docs/superpowers/specs/2026-10-18-hebrew-face-design.md`.
 
 ## Install on the watch (sideload)
 
-1. Build, or take the `.prg` files from a build: `face/bin/HebrewFace.prg`, `glance/bin/HebrewDate.prg`.
+1. Build, or take the `.prg` files from a build: `face/bin/HebrewFace.prg`, `glance/bin/HebrewDate.prg` (Venu: `HebrewFace-venu.prg`, `HebrewDate-venu.prg`).
 2. On the watch: hold **MENU** › System › USB Mode › **MTP**.
 3. Quit Garmin Express if it's running, then connect the watch by USB and open **OpenMTP**.
 4. Copy both `.prg` files into `/GARMIN/APPS/` on the watch, then unplug.
@@ -43,17 +49,24 @@ Requires the Connect IQ SDK 9.2+ (via the SDK Manager), JDK 17 and a developer k
 
 ```sh
 cd face   # or glance
-monkeyc -d instinct3solar45mm -f monkey.jungle -o bin/HebrewFace.prg -y ~/.connectiq/developer_key.der
+# Instinct
+monkeyc -d instinct3solar45mm -f monkey.jungle -o bin/HebrewFace.prg -y ~/.connectiq/developer_key.der -r
+# Venu 4 (41 mm)
+monkeyc -d venu441mm -f monkey.jungle -o bin/HebrewFace-venu.prg -y ~/.connectiq/developer_key.der -r
 ```
+
+In `glance/` the outputs are `bin/HebrewDate.prg` and `bin/HebrewDate-venu.prg`. `-r` makes the small release build.
 
 ## Tests
 
 ```sh
 connectiq &   # start the simulator
-cd face
+cd face       # or glance
 monkeyc -d instinct3solar45mm -f monkey.jungle -o bin/test.prg -y ~/.connectiq/developer_key.der -t
 monkeydo bin/test.prg instinct3solar45mm -t
 ```
+
+Run the suite on both devices (`instinct3solar45mm` and `venu441mm`), for `face/` and `glance/`.
 
 The test fixtures come from `@hebcal/core` (`cd tools && npm install`):
 
@@ -61,3 +74,4 @@ The test fixtures come from `@hebcal/core` (`cd tools && npm install`):
 - `node sun-oracle.mjs` writes the sunrise/sunset fixtures.
 - `node titles-oracle.mjs` writes the parasha/holiday title fixtures used by the layout tests.
 - `python3 tools/make_assets.py` regenerates the icon font, launcher icons and the band's dither bitmap.
+- `node build-icons.mjs` (in `tools/`) regenerates the Venu icons from Material Design Icons (licence in `tools/LICENSE-mdi.txt`).
