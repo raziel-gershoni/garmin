@@ -9,7 +9,7 @@ import Toybox.WatchUi;
 // ring also get a ring, a track with a progress arc from 12 o'clock, since a circle means nothing
 // around a heart rate or an altitude. Geometry is for 390 px and scales with the width; the icon
 // and value offsets and the value sizes scale with each place's radius. Rings end inside the hour
-// marks (18 px), which the seconds pointer also runs along.
+// marks (18 px), which the seconds dot also runs along.
 module Rings {
 
     const SUN = 5;

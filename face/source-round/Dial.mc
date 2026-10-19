@@ -2,7 +2,7 @@ import Toybox.Graphics;
 import Toybox.Lang;
 import Toybox.Math;
 
-// The analog dial on the round screen: ticks, hands and the seconds pointer, awake and always-on.
+// The analog dial on the round screen: ticks, hands and the seconds dot, awake and always-on.
 // Lengths are for a 195 px radius (Venu 4 41 mm) and scale with r.
 module Dial {
 
@@ -78,20 +78,19 @@ module Dial {
         ];
     }
 
-    // The seconds as an orange pointer running round the rim, awake only.
-    function drawSecondsPointer(dc as Dc, cx as Number, cy as Number, r as Number, sec as Number) as Void {
+    // The seconds as an orange dot running round the rim, awake only.
+    function drawSecondsDot(dc as Dc, cx as Number, cy as Number, r as Number, sec as Number) as Void {
+        var dot = secondsDot(cx, cy, r, sec);
         dc.setColor(ACCENT, Graphics.COLOR_TRANSPARENT);
-        dc.fillPolygon(secondsPointer(cx, cy, r, sec));
+        dc.fillCircle(dot[0], dot[1], dot[2]);
     }
 
-    // A small triangle at the rim pointing in at the second's tick: [left, right, tip].
-    function secondsPointer(cx as Numeric, cy as Numeric, r as Number, sec as Number) as Array<Array> {
+    // [x, y, radius] of the dot on the second's tick, between the tick's ends, rounded to whole
+    // pixels so it does not wobble.
+    function secondsDot(cx as Numeric, cy as Numeric, r as Number, sec as Number) as Array<Number> {
         var s = r / 195.0;
-        var a = (sec * Math.PI / 30).toFloat();
-        var outer = r - 1 * s;
-        var inner = r - 15 * s;
-        var half = 5 * s;
-        return [at(cx, cy, a, outer, -half), at(cx, cy, a, outer, half), at(cx, cy, a, inner, 0)];
+        var p = at(cx, cy, (sec * Math.PI / 30).toFloat(), r - 9 * s, 0);
+        return [Math.round(p[0]).toNumber(), Math.round(p[1]).toNumber(), Math.round(5 * s).toNumber()];
     }
 
     function capsule(dc as Dc, cx as Number, cy as Number, angle as Float, from as Float, to as Float,

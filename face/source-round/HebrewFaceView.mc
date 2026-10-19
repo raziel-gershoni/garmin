@@ -7,7 +7,7 @@ import Toybox.WatchUi;
 
 // Venu face: analog dial, the full Hebrew date along the top rim, the parasha (or holiday) along
 // the bottom rim, the Gregorian date in Hebrew under 12, four subdials (rings for gauges), the
-// next sunrise or sunset above 6 and an orange seconds pointer on the rim while awake. Always-on draws the same
+// next sunrise or sunset above 6 and an orange seconds dot on the rim while awake. Always-on draws the same
 // layout thin and dim, without seconds, shifted a few pixels each minute against burn-in.
 class HebrewFaceView extends WatchUi.WatchFace {
 
@@ -49,7 +49,7 @@ class HebrewFaceView extends WatchUi.WatchFace {
         RoundText.drawGregorian(dc, t, cx, cy, w, low);
         drawRings(dc, sun, (t.hour as Number) * 3600 + (t.min as Number) * 60 + (t.sec as Number), w, off, low);
         if (!low) {
-            Dial.drawSecondsPointer(dc, cx, cy, r, t.sec as Number);
+            Dial.drawSecondsDot(dc, cx, cy, r, t.sec as Number);
         }
         Dial.drawHands(dc, cx, cy, r, t.hour as Number, t.min as Number, low);
 

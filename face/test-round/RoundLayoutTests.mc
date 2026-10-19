@@ -123,17 +123,19 @@ function handWallsAreEven(logger as Logger) as Boolean {
         && parts[4][4] == Graphics.COLOR_BLACK;
 }
 
-// The seconds pointer sits on the rim and points in at the second: 0 at 12, 15 at 3.
+// The seconds dot sits on the second's tick (0 at 12, 15 at 3, 30 at 6), on screen and clear of the rings.
 (:test)
-function secondsPointerPointsAtTheSecond(logger as Logger) as Boolean {
-    var top = Dial.secondsPointer(195, 195, 195, 0);
-    var right = Dial.secondsPointer(195, 195, 195, 15);
-    return (top[2][0] - 195).abs() < 0.01 && (top[2][1] - 15).abs() < 0.01 && (top[0][1] - 1).abs() < 0.01
-        && (right[2][0] - 375).abs() < 0.01 && (right[2][1] - 195).abs() < 0.01;
+function secondsDotSitsOnTheSecond(logger as Logger) as Boolean {
+    var top = Dial.secondsDot(195, 195, 195, 0);
+    var right = Dial.secondsDot(195, 195, 195, 15);
+    var bottom = Dial.secondsDot(195, 195, 195, 30);
+    return top[0] == 195 && top[1] == 9 && top[2] == 5 && right[0] == 381 && right[1] == 195
+        && bottom[0] == 195 && bottom[1] == 381
+        && top[1] - top[2] >= 0 && 195 - 9 - top[2] > Rings.ORBIT + Rings.RADIUS + Rings.PEN / 2;
 }
 
 // Rings stay inside the dial, apart from each other, and clear of the rim lines' arcs.
-// The rings stay inside the hour marks (18 px, the seconds pointer's path too) and apart from each
+// The rings stay inside the hour marks (18 px, the seconds dot's path too) and apart from each
 // other (with their stroke); the slot rings
 // stay clear of the rim lines' arcs, and the sun ring above 6 stays inside the parasha's line
 // (its glyphs reach about 26 px in from the rim line's baseline).
