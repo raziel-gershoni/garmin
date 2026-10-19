@@ -1,0 +1,98 @@
+<settings>
+    <setting propertyKey="@Properties.Slot1" title="@Strings.Slot1Title">
+        <settingConfig type="list">
+            <listEntry value="0">@Strings.SlotNone</listEntry>
+            <listEntry value="1">@Strings.SlotHeartRate</listEntry>
+            <listEntry value="2">@Strings.SlotBattery</listEntry>
+            <listEntry value="3">@Strings.SlotSteps</listEntry>
+            <listEntry value="4">@Strings.SlotAltitude</listEntry>
+            <listEntry value="5">@Strings.SlotSunrise</listEntry>
+            <listEntry value="6">@Strings.SlotSunset</listEntry>
+            <listEntry value="7">@Strings.SlotBodyBattery</listEntry>
+            <listEntry value="8">@Strings.SlotSolar</listEntry>
+            <listEntry value="9">@Strings.SlotNotifications</listEntry>
+            <listEntry value="10">@Strings.SlotCalories</listEntry>
+        </settingConfig>
+    </setting>
+    <setting propertyKey="@Properties.Slot2" title="@Strings.Slot2Title">
+        <settingConfig type="list">
+            <listEntry value="0">@Strings.SlotNone</listEntry>
+            <listEntry value="1">@Strings.SlotHeartRate</listEntry>
+            <listEntry value="2">@Strings.SlotBattery</listEntry>
+            <listEntry value="3">@Strings.SlotSteps</listEntry>
+            <listEntry value="4">@Strings.SlotAltitude</listEntry>
+            <listEntry value="5">@Strings.SlotSunrise</listEntry>
+            <listEntry value="6">@Strings.SlotSunset</listEntry>
+            <listEntry value="7">@Strings.SlotBodyBattery</listEntry>
+            <listEntry value="8">@Strings.SlotSolar</listEntry>
+            <listEntry value="9">@Strings.SlotNotifications</listEntry>
+            <listEntry value="10">@Strings.SlotCalories</listEntry>
+        </settingConfig>
+    </setting>
+    <setting propertyKey="@Properties.Slot3" title="@Strings.Slot3Title">
+        <settingConfig type="list">
+            <listEntry value="0">@Strings.SlotNone</listEntry>
+            <listEntry value="1">@Strings.SlotHeartRate</listEntry>
+            <listEntry value="2">@Strings.SlotBattery</listEntry>
+            <listEntry value="3">@Strings.SlotSteps</listEntry>
+            <listEntry value="4">@Strings.SlotAltitude</listEntry>
+            <listEntry value="5">@Strings.SlotSunrise</listEntry>
+            <listEntry value="6">@Strings.SlotSunset</listEntry>
+            <listEntry value="7">@Strings.SlotBodyBattery</listEntry>
+            <listEntry value="8">@Strings.SlotSolar</listEntry>
+            <listEntry value="9">@Strings.SlotNotifications</listEntry>
+            <listEntry value="10">@Strings.SlotCalories</listEntry>
+        </settingConfig>
+    </setting>
+    <setting propertyKey="@Properties.Slot4" title="@Strings.Slot4Title">
+        <settingConfig type="list">
+            <listEntry value="0">@Strings.SlotNone</listEntry>
+            <listEntry value="1">@Strings.SlotHeartRate</listEntry>
+            <listEntry value="2">@Strings.SlotBattery</listEntry>
+            <listEntry value="3">@Strings.SlotSteps</listEntry>
+            <listEntry value="4">@Strings.SlotAltitude</listEntry>
+            <listEntry value="5">@Strings.SlotSunrise</listEntry>
+            <listEntry value="6">@Strings.SlotSunset</listEntry>
+            <listEntry value="7">@Strings.SlotBodyBattery</listEntry>
+            <listEntry value="8">@Strings.SlotSolar</listEntry>
+            <listEntry value="9">@Strings.SlotNotifications</listEntry>
+            <listEntry value="10">@Strings.SlotCalories</listEntry>
+        </settingConfig>
+    </setting>
+    <setting propertyKey="@Properties.Slot5" title="@Strings.Slot5Title">
+        <settingConfig type="list">
+            <listEntry value="0">@Strings.SlotNone</listEntry>
+            <listEntry value="1">@Strings.SlotHeartRate</listEntry>
+            <listEntry value="2">@Strings.SlotBattery</listEntry>
+            <listEntry value="3">@Strings.SlotSteps</listEntry>
+            <listEntry value="4">@Strings.SlotAltitude</listEntry>
+            <listEntry value="5">@Strings.SlotSunrise</listEntry>
+            <listEntry value="6">@Strings.SlotSunset</listEntry>
+            <listEntry value="7">@Strings.SlotBodyBattery</listEntry>
+            <listEntry value="8">@Strings.SlotSolar</listEntry>
+            <listEntry value="9">@Strings.SlotNotifications</listEntry>
+            <listEntry value="10">@Strings.SlotCalories</listEntry>
+        </settingConfig>
+    </setting>
+    <setting propertyKey="@Properties.Slot6" title="@Strings.Slot6Title">
+        <settingConfig type="list">
+            <listEntry value="0">@Strings.SlotNone</listEntry>
+            <listEntry value="1">@Strings.SlotHeartRate</listEntry>
+            <listEntry value="2">@Strings.SlotBattery</listEntry>
+            <listEntry value="3">@Strings.SlotSteps</listEntry>
+            <listEntry value="4">@Strings.SlotAltitude</listEntry>
+            <listEntry value="5">@Strings.SlotSunrise</listEntry>
+            <listEntry value="6">@Strings.SlotSunset</listEntry>
+            <listEntry value="7">@Strings.SlotBodyBattery</listEntry>
+            <listEntry value="8">@Strings.SlotSolar</listEntry>
+            <listEntry value="9">@Strings.SlotNotifications</listEntry>
+            <listEntry value="10">@Strings.SlotCalories</listEntry>
+        </settingConfig>
+    </setting>
+    <setting propertyKey="@Properties.Theme" title="@Strings.ThemeTitle">
+        <settingConfig type="list">
+            <listEntry value="0">@Strings.ThemeDark</listEntry>
+            <listEntry value="1">@Strings.ThemeLight</listEntry>
+        </settingConfig>
+    </setting>
+</settings>

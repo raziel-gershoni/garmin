@@ -1,0 +1,15 @@
+# Build output
+bin/
+*.prg
+*.prg.debug.xml
+*.iq
+
+# Signing keys — never commit (the developer key must also be backed up outside the repo)
+*.der
+*.pem
+
+# Tooling
+node_modules/
+.DS_Store
+.superpowers/
+.claude/

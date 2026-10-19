@@ -1,0 +1,24 @@
+<strings>
+    <string id="AppName">Hebrew Face</string>
+    <string id="SettingsTitle">Hebrew Face</string>
+    <string id="Slot1Title">Slot 1 (top left)</string>
+    <string id="Slot2Title">Slot 2 (top right)</string>
+    <string id="Slot3Title">Slot 3 (middle left)</string>
+    <string id="Slot4Title">Slot 4 (middle right)</string>
+    <string id="Slot5Title">Slot 5 (bottom left)</string>
+    <string id="Slot6Title">Slot 6 (bottom right)</string>
+    <string id="ThemeTitle">Background</string>
+    <string id="ThemeDark">Dark</string>
+    <string id="ThemeLight">Light</string>
+    <string id="SlotNone">Empty</string>
+    <string id="SlotHeartRate">Heart rate</string>
+    <string id="SlotBattery">Battery</string>
+    <string id="SlotSteps">Steps</string>
+    <string id="SlotAltitude">Altitude</string>
+    <string id="SlotSunrise">Sunrise</string>
+    <string id="SlotSunset">Sunset</string>
+    <string id="SlotBodyBattery">Body Battery</string>
+    <string id="SlotSolar">Solar intensity</string>
+    <string id="SlotNotifications">Notifications</string>
+    <string id="SlotCalories">Calories</string>
+</strings>

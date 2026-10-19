@@ -1,0 +1,9 @@
+{
+  "name": "hebrew-face-tools",
+  "private": true,
+  "type": "module",
+  "description": "Test oracles and fixture generators for the Hebrew Face Connect IQ apps",
+  "dependencies": {
+    "@hebcal/core": "^6.14.5"
+  }
+}
