@@ -19,12 +19,21 @@ function glanceAndDetailRender(logger as Logger) as Boolean {
     var detail = new DetailView();
     var glanceDc = GlanceTestSupport.dc(164, 61);
     var screenDc = GlanceTestSupport.dc(176, 176);
+    detail.onLayout(screenDc);
     glance.onUpdate(glanceDc);
     detail.onUpdate(screenDc);
-    Storage.setValue(Parasha.ITEMS_KEY, [[Parasha.todayRd() + 3, "פרשת תזריע־מצורע", true]]);
+    var saved = TestCache.save();
+    var today = Parasha.todayRd();
+    Storage.setValue(Parasha.ITEMS_KEY, [[HebrewCalendar.shabbatOnOrAfter(today), "פרשת תזריע־מצורע", true],
+        [HebrewCalendar.shabbatOnOrAfter(today + 1), "פרשת תזריע־מצורע", true]]);
+    if (Parasha.titleFor(today) == null) {
+        TestCache.restore(saved);
+        return false;
+    }
+    Parasha.changed = true;
     glance.onUpdate(glanceDc);
     detail.onUpdate(screenDc);
-    Storage.deleteValue(Parasha.ITEMS_KEY);
+    TestCache.restore(saved);
     return true;
 }
 

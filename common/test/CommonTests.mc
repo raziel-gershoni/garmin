@@ -82,6 +82,7 @@ function parashaLookupPrefersParashaThenHoliday(logger as Logger) as Boolean {
         ]
     };
     var items = Parasha.compact(sample);
+    var saved = TestCache.save();
     Application.Storage.setValue(Parasha.ITEMS_KEY, items);
     var ok = items.size() == 5
         && "סוכות ו׳ חוה״מ".equals(items[2][1])
@@ -89,6 +90,11 @@ function parashaLookupPrefersParashaThenHoliday(logger as Logger) as Boolean {
         && "שמיני עצרת".equals(Parasha.titleFor(HebrewCalendar.fixedFromGregorian(2026, 9, 27)))
         && "ראש השנה".equals(Parasha.titleFor(HebrewCalendar.fixedFromGregorian(2026, 9, 12)))
         && Parasha.titleFor(HebrewCalendar.fixedFromGregorian(2026, 10, 25)) == null;
-    Application.Storage.deleteValue(Parasha.ITEMS_KEY);
+    TestCache.restore(saved);
     return ok;
+}
+
+(:test)
+function weekdayLetters(logger as Logger) as Boolean {
+    return HebrewFormat.weekday(1).equals("א׳") && HebrewFormat.weekday(6).equals("ו׳") && HebrewFormat.weekday(7).equals("ש׳");
 }

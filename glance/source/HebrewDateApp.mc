@@ -11,13 +11,13 @@ class HebrewDateApp extends Application.AppBase {
     }
 
     function getInitialView() as [WatchUi.Views] or [WatchUi.Views, WatchUi.InputDelegates] {
-        HebrewDay.scheduleSync();
+        Parasha.scheduleSync(true);
         return [new DetailView()];
     }
 
     (:glance)
     function getGlanceView() as [WatchUi.GlanceView] or [WatchUi.GlanceView, WatchUi.GlanceViewDelegate] or Null {
-        HebrewDay.scheduleSync();
+        Parasha.scheduleSync(true);
         return [new HebrewGlanceView()];
     }
 
@@ -28,7 +28,7 @@ class HebrewDateApp extends Application.AppBase {
     // The service writes the cache itself; this only refreshes the schedule and the screen.
     function onBackgroundData(data as Application.PersistableType) as Void {
         Parasha.changed = true;
-        HebrewDay.scheduleSync();
+        Parasha.scheduleSync(false);
         WatchUi.requestUpdate();
     }
 }

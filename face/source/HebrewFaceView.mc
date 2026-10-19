@@ -7,21 +7,21 @@ import Toybox.Time;
 import Toybox.Time.Gregorian;
 import Toybox.WatchUi;
 
-// Layout A: Gregorian date / Hebrew day+month / Hebrew year at top left, analog clock in the
-// round subscreen, a parasha (or holiday) line, then a 2x3 grid of swappable slots.
-// Positions and font choices live in Layout.mc.
+// Gregorian date and two slots left of the round subscreen (analog clock), then a grey band with
+// the full Hebrew date and the parasha (or holiday), then a 2x2 grid of slots. All six slots are
+// swappable. Positions and font choices live in Layout.mc and common/source/DateBand.mc.
 class HebrewFaceView extends WatchUi.WatchFace {
 
     var _iconFont as FontResource?;
+    var _band as BitmapResource?;
     var _clockX = 144;
     var _clockY = 31;
     var _clockR = 31;
 
     var _hebrewRd = -1;
-    var _dayMonth = "";
-    var _year = "";
+    var _hebrewLine = null as Array?;
     var _parashaRd = -1;
-    var _parasha = null as String?;
+    var _parashaLine = null as Array?;
 
     function initialize() {
         WatchFace.initialize();
@@ -29,6 +29,7 @@ class HebrewFaceView extends WatchUi.WatchFace {
 
     function onLayout(dc as Dc) as Void {
         _iconFont = WatchUi.loadResource(Rez.Fonts.Icons) as FontResource;
+        _band = WatchUi.loadResource(Rez.Drawables.Band) as BitmapResource;
         if (WatchUi has :getSubscreen) {
             var box = WatchUi.getSubscreen();
             if (box != null) {
@@ -57,41 +58,20 @@ class HebrewFaceView extends WatchUi.WatchFace {
                 var stats = System.getSystemStats();
                 System.println("face mem " + stats.usedMemory + "/" + stats.totalMemory + " sun " + sun);
             }
-            var h = HebrewCalendar.fromFixed(hebrewRd);
-            _dayMonth = HebrewFormat.dayMonth(h);
-            _year = HebrewFormat.year(h);
+            _hebrewLine = DateBand.hebrewDate(dc, HebrewCalendar.fromFixed(hebrewRd));
             _hebrewRd = hebrewRd;
         }
-
-        drawDates(dc, now);
-        drawParasha(dc, hebrewRd);
-        drawSlots(dc, sun);
-        drawClock(dc, fg, bg, t.hour as Number, t.min as Number);
-    }
-
-    function drawDates(dc as Dc, now as Time.Moment) as Void {
-        var m = Gregorian.info(now, Time.FORMAT_MEDIUM);
-        var gregorian = m.day_of_week + " " + m.day + " " + m.month;
-        dc.drawText(Layout.TEXT_RIGHT, Layout.gregorianY(dc, gregorian), Graphics.FONT_XTINY, gregorian, Graphics.TEXT_JUSTIFY_RIGHT);
-        var dm = Layout.dayMonth(dc, _dayMonth);
-        dc.drawText(Layout.TEXT_RIGHT, dm[1], dm[0], _dayMonth, Graphics.TEXT_JUSTIFY_RIGHT);
-        dc.drawText(Layout.TEXT_RIGHT, Layout.YEAR_Y, Graphics.FONT_XTINY, _year, Graphics.TEXT_JUSTIFY_RIGHT);
-    }
-
-    function drawParasha(dc as Dc, hebrewRd as Number) as Void {
-        dc.setPenWidth(1);
-        dc.drawLine(4, Layout.RULE_1_Y, 172, Layout.RULE_1_Y);
-        dc.drawLine(4, Layout.RULE_2_Y, 172, Layout.RULE_2_Y);
         if (hebrewRd != _parashaRd || Parasha.changed) {
-            _parasha = Parasha.titleFor(hebrewRd);
+            var title = Parasha.titleFor(hebrewRd);
+            _parashaLine = title == null ? null : DateBand.parasha(dc, title);
             _parashaRd = hebrewRd;
             Parasha.changed = false;
         }
-        var title = _parasha;
-        if (title != null) {
-            var p = Layout.parasha(dc, title);
-            dc.drawText(Layout.CENTER_X, p[2], p[1], p[0], Graphics.TEXT_JUSTIFY_CENTER);
-        }
+
+        DateBand.drawGregorian(dc, t);
+        DateBand.drawBand(dc, _band, _hebrewLine as Array, _parashaLine, fg, bg);
+        drawSlots(dc, sun);
+        drawClock(dc, fg, bg, t.hour as Number, t.min as Number);
     }
 
     function drawSlots(dc as Dc, sun as Array<Number>?) as Void {
@@ -102,8 +82,7 @@ class HebrewFaceView extends WatchUi.WatchFace {
             }
             var text = Slots.value(type, sun);
             var place = Layout.slot(dc, slot, text);
-            var iconY = Layout.GRID_TOP + ((slot - 1) / 2) * Layout.ROW_HEIGHT + 6;
-            dc.drawText(place[0], iconY, _iconFont as FontResource, Slots.ICONS[type], Graphics.TEXT_JUSTIFY_LEFT);
+            dc.drawText(place[0], place[4], _iconFont as FontResource, Slots.ICONS[type], Graphics.TEXT_JUSTIFY_LEFT);
             dc.drawText(place[0] + Layout.ICON_W, place[1], place[2], text, Graphics.TEXT_JUSTIFY_LEFT);
         }
     }

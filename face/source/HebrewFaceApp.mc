@@ -11,7 +11,7 @@ class HebrewFaceApp extends Application.AppBase {
     }
 
     function getInitialView() as [WatchUi.Views] or [WatchUi.Views, WatchUi.InputDelegates] {
-        Parasha.scheduleSync();
+        Parasha.scheduleSync(true);
         return [new HebrewFaceView()];
     }
 
@@ -22,7 +22,7 @@ class HebrewFaceApp extends Application.AppBase {
     // The service writes the cache itself; this only refreshes the schedule and the screen.
     function onBackgroundData(data as Application.PersistableType) as Void {
         Parasha.changed = true;
-        Parasha.scheduleSync();
+        Parasha.scheduleSync(false);
         WatchUi.requestUpdate();
     }
 

@@ -14,6 +14,9 @@ module HebrewFormat {
     const TENS = ["י", "כ", "ל", "מ", "נ", "ס", "ע", "פ", "צ"];
     const HUNDREDS = ["ק", "ר", "ש"];
 
+    // Index = Gregorian.Info.day_of_week - 1 (Sunday ... Saturday).
+    const WEEKDAYS = ["א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ש׳"];
+
     // Index = Hebrew month number (1 = Nisan ... 13 = Adar II).
     const MONTHS = ["", "ניסן", "אייר", "סיון", "תמוז", "אב", "אלול",
                     "תשרי", "חשון", "כסלו", "טבת", "שבט", "אדר", "אדר ב׳"];
@@ -61,6 +64,11 @@ module HebrewFormat {
             return "אדר א׳";
         }
         return MONTHS[month];
+    }
+
+    // 1 (Sunday) -> "א׳" ... 7 (Saturday) -> "ש׳"
+    function weekday(dow as Number) as String {
+        return WEEKDAYS[dow - 1];
     }
 
     // "ז׳ חשון"

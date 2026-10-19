@@ -16,7 +16,6 @@ module Parasha {
     const FETCHED_AT_KEY = "hcAt";
     const END_RD_KEY = "hcEnd";
     const SPAN_KEY = "hcSpan";
-    const TRIED_KEY = "hcTried";
     const DEFAULT_SPAN_DAYS = 42;
     const MIN_SPAN_DAYS = 14;
     const MAX_AGE_SEC = 72000; // 20 hours
@@ -53,25 +52,33 @@ module Parasha {
     function needsRefresh(todayRd as Number) as Boolean {
         var at = Storage.getValue(FETCHED_AT_KEY);
         var endRd = Storage.getValue(END_RD_KEY);
-        if (!(at instanceof Number) || !(endRd instanceof Number)) {
+        if (!(at instanceof Number) || !(endRd instanceof Number) || !(Storage.getValue(ITEMS_KEY) instanceof Array)) {
             return true;
         }
         return Time.now().value() - at > MAX_AGE_SEC || endRd - todayRd < MIN_SPAN_DAYS;
     }
 
-    // Called from the foreground (app start and after each background run).
-    function scheduleSync() as Void {
+    // Called from the foreground. At app start (soon) with an empty cache, fetch as soon as allowed:
+    // a past or present moment fires at once, but not within 5 minutes of the last event. Otherwise,
+    // including after a failed background run, retry hourly, so an offline watch does not wake
+    // every 5 minutes.
+    function scheduleSync(soon as Boolean) as Void {
         if (!(Toybox has :Background)) {
             return;
         }
-        var registered = Background.getTemporalEventRegisteredTime();
-        if (Storage.getValue(ITEMS_KEY) == null && Storage.getValue(TRIED_KEY) == null) {
-            // First run: fetch soon instead of waiting a full period. Later retries are hourly.
-            if (!(registered instanceof Time.Moment)) {
-                Background.registerForTemporalEvent(Time.now().add(new Time.Duration(300)));
+        // Registering can be refused (e.g. from a glance on some firmware); the next start tries again.
+        try {
+            var registered = Background.getTemporalEventRegisteredTime();
+            if (soon && Storage.getValue(ITEMS_KEY) == null) {
+                if (!(registered instanceof Time.Moment)) {
+                    var last = Background.getLastTemporalEventTime();
+                    Background.registerForTemporalEvent(last == null ? Time.now() : last.add(new Time.Duration(300)));
+                }
+            } else if (!(registered instanceof Time.Duration)) {
+                Background.registerForTemporalEvent(new Time.Duration(TEMPORAL_PERIOD_SEC));
             }
-        } else if (!(registered instanceof Time.Duration)) {
-            Background.registerForTemporalEvent(new Time.Duration(TEMPORAL_PERIOD_SEC));
+        } catch (e) {
+            System.println("scheduleSync: " + e.getErrorMessage());
         }
     }
 
@@ -141,7 +148,6 @@ class ParashaService extends System.ServiceDelegate {
     }
 
     function onTemporalEvent() as Void {
-        Storage.setValue(Parasha.TRIED_KEY, true);
         if (!Parasha.needsRefresh(Parasha.todayRd())) {
             Background.exit(null);
             return;

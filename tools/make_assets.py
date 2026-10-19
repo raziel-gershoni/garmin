@@ -1,4 +1,5 @@
-"""Generates the 1-bit assets: the slot icon font (BMFont .fnt + .png) and launcher icons.
+"""Generates the 1-bit assets: the slot icon font (BMFont .fnt + .png), launcher icons and the
+dithered grey of the date band.
 
 Icons are a font so they draw in whatever colour the face uses (dark or light theme).
 No dependencies; run with:  python3 tools/make_assets.py
@@ -212,8 +213,15 @@ def launcher_icon(path, crescent):
     write_png(path, n, n, rows, 2)
 
 
+def band(path, width=176, height=49):
+    """The date band's grey: a 50% checkerboard, the only grey a 1-bit screen can show."""
+    rows = [bytes(255 if (x + y) % 2 == 0 else 0 for x in range(width)) for y in range(height)]
+    write_png(path, width, height, rows, 0)
+
+
 if __name__ == "__main__":
     icon_font(ROOT / "face" / "resources" / "fonts")
     launcher_icon(ROOT / "face" / "resources" / "drawables" / "launcher_icon.png", True)
     launcher_icon(ROOT / "glance" / "resources" / "drawables" / "launcher_icon.png", False)
+    band(ROOT / "common" / "resources" / "drawables" / "band.png")
     print("assets written")

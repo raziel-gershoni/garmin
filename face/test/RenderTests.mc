@@ -10,7 +10,15 @@ function faceRendersEverySlotTypeAndTheme(logger as Logger) as Boolean {
     var dc = LayoutTestSupport.offscreenDc();
     var view = new HebrewFaceView();
     view.onLayout(dc);
-    Storage.setValue(Parasha.ITEMS_KEY, [[Parasha.todayRd() + 3, "פרשת אחרי מות־קדושים", true]]);
+    var saved = TestCache.save();
+    var today = Parasha.todayRd();
+    Storage.setValue(Parasha.ITEMS_KEY, [[HebrewCalendar.shabbatOnOrAfter(today), "פרשת אחרי מות־קדושים", true],
+        [HebrewCalendar.shabbatOnOrAfter(today + 1), "פרשת אחרי מות־קדושים", true]]);
+    if (Parasha.titleFor(today) == null) {
+        TestCache.restore(saved);
+        return false;
+    }
+    Parasha.changed = true;
     for (var theme = 0; theme <= 1; theme++) {
         Properties.setValue("Theme", theme);
         for (var type = 0; type < Slots.TYPE_COUNT; type++) {
@@ -21,7 +29,9 @@ function faceRendersEverySlotTypeAndTheme(logger as Logger) as Boolean {
         }
     }
     Storage.deleteValue(Parasha.ITEMS_KEY);
+    Parasha.changed = true;
     view.onUpdate(dc);
+    TestCache.restore(saved);
     for (var slot = 1; slot <= Slots.SLOT_COUNT; slot++) {
         Slots.setType(slot, Slots.DEFAULTS[slot - 1]);
     }

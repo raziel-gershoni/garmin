@@ -4,7 +4,8 @@ import Toybox.System;
 import Toybox.Time;
 import Toybox.Time.Gregorian;
 
-// Today's Hebrew date (rolled over at sunset) and text fitting, shared by the glance and the detail view.
+// Today's Hebrew date (rolled over at sunset), shared by the glance and the detail view, and the
+// glance's text fitting.
 (:glance)
 module HebrewDay {
 
@@ -36,15 +37,5 @@ module HebrewDay {
             options.add([short, Graphics.FONT_XTINY]);
         }
         return options;
-    }
-
-    // Registering may be refused in some contexts (e.g. the glance on some firmware); the next
-    // foreground start tries again.
-    function scheduleSync() as Void {
-        try {
-            Parasha.scheduleSync();
-        } catch (e) {
-            System.println("scheduleSync: " + e.getErrorMessage());
-        }
     }
 }

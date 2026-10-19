@@ -1,5 +1,5 @@
 <strings>
     <string id="AppName">Hebrew Date</string>
-    <string id="Sunrise">Sunrise</string>
-    <string id="Sunset">Sunset</string>
+    <string id="Sunrise">זריחה</string>
+    <string id="Sunset">שקיעה</string>
 </strings>
