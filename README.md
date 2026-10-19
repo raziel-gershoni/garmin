@@ -21,8 +21,8 @@ Two Connect IQ apps for the Instinct 3 (Tactical) Solar (`instinct3solar45mm`) a
     - The full Hebrew date curves along the top rim and the parasha or holiday along the bottom rim; the Gregorian date ("ב׳ 19.10") sits under 12.
     - Six ring subdials with Material Design icons hold the same six slots (no Solar slot, no light theme).
     - White hands with a black outline, plus an orange seconds hand while the watch is awake.
-    - The always-on view is dim and shifts a few pixels each minute against burn-in. Its brightness and hold-to-open have not been tested on a real watch yet.
-    - Touch-and-hold on a ring is meant to open the matching native Garmin view.
+    - The always-on view is dim, with filled grey hands, and shifts a few pixels each minute against burn-in.
+    - Touch-and-hold on a ring opens the matching native Garmin view (heart rate, steps, battery, sunrise/sunset and so on); checked on the watch.
 - **Hebrew Date** (`glance/`): a glance with the Hebrew date and parasha, for use with any watch face. Opening it shows both dates, the parasha, sunrise and sunset, laid out like the face. On the Venu the detail view is round, with the dates on the rim, the Gregorian date under 12 and "זריחה"/"שקיעה" times in the middle.
 
 How it works:
