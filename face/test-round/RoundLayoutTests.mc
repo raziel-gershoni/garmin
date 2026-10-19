@@ -127,7 +127,7 @@ function handWallsAreEven(logger as Logger) as Boolean {
 function secondsLightTheirTick(logger as Logger) as Boolean {
     var ok = Dial.tickColor(10, false, 10) == Dial.ACCENT && Dial.tickColor(13, false, 13) == Dial.ACCENT
         && Dial.tickColor(10, false, 11) == Graphics.COLOR_WHITE && Dial.tickColor(13, false, 10) != Dial.ACCENT
-        && Dial.tickColor(10, true, null) != Dial.ACCENT;
+        && Dial.tickColor(10, true, 10) != Dial.ACCENT && Dial.tickColor(15, true, 15) != Dial.ACCENT;
     for (var low = 0; ok && low <= 1; low++) {
         var pen = Dial.tickPen(0, low == 1);
         var e = Dial.tickEnds(195, 195, 195, 0, low == 1);
