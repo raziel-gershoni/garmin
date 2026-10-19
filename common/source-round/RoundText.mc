@@ -1,13 +1,12 @@
 import Toybox.Graphics;
 import Toybox.Lang;
 import Toybox.Math;
-import Toybox.StringUtil;
 import Toybox.Time.Gregorian;
 
 // Text on the round Venu screen, shared by the face and the glance's detail view.
-// - Rim lines: drawRadialText lays characters out in typing order with no right-to-left
-//   reordering (checked in the Venu 4 simulator), so rim strings are reversed into visual order.
-//   They are pure Hebrew: no digits or brackets that would need their own direction.
+// - Rim lines: the Venu 4 firmware lays Hebrew out right-to-left in drawRadialText, as in
+//   straight text, so rim strings stay in logical order (checked on the watch). The simulator
+//   does not reorder curved text, so it shows rim lines backwards; trust the watch.
 // - Pairs: a Hebrew word with digits beside it ("ב׳ 19.10", "זריחה 06:44"), drawn as two
 //   pieces because Noto Sans Hebrew has no digits.
 // Sizes are for the 390 px Venu 4 41 mm and scale with the screen width.
@@ -32,18 +31,6 @@ module RoundText {
             _fonts[key] = f;
         }
         return f;
-    }
-
-    // Pure Hebrew in visual (left-to-right) order, for drawRadialText.
-    function visual(text as String) as String {
-        var chars = text.toCharArray();
-        var n = chars.size();
-        for (var i = 0; i < n / 2; i++) {
-            var t = chars[i];
-            chars[i] = chars[n - 1 - i];
-            chars[n - 1 - i] = t;
-        }
-        return StringUtil.charArrayToString(chars);
     }
 
     function rimRadius(width as Number) as Number {
@@ -86,20 +73,19 @@ module RoundText {
         return out;
     }
 
-    // [visualText, font] for the first option that fits the rim arc; the last option otherwise.
+    // [text, font] for the first option that fits the rim arc; the last option otherwise.
     // low: always-on, which uses the thinner face.
     function fitRim(dc as Dc, options as Array<Array>, width as Number, low as Boolean) as Array {
         var max = rimMaxLength(width);
         var face = low ? REGULAR : BOLD;
         var chosen = options[options.size() - 1];
         for (var i = 0; i < options.size(); i++) {
-            var text = visual(options[i][0] as String);
-            if (dc.getTextWidthInPixels(text, font(face, options[i][1] as Number, width)) <= max) {
+            if (dc.getTextWidthInPixels(options[i][0] as String, font(face, options[i][1] as Number, width)) <= max) {
                 chosen = options[i];
                 break;
             }
         }
-        return [visual(chosen[0] as String), font(face, chosen[1] as Number, width)];
+        return [chosen[0] as String, font(face, chosen[1] as Number, width)];
     }
 
     // A rim line centred on 12 o'clock (top) or 6 o'clock, upright either way.

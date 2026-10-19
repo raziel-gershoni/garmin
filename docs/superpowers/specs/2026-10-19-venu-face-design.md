@@ -20,7 +20,7 @@ Builds on the Instinct 3 face (`2026-10-18-hebrew-face-design.md`). The data is 
 - **Dial:** 60 grey minute ticks; 12 white hour marks, 4 px wide.
 - **Top rim:** the full Hebrew date ("ח׳ חשון תשפ״ז"), white, in the Noto Sans Hebrew Bold vector font (~32 px). It is drawn with `drawRadialText` clockwise, centred on 12 o'clock, at radius `r − 44`.
 - **Bottom rim:** the parasha or holiday, orange, same font. It is drawn counter-clockwise, centred on 6 o'clock, so it reads upright. If the title is too long for the arc, "פרשת " is dropped first, then the font steps down.
-- **Curved text order:** curved text gets no right-to-left reordering (verified in the simulator), so rim strings are reversed character by character before drawing. They contain no digits.
+- **Curved text order:** on the Venu 4 itself, curved text is laid out right-to-left like straight text, so rim strings stay in logical order. The simulator does not reorder curved text and shows rim lines backwards; an earlier build reversed them to suit the simulator, which made them read backwards on the watch (found on the user's Venu, 2026-10-19).
 - **Under 12:** "ב׳ 19.10", grey, drawn as two pieces as on the Instinct: the Hebrew weekday in Noto Sans Hebrew, the digits in Roboto. Straight text does get right-to-left reordering.
 - **Ring subdials** (slots 1–6):
   - **Layout:** radius 38. Centres on a circle of radius 134 at −37°, 0° and +37° from 9 o'clock (slots 1, 3, 5) and from 3 o'clock (slots 2, 4, 6). So rows pair up as on the Instinct: 1–2, 3–4, 5–6.

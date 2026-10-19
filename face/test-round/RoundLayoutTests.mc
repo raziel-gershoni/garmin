@@ -19,7 +19,7 @@ module RoundTestSupport {
             var h = HebrewCalendar.fromFixed(rd);
             for (var low = 0; low <= 1; low++) {
                 var line = RoundText.fitRim(dc, RoundText.dateOptions(h), w, low == 1);
-                var logical = RoundText.visual(line[0] as String);
+                var logical = line[0] as String;
                 var compacted = !logical.equals(HebrewFormat.full(h));
                 if (dc.getTextWidthInPixels(line[0] as String, line[1]) > max || (compacted && h[1] < HebrewCalendar.ADAR)) {
                     logger.error(HebrewFormat.full(h) + " -> " + logical);
@@ -29,11 +29,6 @@ module RoundTestSupport {
         }
         return failures == 0;
     }
-}
-
-(:test)
-function rimTextReversesIntoVisualOrder(logger as Logger) as Boolean {
-    return RoundText.visual("אבג ד״ה").equals("ה״ד גבא") && RoundText.visual("").equals("");
 }
 
 // 5787 is a leap year (Adar I/II), 5788 a common year, 5798 a leap year with the widest year letters.
