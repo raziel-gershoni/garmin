@@ -36,6 +36,20 @@ module Slots {
         Properties.setValue("Slot" + slot, type);
     }
 
+    // AMOLED watches (the Venu) have no solar charging, so Solar is not offered there.
+    function available(type as Number) as Boolean {
+        return type != SOLAR || !System.getDeviceSettings().requiresBurnInProtection;
+    }
+
+    // The next type offered after type, wrapping round to Empty.
+    function next(type as Number) as Number {
+        var n = (type + 1) % TYPE_COUNT;
+        while (!available(n)) {
+            n = (n + 1) % TYPE_COUNT;
+        }
+        return n;
+    }
+
     // Text for a slot type; "--" when the watch has no reading.
     function value(type as Number, sun as Array<Number>?) as String {
         var v = null;

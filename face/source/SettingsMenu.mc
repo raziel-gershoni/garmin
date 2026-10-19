@@ -1,5 +1,6 @@
 import Toybox.Application;
 import Toybox.Lang;
+import Toybox.System;
 import Toybox.WatchUi;
 
 // On-watch settings (sideloaded apps get no phone settings).
@@ -14,8 +15,15 @@ module SettingsMenu {
         for (var slot = 1; slot <= Slots.SLOT_COUNT; slot++) {
             menu.addItem(new WatchUi.MenuItem(titles[slot - 1], names[Slots.typeOf(slot)], slot, null));
         }
-        menu.addItem(new WatchUi.MenuItem(Rez.Strings.ThemeTitle, themeName(), :theme, null));
+        if (!amoled()) {
+            menu.addItem(new WatchUi.MenuItem(Rez.Strings.ThemeTitle, themeName(), :theme, null));
+        }
         return [menu, new SettingsDelegate()];
+    }
+
+    // AMOLED faces stay black: a light background would burn power and break always-on rules.
+    function amoled() as Boolean {
+        return System.getDeviceSettings().requiresBurnInProtection;
     }
 
     function isLight() as Boolean {
@@ -40,7 +48,7 @@ class SettingsDelegate extends WatchUi.Menu2InputDelegate {
             item.setSubLabel(SettingsMenu.themeName());
         } else {
             var slot = id as Number;
-            var next = (Slots.typeOf(slot) + 1) % Slots.TYPE_COUNT;
+            var next = Slots.next(Slots.typeOf(slot));
             Slots.setType(slot, next);
             item.setSubLabel(Slots.names()[next]);
         }
