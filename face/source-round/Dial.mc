@@ -7,7 +7,7 @@ import Toybox.Math;
 module Dial {
 
     const ACCENT = 0xFFAA00;
-    const HANDS_LOW = 0x8A8A8A;   // always-on hand outlines, as dim as the brighter hour marks
+    const HANDS_LOW = 0x7A7A7A;   // always-on hands: filled, a step dimmer than the brighter hour marks
     // Always-on burn-in shift, one step per minute, at most 2 px from centre.
     const SHIFTS = [[0, 0], [2, 0], [2, 2], [0, 2], [-2, 2], [-2, 0], [-2, -2], [0, -2], [2, -2]];
 
@@ -38,7 +38,7 @@ module Dial {
     }
 
     // Awake: white hands over a black outline, an orange seconds hand (sec != null) and an orange
-    // hub. Always-on: hollow light-grey hands over black, a ring for the hub, no seconds.
+    // hub. Always-on: the same hands filled in dim grey over black, a grey hub, no seconds.
     function drawHands(dc as Dc, cx as Number, cy as Number, r as Number, hour as Number, min as Number,
                        sec as Number?, low as Boolean) as Void {
         var s = r / 195.0;
@@ -48,17 +48,16 @@ module Dial {
         var ml = r * 0.80;
         fill(dc, cx, cy, ha, hl + 3, 18 * s, 18 * s, Graphics.COLOR_BLACK);
         fill(dc, cx, cy, ma, ml + 3, 14 * s, 18 * s, Graphics.COLOR_BLACK);
+        var color = low ? HANDS_LOW : Graphics.COLOR_WHITE;
+        fill(dc, cx, cy, ha, hl, 12 * s, 18 * s, color);
+        fill(dc, cx, cy, ma, ml, 8 * s, 18 * s, color);
         if (low) {
-            outline(dc, cx, cy, ha, hl, 12 * s, 18 * s);
-            outline(dc, cx, cy, ma, ml, 9 * s, 18 * s);
             dc.setColor(HANDS_LOW, Graphics.COLOR_TRANSPARENT);
-            dc.setPenWidth(2);
-            dc.drawCircle(cx, cy, (6 * s).toNumber());
-            dc.setPenWidth(1);
+            dc.fillCircle(cx, cy, (6 * s).toNumber());
+            dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_TRANSPARENT);
+            dc.fillCircle(cx, cy, (2 * s).toNumber());
             return;
         }
-        fill(dc, cx, cy, ha, hl, 12 * s, 18 * s, Graphics.COLOR_WHITE);
-        fill(dc, cx, cy, ma, ml, 8 * s, 18 * s, Graphics.COLOR_WHITE);
         if (sec != null) {
             fill(dc, cx, cy, (sec * Math.PI / 30).toFloat(), r * 0.86, 3 * s, 24 * s, ACCENT);
         }
@@ -91,33 +90,5 @@ module Dial {
         dc.fillPolygon(points(cx, cy, angle, length, width, tail));
         dc.fillCircle((cx + sn * length).toNumber(), (cy - cs * length).toNumber(), (width / 4).toNumber());
         dc.fillCircle((cx - sn * tail).toNumber(), (cy + cs * tail).toNumber(), (width / 2).toNumber());
-    }
-
-    // Hollow tapered hand with round ends (always-on): the two long sides and a half circle at
-    // each end.
-    function outline(dc as Dc, cx as Number, cy as Number, angle as Float, length as Float, width as Float,
-                     tail as Float) as Void {
-        var p = points(cx, cy, angle, length, width, tail);
-        var sn = Math.sin(angle);
-        var cs = Math.cos(angle);
-        var dir = 90 - Math.toDegrees(angle).toNumber();   // the hand's direction, CCW from 3 o'clock
-        dc.setColor(HANDS_LOW, Graphics.COLOR_TRANSPARENT);
-        dc.setPenWidth(2);
-        line(dc, p[0] as Array, p[3] as Array);
-        line(dc, p[1] as Array, p[2] as Array);
-        dc.drawArc((cx + sn * length).toNumber(), (cy - cs * length).toNumber(), (width / 4).toNumber(),
-                   Graphics.ARC_COUNTER_CLOCKWISE, degrees(dir - 90), degrees(dir + 90));
-        dc.drawArc((cx - sn * tail).toNumber(), (cy + cs * tail).toNumber(), (width / 2).toNumber(),
-                   Graphics.ARC_COUNTER_CLOCKWISE, degrees(dir + 90), degrees(dir + 270));
-        dc.setPenWidth(1);
-    }
-
-    function line(dc as Dc, a as Array, b as Array) as Void {
-        dc.drawLine((a[0] as Float).toNumber(), (a[1] as Float).toNumber(), (b[0] as Float).toNumber(), (b[1] as Float).toNumber());
-    }
-
-    // An angle in 0..359 degrees.
-    function degrees(d as Number) as Number {
-        return ((d % 360) + 360) % 360;
     }
 }

@@ -211,11 +211,6 @@ function holdOnRingTargetsItsComplication(logger as Logger) as Boolean {
     return ok;
 }
 
-// Arc angles for the rounded hand ends wrap into 0..359.
-(:test)
-function handEndAnglesWrap(logger as Logger) as Boolean {
-    return Dial.degrees(-90) == 270 && Dial.degrees(0) == 0 && Dial.degrees(360) == 0 && Dial.degrees(450) == 90;
-}
 
 // The battery ring shows the same days-left text as the Instinct slot.
 (:test)
