@@ -55,7 +55,7 @@ Native Garmin faces cannot display third-party data (verified), so this is our o
   - Request: Hebcal `https://www.hebcal.com/hebcal?v=1&cfg=json&s=on&maj=on&i=on&leyning=off&start=…&end=…` (Israel schedule, about 6 weeks ahead).
   - The service compacts the response to `[rd, hebrewTitle, isParasha]` (rd = fixed day number) and stores it.
   - Display: the coming Shabbat's parasha, counted from the sunset-adjusted date. If that Shabbat has no parasha, show the holiday on that date.
-  - If the cache is empty, the line is blank and the Hebrew date sits centred in the band.
+  - If the cache is empty, the line is blank and the Hebrew date sits centred in the glance's band; on the face it moves down to the middle of the two lines' space under the band.
 
 ## Formatting
 Hebrew letters, no niqqud. Gematria uses geresh/gershayim (ט״ו/ט״ז). The year has no thousands digit (תשפ״ז). Leap-year months are אדר א׳ / אדר ב׳. Month spellings follow Hebcal (חשון).

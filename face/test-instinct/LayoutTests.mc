@@ -248,7 +248,8 @@ function parashaTitlesFit(logger as Logger) as Boolean {
             failures++;
         }
     }
-    var lines = [[Layout.HEBREW_Y[1], Layout.HEBREW_MAX_W], [Layout.PARASHA_Y[1], Layout.PARASHA_MAX_W]];
+    var lines = [[Layout.HEBREW_Y[1], Layout.HEBREW_MAX_W], [Layout.HEBREW_Y[1] + Layout.ALONE_SHIFT, Layout.HEBREW_MAX_W],
+                 [Layout.PARASHA_Y[1], Layout.PARASHA_MAX_W]];
     for (var i = 0; i < lines.size(); i++) {
         var w = lines[i][1];
         for (var row = lines[i][0] + 7; row <= lines[i][0] + 24; row++) {
@@ -298,8 +299,9 @@ function secondsBoxCoversSecondsOnly(logger as Logger) as Boolean {
 }
 
 // Slots 5-6: the row's visible range fits the screen on every row its icons and digits cover, and
-// any two of the widest values (or one beside an empty slot) stay inside it, a full gap apart
-// unless their bare text and the gap are wider than the row.
+// any two of the widest values (or one beside an empty slot) stay inside it, in one font and icon
+// setting for both, a full gap apart unless their bare text and the gap are wider than the row.
+// Narrow values keep SMALL and their icons; 24-hour times drop to XTINY, still with icons.
 (:test)
 function bottomRowFits(logger as Logger) as Boolean {
     var dc = LayoutTestSupport.offscreenDc();
@@ -323,7 +325,8 @@ function bottomRowFits(logger as Logger) as Boolean {
             if (l != null && r != null) {
                 var text = dc.getTextWidthInPixels(values[i] as String, l[2]) + dc.getTextWidthInPixels(values[j] as String, r[2]);
                 var room = Layout.BOTTOM_MAX_X - Layout.BOTTOM_MIN_X;
-                ok = ok && (l[0] + lw + Layout.BOTTOM_GAP <= r[0] || text + Layout.BOTTOM_GAP > room);
+                ok = ok && (l[0] + lw + Layout.BOTTOM_GAP <= r[0] || text + Layout.BOTTOM_GAP > room)
+                    && l[2] == r[2] && (l[3] == null) == (r[3] == null);
                 bare += l[3] == null ? 1 : 0;
             }
             if (!ok) {
@@ -333,7 +336,13 @@ function bottomRowFits(logger as Logger) as Boolean {
         }
     }
     logger.debug("bottom pairs without icons: " + bare);
-    return failures == 0;
+    var narrow = Layout.bottomRow(dc, "80", "5d");
+    var lone = Layout.bottomRow(dc, null, "5d");
+    var times = Layout.bottomRow(dc, "06:44", "18:03");
+    return failures == 0
+        && (narrow[0] as Array)[2] == Graphics.FONT_SMALL && (narrow[0] as Array)[3] != null
+        && (lone[1] as Array)[2] == Graphics.FONT_SMALL && (lone[1] as Array)[3] != null
+        && (times[0] as Array)[2] == Graphics.FONT_XTINY && (times[0] as Array)[3] != null;
 }
 
 // The widest gauge values fit the window's smallest font, and that width fits inside the arc's

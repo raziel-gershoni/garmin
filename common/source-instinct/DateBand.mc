@@ -4,18 +4,22 @@ import Toybox.Time.Gregorian;
 import Toybox.WatchUi;
 
 // Shared by the watch face and the glance's detail view on the Instinct 3: the Gregorian date in
-// the column left of the subscreen, and a dithered grey band below the subscreen (like the native
-// faces' time band) with the full Hebrew date and the parasha, outlined so they stay sharp on it.
+// the column left of the subscreen, the dithered grey band's place below the subscreen (like the
+// native faces' time band), the font choices for the Hebrew date and parasha (dateOptions,
+// parashaOptions, fit) and outlined text. The glance's band holds the full Hebrew date and the
+// parasha, outlined so they stay sharp on it (drawBand, HEBREW_Y, PARASHA_Y); the face draws the
+// same bitmap shorter, with the time on it, and the Hebrew lines below it (face Layout.mc).
 // The column is right-aligned at RIGHT, clear of the ring around the subscreen (it hides x > 100 on
 // rows 25-38 and reaches down to row 74). The top-left corner is cut diagonally, so a line's usable
 // width there depends on how high its leftmost glyph reaches: digits, icons, geresh, gershayim and
 // lamed start ~6 rows below y, other Hebrew letters ~10. Geometry is from the simulator's device
-// mask; face/test/LayoutTests.mc checks every date and title against it.
+// mask; face/test-instinct/LayoutTests.mc checks every date and title against it.
 module DateBand {
 
     const RIGHT = 99;
     const GREGORIAN_Y = 2;
-    // The band covers rows 75-123, just below the ring's last row (74); its bitmap is Rez.Drawables.Band.
+    // The band starts just below the ring's last row (74); the glance's covers rows 75-123. Its
+    // bitmap is Rez.Drawables.Band.
     const BAND_TOP = 75;
     const BAND_HEIGHT = 49;
     // y per font [MEDIUM, SMALL, XTINY]: the outlined tall glyphs start inside the band, the date's
@@ -118,8 +122,8 @@ module DateBand {
         return [o[0], font, ys[font == Graphics.FONT_MEDIUM ? 0 : font == Graphics.FONT_SMALL ? 1 : 2]];
     }
 
-    // The band: grey background, Hebrew date, parasha (if known). Lines are [text, font, y] from
-    // hebrewDate() and parasha(); fg/bg are the face's text and background colours.
+    // The glance's band: grey background, Hebrew date, parasha (if known). Lines are [text, font, y]
+    // from hebrewDate() and parasha(); fg/bg are the text and background colours.
     function drawBand(dc as Dc, band as BitmapResource?, hebrew as Array, parashaLine as Array?,
                       fg as Number, bg as Number) as Void {
         if (band != null) {

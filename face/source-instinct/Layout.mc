@@ -35,13 +35,13 @@ module Layout {
 
     // The Hebrew date and the parasha under the band, centred, in SMALL or XTINY (Hebrew is no
     // smaller in XTINY on this watch, only narrower; MEDIUM is too tall). y per font [MEDIUM
-    // (unused), SMALL, XTINY] puts the ink on the same rows. The parasha's rows reach where the
-    // bottom corners narrow the screen, hence its narrower limit. Without a parasha the date moves
-    // down by ALONE_SHIFT, to the middle of the two lines' space.
+    // (unused), SMALL, XTINY] puts the ink on the same rows. Both lines' limits keep them inside
+    // the bottom corners on every row they can reach (the date's when it is moved down too).
+    // Without a parasha the date moves down by ALONE_SHIFT, to the middle of the two lines' space.
     const LINE_FONTS = [Graphics.FONT_SMALL, Graphics.FONT_XTINY];
     const HEBREW_Y = [106, 106, 107];
     const PARASHA_Y = [126, 126, 127];
-    const HEBREW_MAX_W = 168;
+    const HEBREW_MAX_W = 166;
     const PARASHA_MAX_W = 152;
     const ALONE_SHIFT = 10;
 
