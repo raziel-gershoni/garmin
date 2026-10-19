@@ -116,13 +116,18 @@ class HebrewFaceView extends WatchUi.WatchFace {
         }
     }
 
-    // Icon and value at a place from Layout ([x, y, font, iconY]); nothing for an empty slot.
+    // Icon and value at a place from Layout ([x, y, font, iconY]; no icon when iconY is null);
+    // nothing for an empty slot.
     function drawItem(dc as Dc, place as Array?, type as Number, text as String?) as Void {
         if (place == null || text == null) {
             return;
         }
-        dc.drawText(place[0], place[3], _iconFont as FontResource, Slots.ICONS[type], Graphics.TEXT_JUSTIFY_LEFT);
-        dc.drawText(place[0] + Layout.ICON_W, place[1], place[2], text, Graphics.TEXT_JUSTIFY_LEFT);
+        var x = place[0] as Number;
+        if (place[3] != null) {
+            dc.drawText(x, place[3], _iconFont as FontResource, Slots.ICONS[type], Graphics.TEXT_JUSTIFY_LEFT);
+            x += Layout.ICON_W;
+        }
+        dc.drawText(x, place[1], place[2], text, Graphics.TEXT_JUSTIFY_LEFT);
     }
 
     // Hours follow the watch's 12/24-hour setting; 24-hour time keeps the leading zero. Without
@@ -147,7 +152,7 @@ class HebrewFaceView extends WatchUi.WatchFace {
         dc.drawText(Layout.timeRight(dc, font), Layout.TIME_Y, font, sec.format("%02d"), Graphics.TEXT_JUSTIFY_RIGHT);
     }
 
-    // Slot 3 in the subscreen; an empty slot leaves it dark.
+    // Slot 3 in the subscreen; an empty slot leaves it in the background colour.
     function drawWindow(dc as Dc, sun as Array<Number>?) as Void {
         var type = Slots.typeOf(3);
         if (type != Slots.NONE) {

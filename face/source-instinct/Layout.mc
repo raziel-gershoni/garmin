@@ -41,23 +41,38 @@ module Layout {
         return ICON_W + dc.getTextWidthInPixels(text, font);
     }
 
-    // Places for a column line (y is PAIR_Y or SLOT4_Y) as [left, right], each [x, y, font, iconY]
-    // or null where the slot's text is null (empty slot). Both use the largest font in which the
-    // line fits; a lone item ends at DateBand.RIGHT.
-    function line(dc as Dc, y as Number, left as String?, right as String?) as Array {
-        var f = 0;
-        while (f < FONTS.size() - 1 && lineWidth(dc, left, right, FONTS[f]) > DateBand.maxWidth(y + f, true)) {
-            f++;
-        }
-        var font = FONTS[f];
-        var rightX = DateBand.RIGHT - (right == null ? 0 : itemWidth(dc, right, font));
-        var leftX = (right == null ? DateBand.RIGHT : rightX - PAIR_GAP) - (left == null ? 0 : itemWidth(dc, left, font));
-        return [left == null ? null : [leftX, y + f, font, y + ICON_DY],
-                right == null ? null : [rightX, y + f, font, y + ICON_DY]];
+    // An item's width with or without its icon.
+    function valueWidth(dc as Dc, text as String, font as FontType, icon as Boolean) as Number {
+        return icon ? itemWidth(dc, text, font) : dc.getTextWidthInPixels(text, font);
     }
 
-    function lineWidth(dc as Dc, left as String?, right as String?, font as FontType) as Number {
-        var w = (left == null ? 0 : itemWidth(dc, left, font)) + (right == null ? 0 : itemWidth(dc, right, font));
+    // Places for a column line (y is PAIR_Y or SLOT4_Y) as [left, right], each [x, y, font, iconY]
+    // or null where the slot's text is null (empty slot); iconY is null when the icons are left
+    // out. A lone item ends at DateBand.RIGHT. The line takes the first of SMALL, XTINY, then XTINY
+    // without icons that fits, so wide pairs (five-digit steps, sunrise beside sunset) stay whole;
+    // a pair too wide even then (a four-digit or negative altitude beside steps, a time or another
+    // wide value) starts at the visible edge and its gap closes.
+    function line(dc as Dc, y as Number, left as String?, right as String?) as Array {
+        var f = 0;
+        var icons = true;
+        while (lineWidth(dc, left, right, FONTS[f], icons) > DateBand.maxWidth(y + f, true) && icons) {
+            if (f < FONTS.size() - 1) {
+                f++;
+            } else {
+                icons = false;
+            }
+        }
+        var font = FONTS[f];
+        var rightX = DateBand.RIGHT - (right == null ? 0 : valueWidth(dc, right, font, icons));
+        var leftX = (right == null ? DateBand.RIGHT : rightX - PAIR_GAP) - (left == null ? 0 : valueWidth(dc, left, font, icons));
+        var minX = DateBand.RIGHT - DateBand.maxWidth(y + f, true);
+        var iconY = icons ? y + ICON_DY : null;
+        return [left == null ? null : [leftX < minX ? minX : leftX, y + f, font, iconY],
+                right == null ? null : [rightX, y + f, font, iconY]];
+    }
+
+    function lineWidth(dc as Dc, left as String?, right as String?, font as FontType, icons as Boolean) as Number {
+        var w = (left == null ? 0 : valueWidth(dc, left, font, icons)) + (right == null ? 0 : valueWidth(dc, right, font, icons));
         return left != null && right != null ? w + PAIR_GAP : w;
     }
 

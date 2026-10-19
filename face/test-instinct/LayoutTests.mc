@@ -17,7 +17,7 @@ module LayoutTestSupport {
                              small as Boolean) as Number {
         var places = Layout.line(dc, y, left, right);
         var font = (places[0] as Array)[2];
-        var width = Layout.lineWidth(dc, left, right, font);
+        var width = Layout.lineWidth(dc, left, right, font, (places[0] as Array)[3] != null);
         if ((small && font != Graphics.FONT_SMALL) || !ScreenMask.fitsColumn(y, width, true)
                 || (places[0] as Array)[0] + width != DateBand.RIGHT) {
             logger.error("line y=" + y + " " + left + "/" + right + " w=" + width + " font=" + font);
@@ -116,8 +116,9 @@ function gregorianLineFitsColumn(logger as Logger) as Boolean {
 }
 
 // Slots 1-2 share their line in SMALL with a two-digit heart rate beside battery days (the
-// Instinct reports battery in days), and still fit, in XTINY if need be, with a three-digit heart
-// rate beside 99 days or a Body Battery of 100. Any single value fits a column line in SMALL.
+// Instinct reports battery in days), and still fit with their icons, in XTINY if need be, with a
+// three-digit heart rate beside 99 days or a Body Battery of 100. Any single value fits a column
+// line in SMALL.
 (:test)
 function columnLinesFit(logger as Logger) as Boolean {
     var dc = LayoutTestSupport.offscreenDc();
@@ -135,6 +136,44 @@ function columnLinesFit(logger as Logger) as Boolean {
         failures += LayoutTestSupport.columnLineFails(dc, logger, Layout.PAIR_Y, singles[i], null, true);
         failures += LayoutTestSupport.columnLineFails(dc, logger, Layout.SLOT4_Y, singles[i], null, true);
     }
+    return failures == 0;
+}
+
+// Any two of the widest values of each slot type share the line of slots 1-2: never past the
+// visible edge, and a full gap apart unless their bare text and the gap are wider than the line
+// (a four-digit or negative altitude beside steps, a time or another wide value, and five-digit
+// steps side by side: their gap closes).
+(:test)
+function anyPairStaysOnScreen(logger as Logger) as Boolean {
+    var dc = LayoutTestSupport.offscreenDc();
+    var values = ["199", "24d", "100%", "88888", "8848m", "-430m", "23:59", "--:--", "100", "99", "9999", "--"];
+    var failures = 0;
+    var bare = 0;
+    var closed = [];
+    for (var i = 0; i < values.size(); i++) {
+        for (var j = 0; j < values.size(); j++) {
+            var places = Layout.line(dc, Layout.PAIR_Y, values[i], values[j]);
+            var l = places[0] as Array;
+            var r = places[1] as Array;
+            var icons = l[3] != null;
+            var f = l[2] == Graphics.FONT_SMALL ? 0 : 1;
+            var max = DateBand.maxWidth(Layout.PAIR_Y + f, true);
+            var lw = Layout.valueWidth(dc, values[i], l[2], icons);
+            var rw = Layout.valueWidth(dc, values[j], r[2], icons);
+            var text = dc.getTextWidthInPixels(values[i], l[2]) + dc.getTextWidthInPixels(values[j], r[2]);
+            var gapped = l[0] + lw + Layout.PAIR_GAP == r[0];
+            if (!gapped) {
+                closed.add(values[i] + "/" + values[j]);
+            }
+            if (!ScreenMask.fitsColumn(Layout.PAIR_Y + f, DateBand.RIGHT - l[0], true)
+                    || r[0] + rw != DateBand.RIGHT || (!gapped && text + Layout.PAIR_GAP <= max)) {
+                logger.error(values[i] + "/" + values[j] + " x=" + l[0] + "," + r[0] + " w=" + lw + "," + rw);
+                failures++;
+            }
+            bare += icons ? 0 : 1;
+        }
+    }
+    logger.debug("pairs without icons: " + bare + " of " + values.size() * values.size() + "; gap closed: " + closed);
     return failures == 0;
 }
 

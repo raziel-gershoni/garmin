@@ -11,7 +11,9 @@ module FaceViews {
     }
 }
 
-// Stops the once-a-second seconds in low power if the watch finds onPartialUpdate over budget.
+// Stops the once-a-second seconds in low power if the watch finds onPartialUpdate over budget, and
+// asks for a full redraw so the last seconds drawn do not stay on screen (the watch may hold that
+// redraw until the next minute).
 class BudgetDelegate extends WatchUi.WatchFaceDelegate {
 
     var _view as HebrewFaceView;
@@ -24,5 +26,6 @@ class BudgetDelegate extends WatchUi.WatchFaceDelegate {
     function onPowerBudgetExceeded(powerInfo as WatchUi.WatchFacePowerInfo) as Void {
         Parasha.log("power budget exceeded: " + powerInfo.executionTimeAverage + " > " + powerInfo.executionTimeLimit);
         _view.partialUpdates = false;
+        WatchUi.requestUpdate();
     }
 }
