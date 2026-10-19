@@ -200,3 +200,10 @@ function progressIsClamped(logger as Logger) as Boolean {
         && (p == -1.0 || (p >= 0.0 && p <= 1.0))
         && RingData.progress(Slots.HEART_RATE) == -1.0;
 }
+
+// A full gauge is drawn as a circle, because a 360 degree arc is ambiguous.
+(:test)
+function fullProgressDrawsACircle(logger as Logger) as Boolean {
+    return !Rings.isFull(0.0) && !Rings.isFull(0.5) && !Rings.isFull(0.99)
+        && Rings.isFull(0.999) && Rings.isFull(1.0);
+}

@@ -73,7 +73,11 @@ module Rings {
         dc.drawCircle(x, y, r);
         if (progress > 0.005) {
             dc.setColor(color, Graphics.COLOR_TRANSPARENT);
-            dc.drawArc(x, y, r, Graphics.ARC_CLOCKWISE, 90, 90 - (360 * progress).toNumber());
+            if (isFull(progress)) {
+                dc.drawCircle(x, y, r);
+            } else {
+                dc.drawArc(x, y, r, Graphics.ARC_CLOCKWISE, 90, 90 - (360 * progress).toNumber());
+            }
         }
         dc.setPenWidth(1);
         var icon = ring[0] as BitmapResource;
@@ -82,6 +86,11 @@ module Rings {
         dc.setColor(low ? VALUE_LOW : Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
         dc.drawText(x, y + VALUE_DY * width / 390, valueFont(dc, text, width, low), text,
             Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
+    }
+
+    // A full arc has the same start and end angle, which drawArc leaves ambiguous; draw a circle.
+    function isFull(progress as Float) as Boolean {
+        return progress >= 0.999;
     }
 
     // A colour with its RGB channels scaled by f (0..1).
