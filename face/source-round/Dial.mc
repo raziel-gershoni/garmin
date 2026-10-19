@@ -2,7 +2,8 @@ import Toybox.Graphics;
 import Toybox.Lang;
 import Toybox.Math;
 
-// The analog dial on the round screen: ticks, hands and the seconds dot, awake and always-on.
+// The analog dial on the round screen: ticks (the current second's lit orange) and hands, awake
+// and always-on.
 // Lengths are for a 195 px radius (Venu 4 41 mm) and scale with r.
 module Dial {
 
@@ -11,13 +12,16 @@ module Dial {
     // Hands after the Venu's own numbered face: a short thick solid hour capsule and a long
     // hollow minute capsule, neither reaching the centre. [start, end] of the centre line as
     // fractions of r (the round ends reach half the width past them), then the width in px at
-    // r = 195; the minute hand's wall is MINUTE_WALL px. Each hand is one polygon
-    // with its round ends built in (ARC_STEPS segments per end), over a black outline.
+    // r = 195; the minute hand's wall is MINUTE_WALL px. Each hand is a thick line over a wider
+    // black one: the watch draws lines smooth with round ends, where filled polygons came out
+    // fuzzy with faceted ends.
     const HOUR_HAND = [0.10, 0.56, 13.0];
     const MINUTE_HAND = [0.06, 0.90, 9.0];
     const MINUTE_WALL = 2.5;
+    // How far in from the edge the 5-second marks reach, round end included (lines get round
+    // ends half the pen past their endpoints, measured in the simulator).
+    const HOUR_MARK_IN = 18;
     const OUTLINE = 2.0;
-    const ARC_STEPS = 6;
     // Always-on burn-in shift, one step per minute, at most 2 px from centre.
     const SHIFTS = [[0, 0], [2, 0], [2, 2], [0, 2], [-2, 2], [-2, 0], [-2, -2], [0, -2], [2, -2]];
 
@@ -25,26 +29,43 @@ module Dial {
         return SHIFTS[minute % SHIFTS.size()] as Array<Number>;
     }
 
-    // Awake: 60 grey minute ticks and 12 white hour marks. Always-on: dim hour marks only, the
-    // quarters a little brighter.
-    function drawTicks(dc as Dc, cx as Number, cy as Number, r as Number, low as Boolean) as Void {
-        var s = r / 195.0;
+    // Awake: 60 grey minute ticks and 12 white hour marks, the tick at the current second (sec)
+    // lit orange, so the seconds run round the dial on the ticks themselves. Always-on: dim hour
+    // marks only, the quarters a little brighter, no seconds.
+    function drawTicks(dc as Dc, cx as Number, cy as Number, r as Number, low as Boolean, sec as Number?) as Void {
         for (var i = 0; i < 60; i += (low ? 5 : 1)) {
-            var hour = i % 5 == 0;
-            if (low) {
-                dc.setColor(i % 15 == 0 ? 0x8A8A8A : 0x5A5A5A, Graphics.COLOR_TRANSPARENT);
-                dc.setPenWidth(i % 15 == 0 ? 3 : 2);
-            } else {
-                dc.setColor(hour ? Graphics.COLOR_WHITE : 0x666666, Graphics.COLOR_TRANSPARENT);
-                dc.setPenWidth(hour ? 4 : 2);
-            }
-            var a = i * Math.PI / 30;
-            var r0 = r - (hour ? 18 : 9) * s;
-            var r1 = r - 3 * s;
-            dc.drawLine((cx + Math.sin(a) * r0).toNumber(), (cy - Math.cos(a) * r0).toNumber(),
-                        (cx + Math.sin(a) * r1).toNumber(), (cy - Math.cos(a) * r1).toNumber());
+            dc.setColor(tickColor(i, low, sec), Graphics.COLOR_TRANSPARENT);
+            dc.setPenWidth(tickPen(i, low));
+            var ends = tickEnds(cx, cy, r, i, low);
+            dc.drawLine(ends[0][0], ends[0][1], ends[1][0], ends[1][1]);
         }
         dc.setPenWidth(1);
+    }
+
+    function tickColor(i as Number, low as Boolean, sec as Number?) as Number {
+        if (low) {
+            return i % 15 == 0 ? 0x8A8A8A : 0x5A5A5A;
+        }
+        if (i == sec) {
+            return ACCENT;
+        }
+        return i % 5 == 0 ? Graphics.COLOR_WHITE : 0x666666;
+    }
+
+    function tickPen(i as Number, low as Boolean) as Number {
+        if (low) {
+            return i % 15 == 0 ? 3 : 2;
+        }
+        return i % 5 == 0 ? 4 : 2;
+    }
+
+    // [inner end, outer end] of the line for the tick at second i: minute ticks 9 to 3 px in from
+    // the edge, 5-second marks from HOUR_MARK_IN (round end included) to 3 px.
+    function tickEnds(cx as Numeric, cy as Numeric, r as Number, i as Number, low as Boolean) as Array<Array> {
+        var s = r / 195.0;
+        var a = (i * Math.PI / 30).toFloat();
+        var inner = i % 5 == 0 ? r - HOUR_MARK_IN * s + tickPen(i, low) / 2.0 : r - 9 * s;
+        return [at(cx, cy, a, inner, 0), at(cx, cy, a, r - 3 * s, 0)];
     }
 
     // White hands awake, dim grey always-on; the minute hand is drawn last, on top.
@@ -78,43 +99,19 @@ module Dial {
         ];
     }
 
-    // The seconds as an orange dot running round the rim, awake only.
-    function drawSecondsDot(dc as Dc, cx as Number, cy as Number, r as Number, sec as Number) as Void {
-        var dot = secondsDot(cx, cy, r, sec);
-        dc.setColor(ACCENT, Graphics.COLOR_TRANSPARENT);
-        dc.fillCircle(dot[0], dot[1], dot[2]);
-    }
-
-    // [x, y, radius] of the dot on the second's tick, between the tick's ends, rounded to whole
-    // pixels so it does not wobble.
-    function secondsDot(cx as Numeric, cy as Numeric, r as Number, sec as Number) as Array<Number> {
-        var s = r / 195.0;
-        var p = at(cx, cy, (sec * Math.PI / 30).toFloat(), r - 9 * s, 0);
-        return [Math.round(p[0]).toNumber(), Math.round(p[1]).toNumber(), Math.round(5 * s).toNumber()];
-    }
-
+    // A capsule along a clock angle (0 = 12 o'clock, clockwise): a line `width` px thick between
+    // `from` and `to` px out from the centre, whose round ends reach half the width past them.
     function capsule(dc as Dc, cx as Number, cy as Number, angle as Float, from as Float, to as Float,
                      width as Float, color as Number) as Void {
+        var ends = capsuleEnds(cx, cy, angle, from, to);
         dc.setColor(color, Graphics.COLOR_TRANSPARENT);
-        dc.fillPolygon(capsulePoints(cx, cy, angle, from, to, width));
+        dc.setPenWidth(Math.round(width).toNumber());
+        dc.drawLine(ends[0][0], ends[0][1], ends[1][0], ends[1][1]);
+        dc.setPenWidth(1);
     }
 
-    // Outline of a capsule along a clock angle (0 = 12 o'clock, clockwise), from `from` to `to`
-    // pixels out from the centre, width wide: round the far end from the hand's left side to its
-    // right, then round the near end back.
-    function capsulePoints(cx as Numeric, cy as Numeric, angle as Float, from as Float, to as Float,
-                           width as Float) as Array<Array> {
-        var half = width / 2;
-        var points = [];
-        for (var i = 0; i <= ARC_STEPS; i++) {
-            var t = Math.PI * i / ARC_STEPS;
-            points.add(at(cx, cy, angle, to + half * Math.sin(t), -half * Math.cos(t)));
-        }
-        for (var i = 0; i <= ARC_STEPS; i++) {
-            var t = Math.PI * i / ARC_STEPS;
-            points.add(at(cx, cy, angle, from - half * Math.sin(t), half * Math.cos(t)));
-        }
-        return points;
+    function capsuleEnds(cx as Numeric, cy as Numeric, angle as Float, from as Float, to as Float) as Array<Array> {
+        return [at(cx, cy, angle, from, 0), at(cx, cy, angle, to, 0)];
     }
 
     // The point `along` pixels out from the centre along a clock angle and `across` pixels to the

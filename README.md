@@ -21,7 +21,7 @@ Two Connect IQ apps for the Instinct 3 (Tactical) Solar (`instinct3solar45mm`) a
   - **Venu 4 (41 mm):** an analog dial with a different look, built from the same project.
     - The full Hebrew date curves along the top rim and the parasha or holiday along the bottom rim; the Gregorian date ("ב׳ 19.10") sits under 12.
     - Four subdials with Material Design icons hold slots 1–4 (no Solar slot, no light theme): plain values on top, gauges with rings (battery, steps) below. A ring above 6 shows the next sunrise or sunset.
-    - Capsule hands like the Venu's own numbered face (a solid hour hand, a hollow minute hand), plus an orange seconds dot running round the rim while the watch is awake.
+    - Capsule hands like the Venu's own numbered face (a solid hour hand, a hollow minute hand), and, while the watch is awake, the current second's tick lit orange.
     - The always-on view is dim, with grey hands, and shifts a few pixels each minute against burn-in.
     - Touch-and-hold on a ring opens the matching native Garmin view (heart rate, steps, battery, sunrise/sunset and so on); checked on the watch.
 - **Hebrew Date** (`glance/`): a glance with the Hebrew date and parasha, for use with any watch face. Opening it shows both dates, the parasha, sunrise and sunset, laid out like the face. On the Venu the detail view is round, with the dates on the rim, the Gregorian date under 12 and "זריחה"/"שקיעה" times in the middle.

@@ -85,18 +85,15 @@ function burnInShiftMovesEveryMinuteWithinThreePixels(logger as Logger) as Boole
     return true;
 }
 
-// A hand is a capsule along its clock angle (12 o'clock is straight up): its far end reaches
-// `to` plus half its width, its near end stops `from` minus half its width from the centre.
+// A hand is a line along its clock angle (12 o'clock is straight up) from `from` to `to` px out
+// from the centre; the watch's round line ends make it a capsule.
 (:test)
 function handCapsuleFollowsTheAngle(logger as Logger) as Boolean {
-    var up = Dial.capsulePoints(100, 100, 0.0, 20.0, 50.0, 10.0);
-    var right = Dial.capsulePoints(100, 100, (Math.PI / 2).toFloat(), 20.0, 50.0, 10.0);
-    var tip = Dial.ARC_STEPS / 2;
-    var back = Dial.ARC_STEPS + 1 + Dial.ARC_STEPS / 2;
-    return up.size() == 2 * Dial.ARC_STEPS + 2
-        && (up[tip][0] - 100).abs() < 0.01 && (up[tip][1] - 45).abs() < 0.01
-        && (up[back][1] - 85).abs() < 0.01 && (up[0][0] - 95).abs() < 0.01 && (up[Dial.ARC_STEPS][0] - 105).abs() < 0.01
-        && (right[tip][0] - 155).abs() < 0.01 && (right[tip][1] - 100).abs() < 0.01;
+    var up = Dial.capsuleEnds(100, 100, 0.0, 20.0, 50.0);
+    var right = Dial.capsuleEnds(100, 100, (Math.PI / 2).toFloat(), 20.0, 50.0);
+    return (up[0][0] - 100).abs() < 0.01 && (up[0][1] - 80).abs() < 0.01
+        && (up[1][0] - 100).abs() < 0.01 && (up[1][1] - 50).abs() < 0.01
+        && (right[0][0] - 120).abs() < 0.01 && (right[1][0] - 150).abs() < 0.01 && (right[1][1] - 100).abs() < 0.01;
 }
 
 // The hour hand is short and thick, the minute hand long and thin, and neither reaches the centre.
@@ -123,22 +120,26 @@ function handWallsAreEven(logger as Logger) as Boolean {
         && parts[4][4] == Graphics.COLOR_BLACK;
 }
 
-// The seconds dot sits on the second's tick (0 at 12, 15 at 3, 30 at 6), on screen and clear of the rings.
+// While awake the tick at the current second is lit orange, 5-second mark or minute tick, and
+// no other; always-on there are no seconds. The 5-second marks reach HOUR_MARK_IN, round end
+// included.
 (:test)
-function secondsDotSitsOnTheSecond(logger as Logger) as Boolean {
-    var top = Dial.secondsDot(195, 195, 195, 0);
-    var right = Dial.secondsDot(195, 195, 195, 15);
-    var bottom = Dial.secondsDot(195, 195, 195, 30);
-    return top[0] == 195 && top[1] == 9 && top[2] == 5 && right[0] == 381 && right[1] == 195
-        && bottom[0] == 195 && bottom[1] == 381
-        && top[1] - top[2] >= 0 && 195 - 9 - top[2] > Rings.ORBIT + Rings.RADIUS + Rings.PEN / 2;
+function secondsLightTheirTick(logger as Logger) as Boolean {
+    var ok = Dial.tickColor(10, false, 10) == Dial.ACCENT && Dial.tickColor(13, false, 13) == Dial.ACCENT
+        && Dial.tickColor(10, false, 11) == Graphics.COLOR_WHITE && Dial.tickColor(13, false, 10) != Dial.ACCENT
+        && Dial.tickColor(10, true, null) != Dial.ACCENT;
+    for (var low = 0; ok && low <= 1; low++) {
+        var pen = Dial.tickPen(0, low == 1);
+        var e = Dial.tickEnds(195, 195, 195, 0, low == 1);
+        ok = (e[0][1] + pen / 2.0 - Dial.HOUR_MARK_IN).abs() < 0.01;
+    }
+    return ok;
 }
 
-// Rings stay inside the dial, apart from each other, and clear of the rim lines' arcs.
-// The rings stay inside the hour marks (18 px, the seconds dot's path too) and apart from each
-// other (with their stroke); the slot rings
-// stay clear of the rim lines' arcs, and the sun ring above 6 stays inside the parasha's line
-// (its glyphs reach about 26 px in from the rim line's baseline).
+// The rings stay inside the 5-second marks (their round inner end) and apart from each other
+// (with their stroke); the slot rings stay clear of the rim lines' arcs, and the sun
+// ring above 6 stays inside the parasha's line (its glyphs reach about 26 px in from the rim
+// line's baseline).
 (:test)
 function ringsFitBetweenRimLines(logger as Logger) as Boolean {
     var w = System.getDeviceSettings().screenWidth;
@@ -149,8 +150,8 @@ function ringsFitBetweenRimLines(logger as Logger) as Boolean {
         var p = Rings.centre(a, w);
         var r = Rings.radius(a, w) + pen / 2;
         var d = Math.sqrt((p[0] - c) * (p[0] - c) + (p[1] - c) * (p[1] - c));
-        if (d + r > c - 18 * w / 390 - 1) {
-            logger.error("ring " + a + " reaches the hour marks");
+        if (d + r > c - Dial.HOUR_MARK_IN * w / 390 - 1) {
+            logger.error("ring " + a + " reaches the 5-second marks");
             return false;
         }
         for (var b = a + 1; b <= Rings.PLACES; b++) {

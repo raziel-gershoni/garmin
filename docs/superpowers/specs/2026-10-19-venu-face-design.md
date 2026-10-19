@@ -14,9 +14,9 @@ Builds on the Instinct 3 face (`2026-10-18-hebrew-face-design.md`). The data is 
        3d                   5123      capsule hands, no hub
               ( ☀↓ 18:03 )            next sunrise or sunset above 6
           ⌣  פרשת לך־לך  ⌣            parasha / holiday curved along the bottom rim
-                   •                  orange seconds dot on the rim
+                   ╹                  the current second's tick lit orange
 ```
-Revised 2026-10-19 after the user compared it with the Venu's own faces: capsule hands like the native numbered face, the seconds as a dot on the rim, sunrise/sunset merged into one ring above 6, and the four remaining subdials larger. Only gauges keep a ring (a circle means nothing around a heart rate or an altitude), and they sit in the bottom row.
+Revised 2026-10-19 after the user compared it with the Venu's own faces: capsule hands like the native numbered face, the seconds as the current tick lit orange, sunrise/sunset merged into one ring above 6, and the four remaining subdials larger. Only gauges keep a ring (a circle means nothing around a heart rate or an altitude), and they sit in the bottom row.
 
 - **Dial:** 60 grey minute ticks; 12 white hour marks, 4 px wide.
 - **Top rim:** the full Hebrew date ("ח׳ חשון תשפ״ז"), white, in the Noto Sans Hebrew Bold vector font (~32 px). It is drawn with `drawRadialText` clockwise, centred on 12 o'clock, at radius `r − 44`.
@@ -24,7 +24,7 @@ Revised 2026-10-19 after the user compared it with the Venu's own faces: capsule
 - **Curved text order:** on the Venu 4 itself, curved text is laid out right-to-left like straight text, so rim strings stay in logical order. The simulator does not reorder curved text and shows rim lines backwards; an earlier build reversed them to suit the simulator, which made them read backwards on the watch (found on the user's Venu, 2026-10-19).
 - **Under 12:** "ב׳ 19.10", grey, drawn as two pieces as on the Instinct: the Hebrew weekday in Noto Sans Hebrew, the digits in Roboto. Straight text does get right-to-left reordering.
 - **Subdials** (slots 1–4):
-  - **Layout:** places of radius 48, centred on a circle of radius 124 at +29° (top row) and −23° (bottom row) from 9 and 3 o'clock. Rings end inside the 18 px hour marks, which the seconds dot also runs along.
+  - **Layout:** places of radius 48, centred on a circle of radius 124 at +29° (top row) and −23° (bottom row) from 9 and 3 o'clock. Rings end inside the 5-second marks, which reach 18 px in from the edge (round end included).
   - **Placement:** plain values (heart rate, altitude, notifications, calories) take the top places and gauges the bottom ones, each group in slot order (`RingData.arrange`). The defaults give heart rate and altitude on top, battery and steps below.
   - **Contents:** a 34 px icon at the top and the value under it in Roboto Condensed Bold, up to 30. Gauges (battery, steps, Body Battery) also get a 7 px dark-grey track with the progress arc.
   - **Gauge arc:** a coloured progress arc from 12 o'clock clockwise: battery %, Body Battery, and steps against the daily step goal.
@@ -34,8 +34,8 @@ Revised 2026-10-19 after the user compared it with the Venu's own faces: capsule
   - The battery icon shows its level (20/50/80/full) and turns red at ≤ 20%.
 - **Hands**, after the Venu's own numbered face:
   - Hour: a solid capsule 13 px wide whose centre line runs from 10% to 56% of the radius. Minute: a hollow capsule 9 px wide (2.5 px walls, black inside) from 6% to 90%. The round ends reach half the width past those points. Neither hand reaches the centre, and there is no hub.
-  - Each hand is one anti-aliased polygon with its round ends built in, over a 2 px black outline. The outline, the hand and the hollow share one centre line, so walls are even all the way round. Separate end circles drifted up to a pixel off the hand and looked detached (seen on the watch).
-- **Seconds, awake only:** an orange dot (radius 5) on the second's tick, running round the rim. The awake face redraws every second for the ~10 s after a wrist raise. In always-on there are no seconds: Garmin allows AMOLED faces only one redraw a minute there (the user chose this on 2026-10-19).
+  - Each hand is a thick anti-aliased line, which the watch draws with smooth round ends, over a black line 4 px wider (a 2 px outline); the minute hand's hollow is a black line 5 px narrower drawn over it. All share one centre line, so walls are even all the way round. Filled polygons came out fuzzy with faceted ends, and separate end circles drifted off the hand and looked detached (seen on the watch).
+- **Seconds, awake only:** the tick at the current second is lit orange, a minute tick or a 5-second mark, so the seconds run round the dial on the ticks themselves. A separate orange dot was tried first: a smoothed circle and a smoothed line never centre on each other alike at every angle, so it looked off-centre on some seconds. Ticks and dot are placed at sub-pixel precision from one formula, so the dot sits centred on the marks. The awake face redraws every second for the ~10 s after a wrist raise. In always-on there are no seconds: Garmin allows AMOLED faces only one redraw a minute there (the user chose this on 2026-10-19).
 
 ## Look: always-on (low power)
 
