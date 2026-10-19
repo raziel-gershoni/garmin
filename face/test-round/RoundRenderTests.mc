@@ -6,7 +6,7 @@ import Toybox.Test;
 // with and without a parasha, so every drawing path runs.
 (:test)
 function roundFaceRendersAwakeAndAlwaysOn(logger as Logger) as Boolean {
-    var dc = RoundTestSupport.screenDc();
+    var dc = FaceTestSupport.screenDc();
     var view = new HebrewFaceView();
     view.onLayout(dc);
     var saved = TestCache.save();
@@ -38,7 +38,7 @@ function roundFaceRendersAwakeAndAlwaysOn(logger as Logger) as Boolean {
 // while nothing changes, and are refitted when the parasha cache changes.
 (:test)
 function rimLinesFollowTheDayAndTheMode(logger as Logger) as Boolean {
-    var dc = RoundTestSupport.screenDc();
+    var dc = FaceTestSupport.screenDc();
     var w = dc.getWidth();
     var view = new HebrewFaceView();
     var saved = TestCache.save();

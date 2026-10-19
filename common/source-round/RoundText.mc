@@ -2,6 +2,7 @@ import Toybox.Graphics;
 import Toybox.Lang;
 import Toybox.Math;
 import Toybox.StringUtil;
+import Toybox.Time.Gregorian;
 
 // Text on the round Venu screen, shared by the face and the glance's detail view.
 // - Rim lines: drawRadialText lays characters out in typing order with no right-to-left
@@ -17,6 +18,7 @@ module RoundText {
     const RIM_INSET = 44;     // baseline radius = screen radius - inset
     const RIM_DEGREES = 64;   // arc a rim line may cover, centred on 12 or 6 o'clock (clear of the rings)
     const SIZES = [32, 28, 26, 24, 22];
+    const GREGORIAN_DY = -107;   // the Gregorian line under 12, relative to the centre at 390 px
 
     var _fonts = {} as Dictionary<String, Graphics.VectorFont>;
 
@@ -115,5 +117,14 @@ module RoundText {
         var right = cx + (hw + gap + dc.getTextWidthInPixels(other, otherFont)) / 2;
         dc.drawText(right, y, hebrewFont, hebrew, Graphics.TEXT_JUSTIFY_RIGHT);
         dc.drawText(right - hw - gap, y, otherFont, other, Graphics.TEXT_JUSTIFY_RIGHT);
+    }
+
+    // "ב׳ 19.10" under 12: Hebrew weekday letter, day.month in Roboto. cx, cy: the (shifted) centre.
+    function drawGregorian(dc as Dc, t as Gregorian.Info, cx as Number, cy as Number, width as Number, low as Boolean) as Void {
+        dc.setColor(low ? 0x7A7A7A : 0xBBBBBB, Graphics.COLOR_TRANSPARENT);
+        drawPair(dc, cx, cy + GREGORIAN_DY * width / 390,
+            HebrewFormat.weekday(t.day_of_week as Number), font(REGULAR, 28, width),
+            t.day + "." + t.month, font(low ? "RobotoRegular" : "RobotoCondensedBold", 30, width),
+            8 * width / 390);
     }
 }

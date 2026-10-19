@@ -4,3 +4,4 @@ base.resourcePath = resources
 semioctagon.sourcePath = $(semioctagon.sourcePath);source-instinct;../common/source-instinct
 semioctagon.resourcePath = $(semioctagon.resourcePath);../common/resources-instinct
 round.sourcePath = $(round.sourcePath);source-round;../common/source-round
+round.resourcePath = $(round.resourcePath);resources-round

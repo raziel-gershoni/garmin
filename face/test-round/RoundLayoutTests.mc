@@ -7,17 +7,10 @@ import Toybox.Test;
 
 (:test)
 module RoundTestSupport {
-    // Offscreen dc the size of the Venu screen.
-    function screenDc() as Dc {
-        var s = System.getDeviceSettings();
-        var ref = Graphics.createBufferedBitmap({:width => s.screenWidth, :height => s.screenHeight});
-        return (ref.get() as BufferedBitmap).getDc();
-    }
-
     // Every date of a Hebrew year fits the top rim, awake and always-on; only Adar I/II dates may
     // lose the month's geresh.
     function yearFitsTopRim(logger as Logger, year as Number) as Boolean {
-        var dc = screenDc();
+        var dc = FaceTestSupport.screenDc();
         var w = dc.getWidth();
         var max = RoundText.rimMaxLength(w);
         var failures = 0;
@@ -62,7 +55,7 @@ function datesOf5798FitTopRim(logger as Logger) as Boolean {
 // Every parasha and holiday-Shabbat title (Israel) fits the bottom rim, awake and always-on.
 (:test)
 function titlesFitBottomRim(logger as Logger) as Boolean {
-    var dc = RoundTestSupport.screenDc();
+    var dc = FaceTestSupport.screenDc();
     var w = dc.getWidth();
     var max = RoundText.rimMaxLength(w);
     var titles = TitleFixtures.TITLES.slice(0, null);
@@ -150,7 +143,7 @@ function ringHitTest(logger as Logger) as Boolean {
 // The widest realistic values fit inside a ring at the value line, awake and always-on.
 (:test)
 function widestValuesFitInsideRings(logger as Logger) as Boolean {
-    var dc = RoundTestSupport.screenDc();
+    var dc = FaceTestSupport.screenDc();
     var w = dc.getWidth();
     var r = Rings.radius(w) - 2;
     var dy = Rings.VALUE_DY * w / 390 + 9 * w / 390;   // lower edge of the digits

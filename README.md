@@ -1,4 +1,4 @@
-# Hebrew Face for Garmin Instinct 3
+# Hebrew Face for Garmin Instinct 3 and Venu 4
 
 Two Connect IQ apps for the Instinct 3 (Tactical) Solar (`instinct3solar45mm`) and the Venu 4 41 mm (`venu441mm`). Unless a section says Venu, the text below describes the Instinct:
 
@@ -34,12 +34,14 @@ Design: `docs/superpowers/specs/2026-10-18-hebrew-face-design.md`.
 ## Install on the watch (sideload)
 
 1. Build, or take the `.prg` files from a build: `face/bin/HebrewFace.prg`, `glance/bin/HebrewDate.prg` (Venu: `HebrewFace-venu.prg`, `HebrewDate-venu.prg`).
-2. On the watch: hold **MENU** › System › USB Mode › **MTP**.
+2. Instinct: on the watch, hold **MENU** › System › USB Mode › **MTP**.
 3. Quit Garmin Express if it's running, then connect the watch by USB and open **OpenMTP**.
 4. Copy both `.prg` files into `/GARMIN/APPS/` on the watch, then unplug.
-5. Select the face: hold **MENU** › Watch Face › **Hebrew Face** › Apply.
-6. Add the glance: hold **MENU** › Appearance › Glances › Add › **Hebrew Date**.
-7. Settings (slots, dark/light): hold **MENU** › Watch Face, then choose Hebrew Face's settings entry.
+5. Instinct: select the face with hold **MENU** › Watch Face › **Hebrew Face** › Apply.
+6. Instinct: add the glance with hold **MENU** › Appearance › Glances › Add › **Hebrew Date**.
+7. Instinct: settings (slots, dark/light): hold **MENU** › Watch Face, then choose Hebrew Face's settings entry.
+
+Venu 4: copy `HebrewFace-venu.prg` and `HebrewDate-venu.prg` the same way (steps 3-4), then choose the face from the watch-face list on the watch. The exact on-watch menu paths (face, glance, settings) still need confirming on the Venu. Its settings offer the six slots only; dark/light is Instinct-only.
 
 The parasha line fills in after the first background sync, which runs right after the face first starts with the phone connected (retries are hourly). To read logs, create an empty `/GARMIN/APPS/LOGS/HEBREWFACE.TXT` (or `HEBREWDATE.TXT`); crashes go to `/GARMIN/APPS/LOGS/CIQ_LOG.YAML`.
 
@@ -62,8 +64,9 @@ In `glance/` the outputs are `bin/HebrewDate.prg` and `bin/HebrewDate-venu.prg`.
 ```sh
 connectiq &   # start the simulator
 cd face       # or glance
-monkeyc -d instinct3solar45mm -f monkey.jungle -o bin/test.prg -y ~/.connectiq/developer_key.der -t
-monkeydo bin/test.prg instinct3solar45mm -t
+DEVICE=instinct3solar45mm   # or venu441mm
+monkeyc -d $DEVICE -f monkey.jungle -o bin/test-$DEVICE.prg -y ~/.connectiq/developer_key.der -t
+monkeydo bin/test-$DEVICE.prg $DEVICE -t
 ```
 
 Run the suite on both devices (`instinct3solar45mm` and `venu441mm`), for `face/` and `glance/`.

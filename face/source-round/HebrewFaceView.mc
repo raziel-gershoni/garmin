@@ -10,8 +10,6 @@ import Toybox.WatchUi;
 // same layout thin and dim, shifted a few pixels each minute against burn-in.
 class HebrewFaceView extends WatchUi.WatchFace {
 
-    const GREGORIAN_DY = -107;   // under 12, relative to the centre at 390 px
-
     var _asleep = false;
     var _forcedLow = null as Boolean?;
     var _icons = {} as Dictionary<ResourceId, BitmapResource>;
@@ -47,7 +45,7 @@ class HebrewFaceView extends WatchUi.WatchFace {
             dc.setColor(low ? 0x9A7A30 : Dial.ACCENT, Graphics.COLOR_TRANSPARENT);
             RoundText.drawRim(dc, cx, cy, w, _parashaLine as Array, false);
         }
-        drawGregorian(dc, t, cx, cy + GREGORIAN_DY * w / 390, w, low);
+        RoundText.drawGregorian(dc, t, cx, cy, w, low);
         drawRings(dc, sun, w, off, low);
         Dial.drawHands(dc, cx, cy, r, t.hour as Number, t.min as Number, low ? null : t.sec as Number, low);
 
@@ -58,13 +56,14 @@ class HebrewFaceView extends WatchUi.WatchFace {
         }
     }
 
-    // Always-on: the display mode where available (API 5), else the sleep callbacks.
+    // Always-on: anything but high power where the display mode exists (API 5), or the sleep
+    // callbacks (onEnterSleep) when the watch is asleep.
     function lowPower() as Boolean {
         if (_forcedLow != null) {
             return _forcedLow as Boolean;
         }
         if (System has :getDisplayMode) {
-            return System.getDisplayMode() == System.DISPLAY_MODE_LOW_POWER;
+            return _asleep || System.getDisplayMode() != System.DISPLAY_MODE_HIGH_POWER;
         }
         return _asleep;
     }
@@ -89,15 +88,6 @@ class HebrewFaceView extends WatchUi.WatchFace {
         Parasha.changed = false;
     }
 
-    // "ב׳ 19.10": Hebrew weekday letter, day.month in Roboto.
-    function drawGregorian(dc as Dc, t as Gregorian.Info, cx as Number, y as Number, w as Number, low as Boolean) as Void {
-        dc.setColor(low ? 0x7A7A7A : 0xBBBBBB, Graphics.COLOR_TRANSPARENT);
-        RoundText.drawPair(dc, cx, y,
-            HebrewFormat.weekday(t.day_of_week as Number), RoundText.font(RoundText.REGULAR, 28, w),
-            t.day + "." + t.month, RoundText.font(low ? "RobotoRegular" : "RobotoCondensedBold", 30, w),
-            8 * w / 390);
-    }
-
     function drawRings(dc as Dc, sun as Array<Number>?, w as Number, off as Array<Number>, low as Boolean) as Void {
         for (var slot = 1; slot <= Slots.SLOT_COUNT; slot++) {
             var type = Slots.typeOf(slot);
@@ -120,6 +110,7 @@ class HebrewFaceView extends WatchUi.WatchFace {
     }
 
     function onEnterSleep() as Void {
+        // Only burn-in-protected (AMOLED) screens dim into always-on; MIP screens never do.
         _asleep = System.getDeviceSettings().requiresBurnInProtection;
         WatchUi.requestUpdate();
     }

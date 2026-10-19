@@ -1,4 +1,5 @@
 <drawables>
+    <bitmap id="LauncherIcon" filename="launcher_icon.png" dithering="none"/>
     <!-- Material Design Icons (tools/build-icons.mjs, tools/LICENSE-mdi.txt), white on transparent, tinted when drawn -->
     <bitmap id="IconHeart" filename="icon_heart.png" automaticPalette="false"/>
     <bitmap id="IconBattery" filename="icon_battery.png" automaticPalette="false"/>

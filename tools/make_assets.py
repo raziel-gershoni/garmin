@@ -194,15 +194,17 @@ def icon_font(out_dir):
     (out_dir / "icons.fnt").write_text("\n".join(fnt) + "\n")
 
 
-def launcher_icon(path, crescent):
-    """62x62: a ring with a crescent moon (face) or a filled disk with a crescent cut-out (glance)."""
-    n, c = 62, 30.5
+def launcher_icon(path, crescent, n=62):
+    """n x n (62 for the Instinct, 54 for the Venu): a ring with a crescent moon (face) or a filled
+    disk with a crescent cut-out (glance), drawn proportionally to n."""
+    k = n / 62
+    c = 30.5 * k
     rows = []
     for y in range(n):
         row = bytearray()
         for x in range(n):
-            d = ((x - c) ** 2 + (y - c) ** 2) ** 0.5
-            moon = d < 17 and ((x - c - 8) ** 2 + (y - c + 5) ** 2) ** 0.5 > 14
+            d = (((x - c) ** 2 + (y - c) ** 2) ** 0.5) / k
+            moon = d < 17 and (((x - c - 8 * k) ** 2 + (y - c + 5 * k) ** 2) ** 0.5) / k > 14
             if crescent:
                 on = (27 <= d <= 30) or moon
             else:
@@ -223,5 +225,7 @@ if __name__ == "__main__":
     icon_font(ROOT / "face" / "resources-instinct" / "fonts")
     launcher_icon(ROOT / "face" / "resources" / "drawables" / "launcher_icon.png", True)
     launcher_icon(ROOT / "glance" / "resources" / "drawables" / "launcher_icon.png", False)
+    launcher_icon(ROOT / "face" / "resources-round" / "drawables" / "launcher_icon.png", True, 54)
+    launcher_icon(ROOT / "glance" / "resources-round" / "drawables" / "launcher_icon.png", False, 54)
     band(ROOT / "common" / "resources-instinct" / "drawables" / "band.png")
     print("assets written")
