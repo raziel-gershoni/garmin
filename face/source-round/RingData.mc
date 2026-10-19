@@ -49,14 +49,7 @@ module RingData {
         if (type != Slots.SUNRISE && type != Slots.SUNSET && type != Slots.BATTERY) {
             var v = complicationValue(type);
             if (v instanceof Number || v instanceof Float || v instanceof Long || v instanceof Double) {
-                var n = v.toNumber();
-                if (type == Slots.BATTERY) {
-                    return n.format("%d") + "%";
-                }
-                if (type == Slots.ALTITUDE) {
-                    return n.format("%d") + "m";
-                }
-                return n.format("%d");
+                return Slots.whole(v) + (type == Slots.ALTITUDE ? "m" : "");
             }
         }
         return Slots.value(type, sun);

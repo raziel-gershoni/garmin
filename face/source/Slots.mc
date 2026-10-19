@@ -2,6 +2,7 @@ import Toybox.Activity;
 import Toybox.ActivityMonitor;
 import Toybox.Application;
 import Toybox.Lang;
+import Toybox.Math;
 import Toybox.SensorHistory;
 import Toybox.System;
 import Toybox.WatchUi;
@@ -64,7 +65,7 @@ module Slots {
                 break;
             case ALTITUDE:
                 v = altitude();
-                return v == null ? "--" : v.format("%d") + "m";
+                return v == null ? "--" : whole(v) + "m";
             case SUNRISE:
                 return SunTimes.format(sun == null ? null : sun[0]);
             case SUNSET:
@@ -84,7 +85,13 @@ module Slots {
             default:
                 return "";
         }
-        return v == null ? "--" : v.format("%d");
+        return v == null ? "--" : whole(v);
+    }
+
+    // A reading as a whole number, rounded to the nearest like the watch's own screens (format("%d")
+    // would cut 2.8 days down to 2).
+    function whole(v as Numeric) as String {
+        return (v instanceof Float || v instanceof Double ? Math.round(v) : v).toNumber().format("%d");
     }
 
     // 0..1 for gauge types (battery, Body Battery, steps against the daily goal); -1 otherwise
@@ -113,9 +120,9 @@ module Slots {
     function battery() as String {
         var stats = System.getSystemStats();
         if ((stats has :batteryInDays) && stats.batteryInDays != null) {
-            return stats.batteryInDays.format("%d") + "d";
+            return whole(stats.batteryInDays) + "d";
         }
-        return stats.battery.format("%d") + "%";
+        return whole(stats.battery) + "%";
     }
 
     function heartRate() as Number? {
