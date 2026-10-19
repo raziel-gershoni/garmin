@@ -66,20 +66,34 @@ module Parasha {
         if (!(Toybox has :Background)) {
             return;
         }
-        // Registering can be refused (e.g. from a glance on some firmware); the next start tries again.
+        // Registering can be refused (e.g. from a glance on some firmware): fall back to hourly; the
+        // next start tries again.
         try {
             var registered = Background.getTemporalEventRegisteredTime();
             if (soon && Storage.getValue(ITEMS_KEY) == null) {
                 if (!(registered instanceof Time.Moment)) {
                     var last = Background.getLastTemporalEventTime();
                     Background.registerForTemporalEvent(last == null ? Time.now() : last.add(new Time.Duration(300)));
+                    log("sync soon, last " + (last == null ? "none" : (Time.now().value() - last.value()) + "s ago"));
                 }
             } else if (!(registered instanceof Time.Duration)) {
                 Background.registerForTemporalEvent(new Time.Duration(TEMPORAL_PERIOD_SEC));
+                log("sync hourly");
             }
         } catch (e) {
-            System.println("scheduleSync: " + e.getErrorMessage());
+            log("sync failed: " + e.getErrorMessage());
+            try {
+                Background.registerForTemporalEvent(new Time.Duration(TEMPORAL_PERIOD_SEC));
+            } catch (e2) {
+                log("hourly failed: " + e2.getErrorMessage());
+            }
         }
+    }
+
+    // A line in the app's log file (/GARMIN/APPS/LOGS/<APP>.TXT, if that file exists), with the time.
+    function log(message as String) as Void {
+        var c = System.getClockTime();
+        System.println(c.hour.format("%02d") + ":" + c.min.format("%02d") + " " + message);
     }
 
     function todayRd() as Number {
@@ -149,9 +163,11 @@ class ParashaService extends System.ServiceDelegate {
 
     function onTemporalEvent() as Void {
         if (!Parasha.needsRefresh(Parasha.todayRd())) {
+            Parasha.log("event: cache fresh");
             Background.exit(null);
             return;
         }
+        Parasha.log("event: fetching, phone " + System.getDeviceSettings().phoneConnected);
         var span = Storage.getValue(Parasha.SPAN_KEY);
         if (!(span instanceof Number)) {
             span = Parasha.DEFAULT_SPAN_DAYS;
@@ -175,10 +191,10 @@ class ParashaService extends System.ServiceDelegate {
             span = Parasha.DEFAULT_SPAN_DAYS;
         }
         var stats = System.getSystemStats();
-        System.println("hebcal " + code + " mem " + stats.usedMemory + "/" + stats.totalMemory);
+        Parasha.log("hebcal " + code + " mem " + stats.usedMemory + "/" + stats.totalMemory);
         if (code == 200 && data instanceof Dictionary) {
             var items = Parasha.compact(data);
-            System.println("hebcal items " + items.size());
+            Parasha.log("hebcal items " + items.size());
             Storage.setValue(Parasha.ITEMS_KEY, items);
             Storage.setValue(Parasha.FETCHED_AT_KEY, Time.now().value());
             Storage.setValue(Parasha.END_RD_KEY, Parasha.todayRd() + span);

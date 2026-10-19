@@ -1,3 +1,4 @@
+import Toybox.Application;
 import Toybox.Complications;
 import Toybox.Graphics;
 import Toybox.Lang;
@@ -56,7 +57,8 @@ class HebrewFaceView extends WatchUi.WatchFace {
         if (hebrewRd != _hebrewRd) {
             if (_hebrewRd == -1) {
                 var stats = System.getSystemStats();
-                System.println("face mem " + stats.usedMemory + "/" + stats.totalMemory + " sun " + sun);
+                Parasha.log("face mem " + stats.usedMemory + "/" + stats.totalMemory + " sun " + sun + " phone "
+                    + System.getDeviceSettings().phoneConnected + " cached " + (Storage.getValue(Parasha.ITEMS_KEY) != null));
             }
             _hebrewLine = DateBand.hebrewDate(dc, HebrewCalendar.fromFixed(hebrewRd));
             _hebrewRd = hebrewRd;

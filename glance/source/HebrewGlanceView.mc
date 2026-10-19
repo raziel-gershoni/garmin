@@ -1,3 +1,4 @@
+import Toybox.Application;
 import Toybox.Graphics;
 import Toybox.Lang;
 import Toybox.System;
@@ -34,7 +35,8 @@ class HebrewGlanceView extends WatchUi.GlanceView {
         }
         if (!_loggedMemory) {
             var stats = System.getSystemStats();
-            System.println("glance mem " + stats.usedMemory + "/" + stats.totalMemory);
+            Parasha.log("glance mem " + stats.usedMemory + "/" + stats.totalMemory + " phone "
+                + System.getDeviceSettings().phoneConnected + " cached " + (Application.Storage.getValue(Parasha.ITEMS_KEY) != null));
             _loggedMemory = true;
         }
     }
