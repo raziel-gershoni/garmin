@@ -78,3 +78,26 @@ function titlesFitBottomRim(logger as Logger) as Boolean {
     }
     return failures == 0;
 }
+
+// Always-on moves the drawing every minute, never more than 3 px from centre.
+(:test)
+function burnInShiftMovesEveryMinuteWithinThreePixels(logger as Logger) as Boolean {
+    for (var m = 0; m < 60; m++) {
+        var o = Dial.burnInOffset(m);
+        var n = Dial.burnInOffset((m + 1) % 60);
+        if (o[0].abs() > 3 || o[1].abs() > 3 || (o[0] == n[0] && o[1] == n[1])) {
+            logger.error("minute " + m + ": " + o + " then " + n);
+            return false;
+        }
+    }
+    return true;
+}
+
+// A hand's tip points along its clock angle: 12 o'clock is straight up.
+(:test)
+function handTipFollowsTheAngle(logger as Logger) as Boolean {
+    var up = Dial.points(100, 100, 0.0, 50.0, 10.0, 0.0);
+    var right = Dial.points(100, 100, (Math.PI / 2).toFloat(), 50.0, 10.0, 0.0);
+    return (up[2][1] - 50).abs() < 0.01 && (up[3][1] - 50).abs() < 0.01
+        && (right[2][0] - 150).abs() < 0.01 && (right[3][0] - 150).abs() < 0.01;
+}
