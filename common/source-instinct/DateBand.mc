@@ -25,6 +25,7 @@ module DateBand {
     const ALONE_SHIFT = 12; // centres the date in the band while no parasha is known
     const CENTER_X = 88;
     const BAND_MAX_W = 168;
+    const BAND_FONTS = [Graphics.FONT_MEDIUM, Graphics.FONT_SMALL, Graphics.FONT_XTINY];
     const WORD_GAP = 4;
     const HIGH_INK = 6;
     const LOW_INK = 10;
@@ -64,35 +65,51 @@ module DateBand {
     // [text, font, y] for the full Hebrew date ("ח׳ חשון תשפ״ז"): the largest font that fits the
     // band. Leap-year Adar dates drop the month's geresh only if nothing else fits.
     function hebrewDate(dc as Dc, hdate as Array<Number>) as Array {
-        var dayMonth = HebrewFormat.dayMonth(hdate);
-        var year = HebrewFormat.year(hdate);
-        var options = fullThenCompact(dayMonth + " " + year,
-            dayMonth.substring(0, dayMonth.length() - 1) + " " + year,
-            dayMonth.substring(dayMonth.length() - 1, dayMonth.length()).equals(HebrewFormat.GERESH));
-        return fit(dc, options, HEBREW_Y);
+        return fit(dc, dateOptions(hdate, BAND_FONTS), HEBREW_Y, BAND_MAX_W);
     }
 
     // [text, font, y] for the parasha line; long double portions drop the "פרשת " prefix.
     function parasha(dc as Dc, title as String) as Array {
-        var prefixed = title.find("פרשת ") == 0;
-        return fit(dc, fullThenCompact(title, prefixed ? title.substring(5, title.length()) : "", prefixed), PARASHA_Y);
+        return fit(dc, parashaOptions(title, BAND_FONTS), PARASHA_Y, BAND_MAX_W);
     }
 
-    function fullThenCompact(full as String, compact as String, hasCompact as Boolean) as Array<Array> {
-        var options = [[full, Graphics.FONT_MEDIUM], [full, Graphics.FONT_SMALL], [full, Graphics.FONT_XTINY]];
-        if (hasCompact) {
-            options.add([compact, Graphics.FONT_SMALL]);
-            options.add([compact, Graphics.FONT_XTINY]);
+    // [text, font] to try for the full Hebrew date, in fonts (largest first); without the month's
+    // geresh (leap-year Adar I/II) last.
+    function dateOptions(hdate as Array<Number>, fonts as Array) as Array<Array> {
+        var dayMonth = HebrewFormat.dayMonth(hdate);
+        var year = HebrewFormat.year(hdate);
+        return fullThenCompact(dayMonth + " " + year,
+            dayMonth.substring(0, dayMonth.length() - 1) + " " + year,
+            dayMonth.substring(dayMonth.length() - 1, dayMonth.length()).equals(HebrewFormat.GERESH), fonts);
+    }
+
+    // [text, font] to try for a parasha or holiday title, in fonts; without "פרשת " last. Nothing
+    // is abbreviated.
+    function parashaOptions(title as String, fonts as Array) as Array<Array> {
+        var prefixed = title.find("פרשת ") == 0;
+        return fullThenCompact(title, prefixed ? title.substring(5, title.length()) : "", prefixed, fonts);
+    }
+
+    // The full text in every font, then (if there is one) the compact text in every font but MEDIUM.
+    function fullThenCompact(full as String, compact as String, hasCompact as Boolean, fonts as Array) as Array<Array> {
+        var options = [];
+        for (var i = 0; i < fonts.size(); i++) {
+            options.add([full, fonts[i]]);
+        }
+        for (var i = 0; hasCompact && i < fonts.size(); i++) {
+            if (fonts[i] != Graphics.FONT_MEDIUM) {
+                options.add([compact, fonts[i]]);
+            }
         }
         return options;
     }
 
-    // First option that fits the band, as [text, font, y]; otherwise the last one.
+    // First option at most maxWidth wide, as [text, font, y]; otherwise the last one.
     // ys holds the line's y for [MEDIUM, SMALL, XTINY].
-    function fit(dc as Dc, options as Array<Array>, ys as Array<Number>) as Array {
+    function fit(dc as Dc, options as Array<Array>, ys as Array<Number>, maxWidth as Number) as Array {
         var o = options[options.size() - 1];
         for (var i = 0; i < options.size(); i++) {
-            if (dc.getTextWidthInPixels(options[i][0], options[i][1]) <= BAND_MAX_W) {
+            if (dc.getTextWidthInPixels(options[i][0], options[i][1]) <= maxWidth) {
                 o = options[i];
                 break;
             }
@@ -117,15 +134,20 @@ module DateBand {
 
     // Centred text with a 1px outline in the background colour, so thin strokes read on the dither.
     function drawOutlined(dc as Dc, y as Number, line as Array, fg as Number, bg as Number) as Void {
+        drawOutlinedText(dc, CENTER_X, y, line[1], line[0], Graphics.TEXT_JUSTIFY_CENTER, fg, bg);
+    }
+
+    function drawOutlinedText(dc as Dc, x as Number, y as Number, font as FontType, text as String,
+                              justify as Number, fg as Number, bg as Number) as Void {
         dc.setColor(bg, Graphics.COLOR_TRANSPARENT);
         for (var dx = -1; dx <= 1; dx++) {
             for (var dy = -1; dy <= 1; dy++) {
                 if (dx != 0 || dy != 0) {
-                    dc.drawText(CENTER_X + dx, y + dy, line[1], line[0], Graphics.TEXT_JUSTIFY_CENTER);
+                    dc.drawText(x + dx, y + dy, font, text, justify);
                 }
             }
         }
         dc.setColor(fg, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(CENTER_X, y, line[1], line[0], Graphics.TEXT_JUSTIFY_CENTER);
+        dc.drawText(x, y, font, text, justify);
     }
 }

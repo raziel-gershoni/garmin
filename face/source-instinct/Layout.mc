@@ -5,8 +5,9 @@ import Toybox.Lang;
 // - the column left of the subscreen: the Gregorian date (DateBand.drawGregorian), slots 1-2 side
 //   by side, and slot 4 under them;
 // - the subscreen: slot 3 as a gauge (Window.mc);
-// - the grey band with the full Hebrew date and the parasha or holiday (DateBand.drawBand);
-// - the time with seconds, in seven-segment digits (Rez.Fonts.Time);
+// - the grey band (DateBand.BAND_TOP, BAND_HEIGHT rows) with the time and seconds in
+//   seven-segment digits (Rez.Fonts.Time), outlined like the band's text elsewhere;
+// - the full Hebrew date and the parasha or holiday, on the background below the band;
 // - slots 5-6 along the bottom.
 // Limits were measured against the simulator's fonts and the semi-octagon outline (the corners
 // are cut); face/test-instinct/LayoutTests.mc checks the widest values against them.
@@ -23,19 +24,34 @@ module Layout {
     const SLOT4_Y = 48;
     const PAIR_GAP = 6;
 
-    // The time line, 3 rows under the band and 3 above slots 5-6: its ink starts TIME_INK_DY rows
-    // below y (measured in the simulator). It is laid out as TIME_TEMPLATE (every digit has the
-    // same advance), so a one-digit hour leaves its first digit blank and nothing moves.
-    const TIME_Y = 126;
+    // The band (shorter than the glance's) and the time on it, outlined, with a grey row above and
+    // below the outline. The time's ink starts TIME_INK_DY rows below y (measured in the
+    // simulator). It is laid out as TIME_TEMPLATE (every digit has the same advance), so a
+    // one-digit hour leaves its first digit blank and nothing moves.
+    const BAND_HEIGHT = 35;
+    const TIME_Y = 77;
     const TIME_INK_DY = 1;
     const TIME_TEMPLATE = "00:00:00";
 
-    // Slots 5-6: the left one ends at the centre line and the right one starts there. The visible
-    // x range covers the rows their glyphs reach (151-164), where the bottom corners narrow it.
-    const BOTTOM_Y = 145;
-    const BOTTOM_GAP = 6;
-    const BOTTOM_MIN_X = 26;
-    const BOTTOM_MAX_X = 150;
+    // The Hebrew date and the parasha under the band, centred, in SMALL or XTINY (Hebrew is no
+    // smaller in XTINY on this watch, only narrower; MEDIUM is too tall). y per font [MEDIUM
+    // (unused), SMALL, XTINY] puts the ink on the same rows. The parasha's rows reach where the
+    // bottom corners narrow the screen, hence its narrower limit. Without a parasha the date moves
+    // down by ALONE_SHIFT, to the middle of the two lines' space.
+    const LINE_FONTS = [Graphics.FONT_SMALL, Graphics.FONT_XTINY];
+    const HEBREW_Y = [106, 106, 107];
+    const PARASHA_Y = [126, 126, 127];
+    const HEBREW_MAX_W = 168;
+    const PARASHA_MAX_W = 152;
+    const ALONE_SHIFT = 10;
+
+    // Slots 5-6: the left one ends BOTTOM_GAP / 2 before the centre line and the right one starts
+    // as far after it. The visible x range covers the rows their glyphs reach (154-167), where
+    // the bottom corners narrow it.
+    const BOTTOM_Y = 148;
+    const BOTTOM_GAP = 4;
+    const BOTTOM_MIN_X = 30;
+    const BOTTOM_MAX_X = 146;
 
     function itemWidth(dc as Dc, text as String, font as FontType) as Number {
         return ICON_W + dc.getTextWidthInPixels(text, font);
@@ -76,31 +92,60 @@ module Layout {
         return left != null && right != null ? w + PAIR_GAP : w;
     }
 
-    // Right edge of the time line, which is centred as TIME_TEMPLATE.
+    // [text, font, y] for the Hebrew date and for the parasha line, centred at CENTER_X.
+    function hebrewDate(dc as Dc, hdate as Array<Number>) as Array {
+        return DateBand.fit(dc, DateBand.dateOptions(hdate, LINE_FONTS), HEBREW_Y, HEBREW_MAX_W);
+    }
+
+    function parasha(dc as Dc, title as String) as Array {
+        return DateBand.fit(dc, DateBand.parashaOptions(title, LINE_FONTS), PARASHA_Y, PARASHA_MAX_W);
+    }
+
+    // Right edge of the time, which is centred as TIME_TEMPLATE.
     function timeRight(dc as Dc, font as FontType) as Number {
         return CENTER_X + dc.getTextWidthInPixels(TIME_TEMPLATE, font) / 2;
     }
 
-    // [x, y, width, height] of the seconds' two digits, which onPartialUpdate redraws: from y down
-    // to the ink's last row, so it holds them with or without the ink offset.
+    // [x, y, width, height] that onPartialUpdate redraws: the seconds' two digits with their
+    // outline, from one row above y to one below the ink's last row, so it holds them with or
+    // without the ink offset. It stops short of the colon's outline.
     function secondsBox(dc as Dc, font as FontType) as Array<Number> {
         var w = dc.getTextWidthInPixels("00", font);
-        return [timeRight(dc, font) - w, TIME_Y, w, dc.getFontHeight(font) + TIME_INK_DY];
+        return [timeRight(dc, font) - w - 1, TIME_Y - 1, w + 1, dc.getFontHeight(font) + TIME_INK_DY + 2];
     }
 
-    // [x, y, font, iconY] for slot 5 (left) or 6 (right): the largest font that fits.
-    function bottomSlot(dc as Dc, left as Boolean, text as String) as Array {
-        var x = 0;
-        var width = 0;
-        for (var f = 0; f < FONTS.size(); f++) {
-            width = itemWidth(dc, text, FONTS[f]);
-            x = left ? CENTER_X - BOTTOM_GAP / 2 - width : CENTER_X + BOTTOM_GAP / 2;
-            if (x >= BOTTOM_MIN_X && x + width <= BOTTOM_MAX_X) {
-                return [x, BOTTOM_Y + f, FONTS[f], BOTTOM_Y + ICON_DY];
+    // Places for slots 5 and 6 as [left, right], each [x, y, font, iconY] or null for an empty
+    // slot; iconY is null when the icons are left out. Both take the first of SMALL, XTINY, then
+    // XTINY without icons in which they fit their side of the row, so wide values stay whole; a
+    // value too wide even then keeps to the visible edge and the gap closes.
+    function bottomRow(dc as Dc, left as String?, right as String?) as Array {
+        var f = 0;
+        var icons = true;
+        while (!bottomFits(dc, left, right, FONTS[f], icons) && icons) {
+            if (f < FONTS.size() - 1) {
+                f++;
+            } else {
+                icons = false;
             }
         }
-        // Still too wide for the narrowing bottom: pull it inward, toward the centre gap.
-        x = left ? BOTTOM_MIN_X : BOTTOM_MAX_X - width;
-        return [x, BOTTOM_Y + 1, Graphics.FONT_XTINY, BOTTOM_Y + ICON_DY];
+        var font = FONTS[f];
+        var iconY = icons ? BOTTOM_Y + ICON_DY : null;
+        var l = null;
+        var r = null;
+        if (left != null) {
+            var x = CENTER_X - BOTTOM_GAP / 2 - valueWidth(dc, left, font, icons);
+            l = [x < BOTTOM_MIN_X ? BOTTOM_MIN_X : x, BOTTOM_Y + f, font, iconY];
+        }
+        if (right != null) {
+            var w = valueWidth(dc, right, font, icons);
+            var x = CENTER_X + BOTTOM_GAP / 2;
+            r = [x + w > BOTTOM_MAX_X ? BOTTOM_MAX_X - w : x, BOTTOM_Y + f, font, iconY];
+        }
+        return [l, r];
+    }
+
+    function bottomFits(dc as Dc, left as String?, right as String?, font as FontType, icons as Boolean) as Boolean {
+        return (left == null || CENTER_X - BOTTOM_GAP / 2 - valueWidth(dc, left, font, icons) >= BOTTOM_MIN_X)
+            && (right == null || CENTER_X + BOTTOM_GAP / 2 + valueWidth(dc, right, font, icons) <= BOTTOM_MAX_X);
     }
 }

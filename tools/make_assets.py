@@ -243,8 +243,8 @@ def segment(x, y, w, h, t):
     return [{side}] if left or right else []
 
 
-def time_font(out_dir, w=12, h=21, t=3, gap=2):
-    """Seven-segment digits and a colon for the time line: w x h digits with t-thick strokes, gap
+def time_font(out_dir, w=16, h=29, t=4, gap=2):
+    """Seven-segment digits and a colon for the time: w x h digits with t-thick strokes, gap
     pixels apart. Every digit has the same advance, so the time never shifts sideways."""
     glyphs = {}
     for ch, lit in SEGMENTS.items():

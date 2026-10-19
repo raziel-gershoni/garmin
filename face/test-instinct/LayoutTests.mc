@@ -65,9 +65,10 @@ module ScreenMask {
 }
 
 // Every day of two leap years (5787, and 5798 with the widest year letters) and a common year
-// fits the band; only Adar I/II dates may lose the month's geresh.
+// fits the glance's band (DateBand) and the face's line under its band (Layout); only Adar I/II
+// dates may lose the month's geresh.
 (:test)
-function hebrewDatesFitBand(logger as Logger) as Boolean {
+function hebrewDatesFit(logger as Logger) as Boolean {
     var dc = LayoutTestSupport.offscreenDc();
     var failures = 0;
     var counts = {};
@@ -77,15 +78,19 @@ function hebrewDatesFitBand(logger as Logger) as Boolean {
         var end = HebrewCalendar.newYear(years[y] + 1);
         for (var rd = start; rd < end; rd++) {
             var h = HebrewCalendar.fromFixed(rd);
-            var line = DateBand.hebrewDate(dc, h);
-            var width = dc.getTextWidthInPixels(line[0], line[1]);
-            var compacted = !line[0].equals(HebrewFormat.full(h));
-            if (width > DateBand.BAND_MAX_W || (compacted && h[1] < HebrewCalendar.ADAR)) {
-                logger.error(HebrewFormat.full(h) + " -> " + line[0] + " w=" + width);
-                failures++;
+            var lines = [DateBand.hebrewDate(dc, h), Layout.hebrewDate(dc, h)];
+            var limits = [DateBand.BAND_MAX_W, Layout.HEBREW_MAX_W];
+            for (var i = 0; i < 2; i++) {
+                var line = lines[i] as Array;
+                var width = dc.getTextWidthInPixels(line[0], line[1]);
+                var compacted = !line[0].equals(HebrewFormat.full(h));
+                if (width > limits[i] || (compacted && h[1] < HebrewCalendar.ADAR)) {
+                    logger.error((i == 0 ? "band " : "face ") + HebrewFormat.full(h) + " -> " + line[0] + " w=" + width);
+                    failures++;
+                }
+                var key = (i == 0 ? "band " : "face ") + line[1].toString() + (compacted ? "c" : "");
+                counts[key] = counts.hasKey(key) ? counts[key] + 1 : 1;
             }
-            var key = line[1].toString() + (compacted ? "c" : "");
-            counts[key] = counts.hasKey(key) ? counts[key] + 1 : 1;
         }
     }
     logger.debug("Hebrew date fonts (c = without geresh): " + counts);
@@ -177,110 +182,78 @@ function anyPairStaysOnScreen(logger as Logger) as Boolean {
     return failures == 0;
 }
 
-// The column lines, the band and the time line stack without touching (ink offsets measured in
-// the simulator: tall glyphs start 6 rows below y, 7 for MEDIUM Hebrew; letters end 20-21 rows
-// below, descenders 27; band text has a 1px outline). The band's fonts are [MEDIUM, SMALL, XTINY].
+// The glance's band (DateBand) stacks its two lines inside it (ink offsets measured in the
+// simulator: tall glyphs start 6 rows below y, 7 for MEDIUM Hebrew; descenders end 27 below; band
+// text has a 1px outline). Its fonts are [MEDIUM, SMALL, XTINY].
 (:test)
-function bandAndColumnStack(logger as Logger) as Boolean {
+function glanceBandStacks(logger as Logger) as Boolean {
     var h = DateBand.HEBREW_Y;
     var p = DateBand.PARASHA_Y;
     var top = DateBand.BAND_TOP;
     var bottom = DateBand.BAND_TOP + DateBand.BAND_HEIGHT - 1;
-    return DateBand.GREGORIAN_Y + 3 + 21 < Layout.PAIR_Y + 6
-        && Layout.PAIR_Y + 21 < Layout.SLOT4_Y + 6
-        && Layout.SLOT4_Y + 21 < top - 2
-        // the band starts below the ring, and the outlined text starts inside it
-        && top >= ScreenMask.RING.size()
+    return top >= ScreenMask.RING.size()
         && h[0] + 7 - 1 > top && h[1] + 6 - 1 > top && h[2] + 6 - 1 > top
         // the date's descenders end above the parasha's tall glyphs
         && h[1] + 27 < p[0] + 7 - 1 && h[1] + 27 < p[1] + 6 - 1 && h[1] + 27 < p[2] + 6 - 1
         // the parasha's outlined descenders end inside the band; the date alone stays inside too
         && p[0] + 27 + 1 < bottom && p[1] + 27 + 1 < bottom && p[2] + 27 + 1 < bottom
-        && h[0] + DateBand.ALONE_SHIFT + 27 + 1 < bottom
-        // three clear rows between the band and the time line's ink
-        && Layout.TIME_Y + Layout.TIME_INK_DY - bottom - 1 >= 3;
+        && h[0] + DateBand.ALONE_SHIFT + 27 + 1 < bottom;
 }
 
-// Every parasha (Israel) and every holiday that replaces one on Shabbat fits the band,
-// including Hebcal API spellings that differ from @hebcal/core's.
+// The face, top to bottom, stacks without touching (ink measured in the simulator: digits and
+// icons from 6 rows below y, the icon and time fonts' ink one row lower than their y; SMALL Hebrew
+// from 7 to 24 rows below y, XTINY from 6 to 23; outlined text gains a row on each side): the
+// column lines, the band below the ring with a grey row above and below the outlined time, then
+// three clear rows under the band, two between the Hebrew lines (descenders above top marks) and
+// three above the bottom row's SMALL digits (four above its icons).
 (:test)
-function parashaTitlesFitBand(logger as Logger) as Boolean {
+function faceStacks(logger as Logger) as Boolean {
+    var dc = LayoutTestSupport.offscreenDc();
+    var height = dc.getFontHeight(WatchUi.loadResource(Rez.Fonts.Time) as FontResource);
+    var h = Layout.HEBREW_Y;
+    var p = Layout.PARASHA_Y;
+    var bandBottom = DateBand.BAND_TOP + Layout.BAND_HEIGHT - 1;
+    var timeTop = Layout.TIME_Y + Layout.TIME_INK_DY;
+    var icons = Layout.BOTTOM_Y + Layout.ICON_DY + 1;
+    return DateBand.GREGORIAN_Y + 3 + 21 < Layout.PAIR_Y + 6
+        && Layout.PAIR_Y + 21 < Layout.SLOT4_Y + 6
+        && Layout.SLOT4_Y + 21 < DateBand.BAND_TOP - 2
+        && DateBand.BAND_TOP >= ScreenMask.RING.size()
+        && timeTop - 2 >= DateBand.BAND_TOP && timeTop + height + 1 <= bandBottom
+        && h[1] + 7 == h[2] + 6 && p[1] + 7 == p[2] + 6
+        && h[1] + 7 - bandBottom - 1 >= 3
+        && p[1] + 7 - (h[1] + 24) - 1 >= 2
+        && icons - (p[1] + 24) - 1 >= 4 && Layout.BOTTOM_Y + 6 - (p[1] + 24) - 1 >= 3
+        // without a parasha the date sits lower, still clear of the bottom row
+        && h[1] + Layout.ALONE_SHIFT + 24 < icons - 3;
+}
+
+// Every parasha (Israel) and every holiday that replaces one on Shabbat fits the glance's band and
+// the face's parasha line, including Hebcal API spellings that differ from @hebcal/core's; the
+// face's limit fits the screen on every row the line's ink reaches, where the corners narrow it.
+(:test)
+function parashaTitlesFit(logger as Logger) as Boolean {
     var dc = LayoutTestSupport.offscreenDc();
     var titles = TitleFixtures.TITLES.slice(0, null);
     titles.addAll(["פרשת אחרי מות־קדושים", "פרשת תזריע־מצורע", "פרשת בהר־בחוקותי"]);
     var failures = 0;
     for (var i = 0; i < titles.size(); i++) {
-        var p = DateBand.parasha(dc, titles[i]);
-        if (dc.getTextWidthInPixels(p[0], p[1]) > DateBand.BAND_MAX_W) {
-            logger.error(titles[i] + " does not fit");
+        var band = DateBand.parasha(dc, titles[i]);
+        var face = Layout.parasha(dc, titles[i]);
+        var bandW = dc.getTextWidthInPixels(band[0], band[1]);
+        var faceW = dc.getTextWidthInPixels(face[0], face[1]);
+        if (bandW > DateBand.BAND_MAX_W || faceW > Layout.PARASHA_MAX_W) {
+            logger.error(titles[i] + " does not fit: band " + band[0] + " w=" + bandW + ", face " + face[0] + " w=" + faceW
+                + " (SMALL " + dc.getTextWidthInPixels(face[0], Graphics.FONT_SMALL) + ")");
             failures++;
         }
     }
-    return failures == 0;
-}
-
-
-// The time line stays on screen where the bottom corners start to narrow it, keeps three clear
-// rows above slots 5-6, and every time with a two-digit hour is exactly as wide as the template, so
-// nothing moves (a one-digit hour is one digit narrower and leaves that digit blank).
-(:test)
-function timeLineFits(logger as Logger) as Boolean {
-    var dc = LayoutTestSupport.offscreenDc();
-    var font = WatchUi.loadResource(Rez.Fonts.Time) as FontResource;
-    var width = dc.getTextWidthInPixels(Layout.TIME_TEMPLATE, font);
-    var right = Layout.timeRight(dc, font);
-    var height = dc.getFontHeight(font);
-    var top = Layout.TIME_Y + Layout.TIME_INK_DY;
-    for (var row = top; row < top + height; row++) {
-        if (right - width < ScreenMask.firstX(row) || right - 1 > ScreenMask.lastX(row)) {
-            logger.error("time line off screen at row " + row);
-            return false;
-        }
-    }
-    var times = ["00:00:00", "23:59:59", "12:59:59", "11:11:11", "08:08:08"];
-    for (var i = 0; i < times.size(); i++) {
-        if (dc.getTextWidthInPixels(times[i], font) != width) {
-            logger.error(times[i] + " is not as wide as the template");
-            return false;
-        }
-    }
-    return dc.getTextWidthInPixels("1:00:00", font) == width - dc.getTextWidthInPixels("0", font)
-        && Layout.BOTTOM_Y + Layout.ICON_DY - (top + height) >= 3;
-}
-
-// The low-power redraw covers exactly the seconds' two digits: right of the second colon, up to
-// the line's end, from y down to the ink's last row.
-(:test)
-function secondsBoxCoversSecondsOnly(logger as Logger) as Boolean {
-    var dc = LayoutTestSupport.offscreenDc();
-    var font = WatchUi.loadResource(Rez.Fonts.Time) as FontResource;
-    var right = Layout.timeRight(dc, font);
-    var left = right - dc.getTextWidthInPixels(Layout.TIME_TEMPLATE, font);
-    var box = Layout.secondsBox(dc, font);
-    logger.debug("seconds box " + box);
-    return box[0] == left + dc.getTextWidthInPixels("00:00:", font) && box[0] + box[2] == right
-        && box[1] == Layout.TIME_Y && box[1] + box[3] == Layout.TIME_Y + Layout.TIME_INK_DY + dc.getFontHeight(font);
-}
-
-// Widest realistic values stay inside the bottom row's visible range, and that range fits the
-// screen on every row the row's icons and digits cover.
-(:test)
-function bottomSlotsFit(logger as Logger) as Boolean {
-    var dc = LayoutTestSupport.offscreenDc();
-    for (var row = Layout.BOTTOM_Y + Layout.ICON_DY; row <= Layout.BOTTOM_Y + 1 + 18; row++) {
-        if (Layout.BOTTOM_MIN_X < ScreenMask.firstX(row) || Layout.BOTTOM_MAX_X - 1 > ScreenMask.lastX(row)) {
-            logger.error("bottom range off screen at row " + row);
-            return false;
-        }
-    }
-    var values = ["88888", "23:59", "12:59", "100%", "8848m", "-430m", "--:--", "--"];
-    var failures = 0;
-    for (var i = 0; i < values.size(); i++) {
-        for (var side = 0; side < 2; side++) {
-            var p = Layout.bottomSlot(dc, side == 0, values[i]);
-            var w = Layout.itemWidth(dc, values[i], p[2]);
-            if (p[0] < Layout.BOTTOM_MIN_X || p[0] + w > Layout.BOTTOM_MAX_X) {
-                logger.error("bottom " + side + " " + values[i] + " x=" + p[0] + " w=" + w);
+    var lines = [[Layout.HEBREW_Y[1], Layout.HEBREW_MAX_W], [Layout.PARASHA_Y[1], Layout.PARASHA_MAX_W]];
+    for (var i = 0; i < lines.size(); i++) {
+        var w = lines[i][1];
+        for (var row = lines[i][0] + 7; row <= lines[i][0] + 24; row++) {
+            if (Layout.CENTER_X - w / 2 < ScreenMask.firstX(row) || Layout.CENTER_X + w / 2 - 1 > ScreenMask.lastX(row)) {
+                logger.error("line " + i + " off screen at row " + row);
                 failures++;
             }
         }
@@ -288,20 +261,79 @@ function bottomSlotsFit(logger as Logger) as Boolean {
     return failures == 0;
 }
 
-// Slots 5 and 6 never touch, even with the widest pairs.
+// The time is centred as its template and every time with a two-digit hour is exactly as wide,
+// so nothing moves (a one-digit hour is one digit narrower and leaves that digit blank).
 (:test)
-function bottomSlotsDoNotOverlap(logger as Logger) as Boolean {
+function timeKeepsItsPlace(logger as Logger) as Boolean {
     var dc = LayoutTestSupport.offscreenDc();
-    var pairs = [["88888", "88888"], ["8848m", "23:59"], ["23:59", "8848m"], ["88888", "23:59"]];
-    for (var i = 0; i < pairs.size(); i++) {
-        var l = Layout.bottomSlot(dc, true, pairs[i][0]);
-        var r = Layout.bottomSlot(dc, false, pairs[i][1]);
-        if (l[0] + Layout.itemWidth(dc, pairs[i][0], l[2]) >= r[0]) {
-            logger.error(pairs[i].toString() + " overlaps");
+    var font = WatchUi.loadResource(Rez.Fonts.Time) as FontResource;
+    var width = dc.getTextWidthInPixels(Layout.TIME_TEMPLATE, font);
+    var times = ["00:00:00", "23:59:59", "12:59:59", "11:11:11", "08:08:08"];
+    for (var i = 0; i < times.size(); i++) {
+        if (dc.getTextWidthInPixels(times[i], font) != width) {
+            logger.error(times[i] + " is not as wide as the template");
             return false;
         }
     }
-    return true;
+    var right = Layout.timeRight(dc, font);
+    return dc.getTextWidthInPixels("1:00:00", font) == width - dc.getTextWidthInPixels("0", font)
+        && right - width - 1 >= 1 && right + 1 <= 174;
+}
+
+// The low-power redraw covers the seconds' two digits and their outline, from one column before
+// them to the line's end and from a row above the ink to a row below it (with or without the ink
+// offset), clear of the colon's outline and inside the band.
+(:test)
+function secondsBoxCoversSecondsOnly(logger as Logger) as Boolean {
+    var dc = LayoutTestSupport.offscreenDc();
+    var font = WatchUi.loadResource(Rez.Fonts.Time) as FontResource;
+    var right = Layout.timeRight(dc, font);
+    var left = right - dc.getTextWidthInPixels(Layout.TIME_TEMPLATE, font);
+    var box = Layout.secondsBox(dc, font);
+    var height = dc.getFontHeight(font);
+    logger.debug("seconds box " + box);
+    return box[0] == left + dc.getTextWidthInPixels("00:00:", font) - 1 && box[0] + box[2] == right
+        && box[1] == Layout.TIME_Y - 1 && box[1] + box[3] == Layout.TIME_Y + Layout.TIME_INK_DY + height + 1
+        && box[1] >= DateBand.BAND_TOP && box[1] + box[3] <= DateBand.BAND_TOP + Layout.BAND_HEIGHT;
+}
+
+// Slots 5-6: the row's visible range fits the screen on every row its icons and digits cover, and
+// any two of the widest values (or one beside an empty slot) stay inside it, a full gap apart
+// unless their bare text and the gap are wider than the row.
+(:test)
+function bottomRowFits(logger as Logger) as Boolean {
+    var dc = LayoutTestSupport.offscreenDc();
+    for (var row = Layout.BOTTOM_Y + Layout.ICON_DY; row <= Layout.BOTTOM_Y + 1 + 18; row++) {
+        if (Layout.BOTTOM_MIN_X < ScreenMask.firstX(row) || Layout.BOTTOM_MAX_X - 1 > ScreenMask.lastX(row)) {
+            logger.error("bottom range off screen at row " + row);
+            return false;
+        }
+    }
+    var values = [null, "88888", "23:59", "12:59", "06:44", "100%", "8848m", "-430m", "--:--", "--", "199"];
+    var failures = 0;
+    var bare = 0;
+    for (var i = 0; i < values.size(); i++) {
+        for (var j = 0; j < values.size(); j++) {
+            var places = Layout.bottomRow(dc, values[i], values[j]);
+            var l = places[0] as Array?;
+            var r = places[1] as Array?;
+            var lw = l == null ? 0 : Layout.valueWidth(dc, values[i] as String, l[2], l[3] != null);
+            var rw = r == null ? 0 : Layout.valueWidth(dc, values[j] as String, r[2], r[3] != null);
+            var ok = (l == null || l[0] >= Layout.BOTTOM_MIN_X) && (r == null || r[0] + rw <= Layout.BOTTOM_MAX_X);
+            if (l != null && r != null) {
+                var text = dc.getTextWidthInPixels(values[i] as String, l[2]) + dc.getTextWidthInPixels(values[j] as String, r[2]);
+                var room = Layout.BOTTOM_MAX_X - Layout.BOTTOM_MIN_X;
+                ok = ok && (l[0] + lw + Layout.BOTTOM_GAP <= r[0] || text + Layout.BOTTOM_GAP > room);
+                bare += l[3] == null ? 1 : 0;
+            }
+            if (!ok) {
+                logger.error(values[i] + "/" + values[j] + " l=" + l + " r=" + r);
+                failures++;
+            }
+        }
+    }
+    logger.debug("bottom pairs without icons: " + bare);
+    return failures == 0;
 }
 
 // The widest gauge values fit the window's smallest font, and that width fits inside the arc's

@@ -20,21 +20,22 @@ Native Garmin faces cannot display third-party data (verified), so this is our o
    [3] steps    [4] altitude m
    [5] sunrise  [6] sunset
    ```
-   Revised again 2026-10-19 (digital time). The subscreen became a gauge for slot 3, slot 4 moved into the column, and the time moved under the band as a seven-segment line with seconds:
+   Revised again 2026-10-19 (digital time). The subscreen became a gauge for slot 3, slot 4 moved into the column, the band became shorter and carries a seven-segment time with seconds, and the Hebrew lines moved under it:
    ```
    ב׳ 19.10            ( steps  )
    [1] HR  [2] battery ( gauge  )
    [4] altitude m
+   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  band rows 75-109
+   ░░░░░░░░ 8:05:24 ░░░░░░░░░░░░░░  outlined, 29 px
    ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-   ░░░░░░ ח׳ חשון תשפ״ז ░░░░░░░░░░
-   ░░░░░░░ פרשת לך־לך ░░░░░░░░░░░░
-   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-             6:54:55
+        ח׳ חשון תשפ״ז
+         פרשת לך־לך
    [5] sunrise  [6] sunset
    ```
    - The Gregorian date is in Hebrew: weekday letter (א׳ … ו׳, ש׳) and day.month.
-   - The full Hebrew date takes the largest font that fits the band; only some leap-year Adar dates drop the month's geresh (אדר א) when nothing else fits. The parasha steps down a font, then drops "פרשת"; nothing is abbreviated.
-   - Time: hours, minutes and seconds in a seven-segment font drawn by `tools/make_assets.py` (21 px, solid strokes, every digit one width). The hour follows the watch's 12/24-hour setting; the line is laid out as `00:00:00`, so a one-digit hour leaves its first digit blank and nothing moves.
+   - Time: hours, minutes and seconds in a seven-segment font drawn by `tools/make_assets.py` (29 px, solid strokes, every digit one width), outlined on the band. The hour follows the watch's 12/24-hour setting; the time is laid out as `00:00:00`, so a one-digit hour leaves its first digit blank and nothing moves. The band is the glance's band cut to 35 rows.
+   - The full Hebrew date and the parasha sit under the band in SMALL, or XTINY when SMALL is too wide (Hebrew is no smaller in XTINY on this watch, only narrower; MEDIUM is too tall for the space). Only some leap-year Adar dates drop the month's geresh (אדר א) when nothing else fits. The parasha steps down a font, then drops "פרשת"; nothing is abbreviated. Its line is limited to 152 px because the bottom corners narrow the screen there.
+   - Slots 5–6 take the first of SMALL, XTINY, then XTINY without icons in which both fit; with 24-hour times they are XTINY. Values too wide even then keep to the visible edge and the gap closes.
    - Slot 3 fills the round subscreen as a gauge: a 270° track with a progress arc for steps (against the daily goal), battery or Body Battery, the value in the middle and the icon in the gap.
    - Slots 1–2 share a line and slot 4 has the line under them. The pair takes SMALL, then XTINY, then XTINY without the icons when it is still too wide; values are never abbreviated. A pair too wide even then (a four-digit or negative altitude beside steps, a time or another wide value, or five-digit steps side by side) starts at the visible edge and its gap closes.
    - Slots 1–6 can each show: heart rate, battery (days left where the watch estimates them, else %), steps, altitude (m), sunrise, sunset, Body Battery, solar intensity, notifications, calories, or nothing.

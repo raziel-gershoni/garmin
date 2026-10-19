@@ -8,15 +8,15 @@ Two Connect IQ apps for the Instinct 3 (Tactical) Solar (`instinct3solar45mm`) a
    ♥ 80  ▭ 5d        ← slots 1–2
    ▲ -17m            ← slot 4
    ░░░░░░░░░░░░░░░░░
-   ░░ ח׳ חשון תשפ״ז ░ ← grey band
-   ░░░ פרשת לך־לך ░░░ ← or the holiday when that Shabbat has none
+   ░░░░ 8:05:24 ░░░░ ← grey band with the seven-segment time and seconds
    ░░░░░░░░░░░░░░░░░
-       6:54:55       ← seven-segment time with seconds
+     ח׳ חשון תשפ״ז    ← full Hebrew date
+      פרשת לך־לך      ← or the holiday when that Shabbat has none
    ☀ 06:44  ☀ 18:03  ← slots 5–6
   ```
   - Gregorian date in Hebrew (weekday letter, day.month) beside the round window, which shows slot 3 as a gauge (steps against the daily goal, battery or Body Battery).
-  - Full Hebrew date and the week's parasha on a grey band, like the native faces' time band; long dates and titles step down a font size, and nothing is abbreviated.
-  - The time follows the watch's 12/24-hour setting and never shifts sideways; the seconds keep ticking in low power unless the watch finds that over its power budget.
+  - The time sits on a grey band, like the native faces' time band. It follows the watch's 12/24-hour setting and never shifts sideways; the seconds keep ticking in low power unless the watch finds that over its power budget.
+  - Full Hebrew date and the week's parasha under the band; long dates and titles step down a font size, and nothing is abbreviated.
   - Six swappable data slots: heart rate, battery, steps, altitude, sunrise, sunset, Body Battery, solar, notifications, calories.
   - **Venu 4 (41 mm):** an analog dial with a different look, built from the same project.
     - The full Hebrew date curves along the top rim and the parasha or holiday along the bottom rim; the Gregorian date ("ב׳ 19.10") sits under 12.
