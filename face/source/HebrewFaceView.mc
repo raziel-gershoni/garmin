@@ -72,11 +72,13 @@ class HebrewFaceView extends WatchUi.WatchFace {
 
         DateBand.drawGregorian(dc, t);
         DateBand.drawBand(dc, _band, _hebrewLine as Array, _parashaLine, fg, bg);
-        drawSlots(dc, sun);
+        drawSlots(dc, fg, sun);
         drawClock(dc, fg, bg, t.hour as Number, t.min as Number);
     }
 
-    function drawSlots(dc as Dc, sun as Array<Number>?) as Void {
+    // Transparent text background: a filled one would cut into the band above the grid.
+    function drawSlots(dc as Dc, fg as Number, sun as Array<Number>?) as Void {
+        dc.setColor(fg, Graphics.COLOR_TRANSPARENT);
         for (var slot = 1; slot <= Slots.SLOT_COUNT; slot++) {
             var type = Slots.typeOf(slot);
             if (type == Slots.NONE) {

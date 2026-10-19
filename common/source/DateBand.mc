@@ -112,7 +112,7 @@ module DateBand {
         if (parashaLine != null) {
             drawOutlined(dc, parashaLine[2] as Number, parashaLine, fg, bg);
         }
-        dc.setColor(fg, bg);
+        dc.setColor(fg, Graphics.COLOR_TRANSPARENT);
     }
 
     // Centred text with a 1px outline in the background colour, so thin strokes read on the dither.
