@@ -1,0 +1,10 @@
+import Toybox.Lang;
+import Toybox.WatchUi;
+
+// The face's initial view on the Venu.
+module FaceViews {
+
+    function initial() as [WatchUi.Views] or [WatchUi.Views, WatchUi.InputDelegates] {
+        return [new HebrewFaceView()];
+    }
+}

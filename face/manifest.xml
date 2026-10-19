@@ -4,6 +4,7 @@
                     entry="HebrewFaceApp" launcherIcon="@Drawables.LauncherIcon" minApiLevel="4.2.0">
         <iq:products>
             <iq:product id="instinct3solar45mm"/>
+            <iq:product id="venu441mm"/>
         </iq:products>
         <iq:permissions>
             <iq:uses-permission id="Background"/>

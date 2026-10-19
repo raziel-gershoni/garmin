@@ -1,3 +1,6 @@
 project.manifest = manifest.xml
 base.sourcePath = source;test;../common/source;../common/test
-base.resourcePath = resources;../common/resources
+base.resourcePath = resources
+semioctagon.sourcePath = $(semioctagon.sourcePath);source-instinct;../common/source-instinct
+semioctagon.resourcePath = $(semioctagon.resourcePath);../common/resources-instinct
+round.sourcePath = $(round.sourcePath);source-round;../common/source-round

@@ -220,8 +220,8 @@ def band(path, width=176, height=49):
 
 
 if __name__ == "__main__":
-    icon_font(ROOT / "face" / "resources" / "fonts")
+    icon_font(ROOT / "face" / "resources-instinct" / "fonts")
     launcher_icon(ROOT / "face" / "resources" / "drawables" / "launcher_icon.png", True)
     launcher_icon(ROOT / "glance" / "resources" / "drawables" / "launcher_icon.png", False)
-    band(ROOT / "common" / "resources" / "drawables" / "band.png")
+    band(ROOT / "common" / "resources-instinct" / "drawables" / "band.png")
     print("assets written")

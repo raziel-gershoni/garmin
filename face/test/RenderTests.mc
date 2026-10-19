@@ -1,13 +1,25 @@
 import Toybox.Application;
+import Toybox.Graphics;
 import Toybox.Lang;
+import Toybox.System;
 import Toybox.Test;
 import Toybox.WatchUi;
+
+(:test)
+module FaceTestSupport {
+    // Offscreen dc the size of the device's screen.
+    function screenDc() as Dc {
+        var s = System.getDeviceSettings();
+        var ref = Graphics.createBufferedBitmap({:width => s.screenWidth, :height => s.screenHeight});
+        return (ref.get() as BufferedBitmap).getDc();
+    }
+}
 
 // Draws the real face off-screen with every slot type in every slot, in both themes,
 // with and without a parasha cache, so all drawing paths run at least once.
 (:test)
 function faceRendersEverySlotTypeAndTheme(logger as Logger) as Boolean {
-    var dc = LayoutTestSupport.offscreenDc();
+    var dc = FaceTestSupport.screenDc();
     var view = new HebrewFaceView();
     view.onLayout(dc);
     var saved = TestCache.save();

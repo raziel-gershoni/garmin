@@ -12,7 +12,7 @@ class HebrewFaceApp extends Application.AppBase {
 
     function getInitialView() as [WatchUi.Views] or [WatchUi.Views, WatchUi.InputDelegates] {
         Parasha.scheduleSync(true);
-        return [new HebrewFaceView()];
+        return FaceViews.initial();
     }
 
     function getServiceDelegate() as [System.ServiceDelegate] {

@@ -1,6 +1,7 @@
 import Toybox.Application;
 import Toybox.Graphics;
 import Toybox.Lang;
+import Toybox.System;
 import Toybox.Test;
 
 (:test)
@@ -18,7 +19,7 @@ function glanceAndDetailRender(logger as Logger) as Boolean {
     var glance = new HebrewGlanceView();
     var detail = new DetailView();
     var glanceDc = GlanceTestSupport.dc(164, 61);
-    var screenDc = GlanceTestSupport.dc(176, 176);
+    var screenDc = GlanceTestSupport.dc(System.getDeviceSettings().screenWidth, System.getDeviceSettings().screenHeight);
     detail.onLayout(screenDc);
     glance.onUpdate(glanceDc);
     detail.onUpdate(screenDc);
