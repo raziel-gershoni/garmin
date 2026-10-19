@@ -33,7 +33,7 @@ Builds on the Instinct 3 face (`2026-10-18-hebrew-face-design.md`). The data is 
   - Shape: tapered polygons with a short tail, anti-aliased. The hour hand is 52% of the radius and the minute hand 80%.
   - Each hand is drawn white over a slightly larger black copy, a 3 px outline, so it stays distinct over the subdials.
   - Hub: orange with a black centre.
-- **No seconds hand**, to save battery.
+- **Seconds hand, awake only:** a thin orange hand matching the hub, with a short tail. The awake face redraws every second for the ~10 s after a wrist raise. In always-on there is no seconds hand: Garmin allows AMOLED faces only one redraw a minute there (the user chose this on 2026-10-19).
 
 ## Look: always-on (low power)
 
