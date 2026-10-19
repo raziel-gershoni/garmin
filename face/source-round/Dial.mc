@@ -9,8 +9,9 @@ module Dial {
     const ACCENT = 0xFFAA00;
     const HANDS_LOW = 0x7A7A7A;   // always-on hands, a step dimmer than the brighter hour marks
     // Hands after the Venu's own numbered face: a short thick solid hour capsule and a long
-    // hollow minute capsule, neither reaching the centre. [start, end] as fractions of r, then the
-    // width in px at r = 195; the minute hand's wall is MINUTE_WALL px. Each hand is one polygon
+    // hollow minute capsule, neither reaching the centre. [start, end] of the centre line as
+    // fractions of r (the round ends reach half the width past them), then the width in px at
+    // r = 195; the minute hand's wall is MINUTE_WALL px. Each hand is one polygon
     // with its round ends built in (ARC_STEPS segments per end), over a black outline.
     const HOUR_HAND = [0.10, 0.56, 13.0];
     const MINUTE_HAND = [0.06, 0.90, 9.0];
@@ -49,18 +50,32 @@ module Dial {
     // White hands awake, dim grey always-on; the minute hand is drawn last, on top.
     function drawHands(dc as Dc, cx as Number, cy as Number, r as Number, hour as Number, min as Number,
                        low as Boolean) as Void {
-        var s = r / 195.0;
-        var color = low ? HANDS_LOW : Graphics.COLOR_WHITE;
-        var o = (OUTLINE * s).toFloat();
         var ha = (((hour % 12) * 60 + min) * Math.PI / 360).toFloat();
         var ma = (min * Math.PI / 30).toFloat();
-        capsule(dc, cx, cy, ha, HOUR_HAND[0] * r - o, HOUR_HAND[1] * r + o, HOUR_HAND[2] * s + 2 * o, Graphics.COLOR_BLACK);
-        capsule(dc, cx, cy, ha, HOUR_HAND[0] * r, HOUR_HAND[1] * r, HOUR_HAND[2] * s, color);
-        capsule(dc, cx, cy, ma, MINUTE_HAND[0] * r - o, MINUTE_HAND[1] * r + o, MINUTE_HAND[2] * s + 2 * o, Graphics.COLOR_BLACK);
-        capsule(dc, cx, cy, ma, MINUTE_HAND[0] * r, MINUTE_HAND[1] * r, MINUTE_HAND[2] * s, color);
-        var wall = MINUTE_WALL * s;
-        capsule(dc, cx, cy, ma, MINUTE_HAND[0] * r + wall, MINUTE_HAND[1] * r - wall, MINUTE_HAND[2] * s - 2 * wall,
-            Graphics.COLOR_BLACK);
+        var parts = handCapsules(r, ha, ma, low ? HANDS_LOW : Graphics.COLOR_WHITE);
+        for (var i = 0; i < parts.size(); i++) {
+            var c = parts[i] as Array;
+            capsule(dc, cx, cy, c[0], c[1], c[2], c[3], c[4]);
+        }
+    }
+
+    // The capsules to draw, in order, as [angle, from, to, width, color]: each hand's outline,
+    // then the hand, then the minute hand's hollow. They share each hand's centre line and differ
+    // only in width, so the outline and the walls are even all the way round.
+    function handCapsules(r as Number, ha as Float, ma as Float, color as Number) as Array<Array> {
+        var s = r / 195.0;
+        var o = OUTLINE * s;
+        var hFrom = HOUR_HAND[0] * r;
+        var hTo = HOUR_HAND[1] * r;
+        var mFrom = MINUTE_HAND[0] * r;
+        var mTo = MINUTE_HAND[1] * r;
+        return [
+            [ha, hFrom, hTo, HOUR_HAND[2] * s + 2 * o, Graphics.COLOR_BLACK],
+            [ha, hFrom, hTo, HOUR_HAND[2] * s, color],
+            [ma, mFrom, mTo, MINUTE_HAND[2] * s + 2 * o, Graphics.COLOR_BLACK],
+            [ma, mFrom, mTo, MINUTE_HAND[2] * s, color],
+            [ma, mFrom, mTo, (MINUTE_HAND[2] - 2 * MINUTE_WALL) * s, Graphics.COLOR_BLACK]
+        ];
     }
 
     // The seconds as an orange pointer running round the rim, awake only.

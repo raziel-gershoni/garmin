@@ -81,10 +81,10 @@ module RingData {
     // The sun ring: [Slots.SUNSET or SUNRISE, progress] for the next of the two, with how far
     // the day (sunrise to sunset) or the night (sunset to the next sunrise, taken at today's
     // times) has run. sun is [sunrise, sunset] in seconds after midnight, either way round past
-    // midnight; without it, sunrise and no gauge.
+    // midnight; without it, sunrise and an empty arc.
     function nextSun(sun as Array<Number>?, now as Number) as Array {
         if (sun == null) {
-            return [Slots.SUNRISE, -1.0];
+            return [Slots.SUNRISE, 0.0];
         }
         var day = (sun[1] - sun[0] + 86400) % 86400;
         var sinceRise = (now - sun[0] + 86400) % 86400;
@@ -92,6 +92,25 @@ module RingData {
             return [Slots.SUNSET, sinceRise.toFloat() / day];
         }
         return [Slots.SUNRISE, (sinceRise - day).toFloat() / (86400 - day)];
+    }
+
+    // Gauge types get a ring (a track and a progress arc); the rest show only icon and value.
+    function isGauge(type as Number) as Boolean {
+        return type == Slots.BATTERY || type == Slots.STEPS || type == Slots.BODY_BATTERY;
+    }
+
+    // Slot numbers in place order (places 1-2 the top row, 3-4 the bottom): plain values on top
+    // and gauges, with their rings, below, each group in slot order.
+    function arrange(types as Array<Number>) as Array<Number> {
+        var order = [];
+        for (var pass = 0; pass < 2; pass++) {
+            for (var i = 0; i < types.size(); i++) {
+                if (isGauge(types[i]) == (pass == 1)) {
+                    order.add(i + 1);
+                }
+            }
+        }
+        return order;
     }
 
     function color(type as Number) as Number {

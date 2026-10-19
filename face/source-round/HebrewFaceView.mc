@@ -6,8 +6,8 @@ import Toybox.Time.Gregorian;
 import Toybox.WatchUi;
 
 // Venu face: analog dial, the full Hebrew date along the top rim, the parasha (or holiday) along
-// the bottom rim, the Gregorian date in Hebrew under 12, four ring subdials, the next sunrise or
-// sunset above 6 and an orange seconds pointer on the rim while awake. Always-on draws the same
+// the bottom rim, the Gregorian date in Hebrew under 12, four subdials (rings for gauges), the
+// next sunrise or sunset above 6 and an orange seconds pointer on the rim while awake. Always-on draws the same
 // layout thin and dim, without seconds, shifted a few pixels each minute against burn-in.
 class HebrewFaceView extends WatchUi.WatchFace {
 
@@ -92,22 +92,31 @@ class HebrewFaceView extends WatchUi.WatchFace {
         Parasha.changed = false;
     }
 
-    // The slot rings, then the sun ring with the next sunrise or sunset (now: seconds after
-    // midnight).
+    // The slot subdials (plain values on top, gauges below), then the sun ring above 6 with the
+    // next sunrise or sunset (now: seconds after midnight).
     function drawRings(dc as Dc, sun as Array<Number>?, now as Number, w as Number, off as Array<Number>, low as Boolean) as Void {
-        for (var slot = 1; slot <= FaceSlots.COUNT; slot++) {
-            var type = Slots.typeOf(slot);
+        var order = RingData.arrange(slotTypes());
+        for (var place = 1; place <= order.size(); place++) {
+            var type = Slots.typeOf(order[place - 1]);
             var iconId = RingData.icon(type);
             if (type == Slots.NONE || iconId == null) {
                 continue;
             }
-            Rings.draw(dc, slot, w, off,
-                [bitmap(iconId as ResourceId), RingData.color(type), RingData.value(type, sun), RingData.progress(type)], low);
+            Rings.draw(dc, place, w, off, [bitmap(iconId as ResourceId), RingData.color(type), RingData.value(type, sun),
+                RingData.progress(type), RingData.isGauge(type)], low);
         }
         var next = RingData.nextSun(sun, now);
         var type = next[0] as Number;
         Rings.draw(dc, Rings.SUN, w, off,
-            [bitmap(RingData.icon(type) as ResourceId), RingData.color(type), RingData.value(type, sun), next[1]], low);
+            [bitmap(RingData.icon(type) as ResourceId), RingData.color(type), RingData.value(type, sun), next[1], true], low);
+    }
+
+    static function slotTypes() as Array<Number> {
+        var types = [];
+        for (var slot = 1; slot <= FaceSlots.COUNT; slot++) {
+            types.add(Slots.typeOf(slot));
+        }
+        return types;
     }
 
     function bitmap(id as ResourceId) as BitmapResource {

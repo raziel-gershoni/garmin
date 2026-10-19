@@ -3,18 +3,20 @@ import Toybox.Lang;
 import Toybox.Math;
 import Toybox.WatchUi;
 
-// Ring subdials at places 1-5: slots 1 and 3 on the left, 2 and 4 on the right (rows top to
-// bottom, between the rim lines), and the sun ring above 6 (SUN), which shows the next sunrise or
-// sunset. Each ring has an icon on top, the value under it, a track and, for gauges, a progress
-// arc from 12 o'clock. Geometry is for 390 px and scales with the width; the icon and value
-// offsets and the value sizes scale with each ring's radius.
+// Subdials at places 1-5: slots 1 and 3 on the left, 2 and 4 on the right (rows top to bottom,
+// between the rim lines), and the sun place above 6 (SUN), which shows the next sunrise or
+// sunset. Each has an icon on top and the value under it; gauges (RingData.isGauge) and the sun
+// ring also get a ring, a track with a progress arc from 12 o'clock, since a circle means nothing
+// around a heart rate or an altitude. Geometry is for 390 px and scales with the width; the icon
+// and value offsets and the value sizes scale with each place's radius. Rings end inside the hour
+// marks (18 px), which the seconds pointer also runs along.
 module Rings {
 
     const SUN = 5;
     const PLACES = 5;
-    const ORBIT = 130;            // slot ring centre distance from the screen centre
-    const ROW_ANGLES = [28, -22]; // degrees above 3 (or 9) o'clock of the top and bottom rows
-    const RADIUS = 50;
+    const ORBIT = 124;            // slot ring centre distance from the screen centre
+    const ROW_ANGLES = [29, -23]; // degrees above 3 (or 9) o'clock of the top and bottom rows
+    const RADIUS = 48;
     const SUN_DY = 76;            // sun ring centre below the screen centre
     const SUN_RADIUS = 42;
     const PEN = 7;
@@ -56,13 +58,15 @@ module Rings {
         return 0;
     }
 
-    // The largest value font whose text fits inside the ring, at the value line's lower edge.
-    function valueFont(dc as Dc, text as String, place as Number, width as Number, low as Boolean) as Graphics.VectorFont {
+    // The largest value font whose text fits inside the place at the value line's lower edge:
+    // inside the ring's stroke when it has one (ringed), else inside its circle.
+    function valueFont(dc as Dc, text as String, place as Number, width as Number, low as Boolean,
+                       ringed as Boolean) as Graphics.VectorFont {
         var face = low ? "RobotoRegular" : "RobotoCondensedBold";
         var r = radius(place, width);
         var k = r.toFloat() / (RADIUS * width / 390);
         var dy = r * VALUE_DY + 11 * k * width / 390;
-        var inner = r - PEN * width / 390;
+        var inner = ringed ? r - PEN * width / 390 : r;
         var chord = 2 * Math.sqrt(inner * inner - dy * dy) - 4;
         var f = RoundText.font(face, (VALUE_SIZES[0] * k).toNumber(), width);
         for (var i = 1; i < VALUE_SIZES.size() && dc.getTextWidthInPixels(text, f) > chord; i++) {
@@ -71,7 +75,7 @@ module Rings {
         return f;
     }
 
-    // ring: [icon, color, value, progress]; offset: always-on burn-in shift.
+    // ring: [icon, color, value, progress, ringed]; offset: always-on burn-in shift.
     function draw(dc as Dc, place as Number, width as Number, offset as Array<Number>, ring as Array, low as Boolean) as Void {
         var p = centre(place, width);
         var x = p[0] + offset[0];
@@ -79,23 +83,26 @@ module Rings {
         var r = radius(place, width);
         var color = low ? dimmed(ring[1] as Number, 0.45) : ring[1] as Number;
         var progress = ring[3] as Float;
-        dc.setPenWidth((low ? PEN_LOW : PEN) * width / 390);
-        dc.setColor(low ? TRACK_LOW : TRACK, Graphics.COLOR_TRANSPARENT);
-        dc.drawCircle(x, y, r);
-        if (progress > 0.005) {
-            dc.setColor(color, Graphics.COLOR_TRANSPARENT);
-            if (isFull(progress)) {
-                dc.drawCircle(x, y, r);
-            } else {
-                dc.drawArc(x, y, r, Graphics.ARC_CLOCKWISE, 90, 90 - (360 * progress).toNumber());
+        var ringed = ring[4] as Boolean;
+        if (ringed) {
+            dc.setPenWidth((low ? PEN_LOW : PEN) * width / 390);
+            dc.setColor(low ? TRACK_LOW : TRACK, Graphics.COLOR_TRANSPARENT);
+            dc.drawCircle(x, y, r);
+            if (progress > 0.005) {
+                dc.setColor(color, Graphics.COLOR_TRANSPARENT);
+                if (isFull(progress)) {
+                    dc.drawCircle(x, y, r);
+                } else {
+                    dc.drawArc(x, y, r, Graphics.ARC_CLOCKWISE, 90, 90 - (360 * progress).toNumber());
+                }
             }
+            dc.setPenWidth(1);
         }
-        dc.setPenWidth(1);
         var icon = ring[0] as BitmapResource;
         dc.drawBitmap2(x - icon.getWidth() / 2, y + (ICON_DY * r).toNumber(), icon, {:tintColor => color});
         var text = ring[2] as String;
         dc.setColor(low ? VALUE_LOW : Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(x, y + (VALUE_DY * r).toNumber(), valueFont(dc, text, place, width, low), text,
+        dc.drawText(x, y + (VALUE_DY * r).toNumber(), valueFont(dc, text, place, width, low, ringed), text,
             Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
     }
 

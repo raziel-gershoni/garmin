@@ -4,6 +4,8 @@ import Toybox.Lang;
 import Toybox.Math;
 import Toybox.System;
 import Toybox.Test;
+import Toybox.Time;
+import Toybox.Time.Gregorian;
 import Toybox.WatchUi;
 
 (:test)
@@ -105,6 +107,22 @@ function handsAreDistinct(logger as Logger) as Boolean {
         && Dial.MINUTE_HAND[2] - 2 * Dial.MINUTE_WALL > 0;
 }
 
+// Each hand's outline, fill and (minute) hollow share one centre line and differ only in width,
+// so the outline and the hollow's walls are as thick at the round ends as along the sides.
+(:test)
+function handWallsAreEven(logger as Logger) as Boolean {
+    var parts = Dial.handCapsules(195, 0.0, 1.0, Graphics.COLOR_WHITE);
+    var ok = parts.size() == 5;
+    for (var i = 1; ok && i < parts.size(); i++) {
+        var hand = i < 2 ? parts[0] : parts[2];
+        ok = parts[i][0] == hand[0] && parts[i][1] == hand[1] && parts[i][2] == hand[2];
+    }
+    return ok && (parts[0][3] - parts[1][3] - 2 * Dial.OUTLINE).abs() < 0.01
+        && (parts[2][3] - parts[3][3] - 2 * Dial.OUTLINE).abs() < 0.01
+        && (parts[3][3] - parts[4][3] - 2 * Dial.MINUTE_WALL).abs() < 0.01
+        && parts[4][4] == Graphics.COLOR_BLACK;
+}
+
 // The seconds pointer sits on the rim and points in at the second: 0 at 12, 15 at 3.
 (:test)
 function secondsPointerPointsAtTheSecond(logger as Logger) as Boolean {
@@ -115,7 +133,8 @@ function secondsPointerPointsAtTheSecond(logger as Logger) as Boolean {
 }
 
 // Rings stay inside the dial, apart from each other, and clear of the rim lines' arcs.
-// The rings stay inside the ticks and apart from each other (with their stroke); the slot rings
+// The rings stay inside the hour marks (18 px, the seconds pointer's path too) and apart from each
+// other (with their stroke); the slot rings
 // stay clear of the rim lines' arcs, and the sun ring above 6 stays inside the parasha's line
 // (its glyphs reach about 26 px in from the rim line's baseline).
 (:test)
@@ -128,8 +147,8 @@ function ringsFitBetweenRimLines(logger as Logger) as Boolean {
         var p = Rings.centre(a, w);
         var r = Rings.radius(a, w) + pen / 2;
         var d = Math.sqrt((p[0] - c) * (p[0] - c) + (p[1] - c) * (p[1] - c));
-        if (d + r > c - 9 * w / 390) {
-            logger.error("ring " + a + " reaches the ticks");
+        if (d + r > c - 18 * w / 390 - 1) {
+            logger.error("ring " + a + " reaches the hour marks");
             return false;
         }
         for (var b = a + 1; b <= Rings.PLACES; b++) {
@@ -170,8 +189,8 @@ function ringHitTest(logger as Logger) as Boolean {
     return Rings.hit(w / 2, w / 2, w) == 0 && Rings.hit(0, 0, w) == 0;
 }
 
-// The widest realistic values fit inside every ring, within its stroke at the value line's lower
-// edge, awake and always-on.
+// The widest realistic values fit inside every place at the value line's lower edge, within the
+// ring's stroke where there is one, awake and always-on.
 (:test)
 function widestValuesFitInsideRings(logger as Logger) as Boolean {
     var dc = FaceTestSupport.screenDc();
@@ -179,15 +198,17 @@ function widestValuesFitInsideRings(logger as Logger) as Boolean {
     var values = ["88888", "23:59", "12:59", "100%", "3999m", "-417m", "--:--", "--"];
     for (var place = 1; place <= Rings.PLACES; place++) {
         var r = Rings.radius(place, w);
-        var inner = r - Rings.PEN * w / 390;
         var dy = r * Rings.VALUE_DY + 11 * r / Rings.RADIUS;
-        var chord = 2 * Math.sqrt(inner * inner - dy * dy) - 4;
-        for (var low = 0; low <= 1; low++) {
-            for (var i = 0; i < values.size(); i++) {
-                var f = Rings.valueFont(dc, values[i], place, w, low == 1);
-                if (dc.getTextWidthInPixels(values[i], f) > chord) {
-                    logger.error("ring " + place + ": " + values[i] + " wider than " + chord);
-                    return false;
+        for (var ringed = 0; ringed <= 1; ringed++) {
+            var inner = ringed == 1 ? r - Rings.PEN * w / 390 : r;
+            var chord = 2 * Math.sqrt(inner * inner - dy * dy) - 4;
+            for (var low = 0; low <= 1; low++) {
+                for (var i = 0; i < values.size(); i++) {
+                    var f = Rings.valueFont(dc, values[i], place, w, low == 1, ringed == 1);
+                    if (dc.getTextWidthInPixels(values[i], f) > chord) {
+                        logger.error("place " + place + ": " + values[i] + " wider than " + chord);
+                        return false;
+                    }
                 }
             }
         }
@@ -195,21 +216,35 @@ function widestValuesFitInsideRings(logger as Logger) as Boolean {
     return true;
 }
 
-// The sun ring shows sunset through the day and sunrise through the night, with how far each has
-// run, also when sunset falls after midnight; without sun times it shows sunrise and no gauge.
+// The sun ring shows sunset through the day and sunrise through the night, flipping exactly at
+// each, with how far each has run, also when sunset falls after midnight; without sun times it
+// shows sunrise with an empty arc.
 (:test)
 function sunRingFlipsAtSunriseAndSunset(logger as Logger) as Boolean {
     var sun = [6 * 3600, 18 * 3600];
     var dawn = RingData.nextSun(sun, 3 * 3600);
+    var rise = RingData.nextSun(sun, 6 * 3600);
     var noon = RingData.nextSun(sun, 12 * 3600);
-    var evening = RingData.nextSun(sun, 21 * 3600);
+    var set = RingData.nextSun(sun, 18 * 3600);
     var late = RingData.nextSun([20 * 3600, 2 * 3600], 23 * 3600);
     var none = RingData.nextSun(null, 0);
     return dawn[0] == Slots.SUNRISE && (dawn[1] - 0.75).abs() < 0.001
+        && rise[0] == Slots.SUNSET && rise[1] == 0.0
         && noon[0] == Slots.SUNSET && (noon[1] - 0.5).abs() < 0.001
-        && evening[0] == Slots.SUNRISE && (evening[1] - 0.25).abs() < 0.001
+        && set[0] == Slots.SUNRISE && set[1] == 0.0
         && late[0] == Slots.SUNSET && (late[1] - 0.5).abs() < 0.001
-        && none[0] == Slots.SUNRISE && none[1] == -1.0;
+        && none[0] == Slots.SUNRISE && none[1] == 0.0;
+}
+
+// Only gauges get a ring, and they go to the bottom row: plain values fill the top places first,
+// each group in slot order.
+(:test)
+function gaugesGoBelowPlainValues(logger as Logger) as Boolean {
+    var order = RingData.arrange([Slots.HEART_RATE, Slots.BATTERY, Slots.STEPS, Slots.ALTITUDE]);
+    var gauges = RingData.arrange([Slots.BATTERY, Slots.STEPS, Slots.BODY_BATTERY, Slots.NONE]);
+    return RingData.isGauge(Slots.BATTERY) && RingData.isGauge(Slots.STEPS) && RingData.isGauge(Slots.BODY_BATTERY)
+        && !RingData.isGauge(Slots.HEART_RATE) && !RingData.isGauge(Slots.ALTITUDE) && !RingData.isGauge(Slots.SUNSET)
+        && order.toString().equals("[1, 4, 2, 3]") && gauges.toString().equals("[4, 1, 2, 3]");
 }
 
 // Review focus: a missing reading shows text ("--"), never crashes, for every type.
@@ -252,21 +287,35 @@ function fullProgressDrawsACircle(logger as Logger) as Boolean {
         && Rings.isFull(0.999) && Rings.isFull(1.0);
 }
 
-// Holding a ring targets its complication; an empty slot or the centre targets nothing.
+// Holding a place targets the complication of the slot shown there (gauges are moved to the
+// bottom row), and holding the sun ring the next sunrise or sunset; an empty slot or the centre
+// targets nothing.
 (:test)
 function holdOnRingTargetsItsComplication(logger as Logger) as Boolean {
     var w = System.getDeviceSettings().screenWidth;
-    var before = Slots.typeOf(1);
-    var p = Rings.centre(1, w);
-    Slots.setType(1, Slots.HEART_RATE);
-    var ok = RingPressDelegate.target(p[0], p[1], w) == Complications.COMPLICATION_TYPE_HEART_RATE;
-    Slots.setType(1, Slots.NONE);
-    ok = ok && RingPressDelegate.target(p[0], p[1], w) == -1;
-    ok = ok && RingPressDelegate.target(w / 2, w / 2, w) == -1;
-    Slots.setType(1, before);
+    var saved = [Slots.typeOf(1), Slots.typeOf(2), Slots.typeOf(3), Slots.typeOf(4), Slots.typeOf(5)];
+    Slots.setType(1, Slots.BATTERY);
+    Slots.setType(2, Slots.HEART_RATE);
+    Slots.setType(3, Slots.ALTITUDE);
+    Slots.setType(4, Slots.STEPS);
+    Slots.setType(5, Slots.HEART_RATE);
+    var top = Rings.centre(1, w);
+    var bottom = Rings.centre(3, w);
+    var ok = RingPressDelegate.target(top[0], top[1], w) == Complications.COMPLICATION_TYPE_HEART_RATE
+        && RingPressDelegate.target(bottom[0], bottom[1], w) == Complications.COMPLICATION_TYPE_BATTERY;
+    Slots.setType(2, Slots.NONE);
+    ok = ok && RingPressDelegate.target(top[0], top[1], w) == -1
+        && RingPressDelegate.target(w / 2, w / 2, w) == -1;
+    var day = Today.at(Time.now(), WatchSun.get());
+    var t = day[0] as Gregorian.Info;
+    var now = (t.hour as Number) * 3600 + (t.min as Number) * 60 + (t.sec as Number);
     var sun = Rings.centre(Rings.SUN, w);
-    var t = RingPressDelegate.target(sun[0], sun[1], w);
-    return ok && (t == Complications.COMPLICATION_TYPE_SUNRISE || t == Complications.COMPLICATION_TYPE_SUNSET);
+    ok = ok && RingPressDelegate.target(sun[0], sun[1], w)
+        == RingData.complicationType(RingData.nextSun(day[2] as Array<Number>?, now)[0] as Number);
+    for (var i = 0; i < saved.size(); i++) {
+        Slots.setType(i + 1, saved[i]);
+    }
+    return ok;
 }
 
 // The Venu's settings list its four ring slots.
