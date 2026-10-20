@@ -8,20 +8,19 @@ import Toybox.Math;
 module Dial {
 
     const ACCENT = 0xFFAA00;
-    const HANDS_LOW = 0x7A7A7A;   // always-on hands, a step dimmer than the brighter hour marks
-    // Hands after the Venu's own numbered face: a short thick solid hour capsule and a long
-    // hollow minute capsule, neither reaching the centre. [start, end] of the centre line as
-    // fractions of r (the round ends reach half the width past them), then the width in px at
-    // r = 195; the minute hand's wall is MINUTE_WALL px. Each hand is a thick line over a wider
-    // black one: the watch draws lines smooth with round ends, where filled polygons came out
+    // Hands: a short thick hour capsule and a long thin minute capsule, neither reaching the
+    // centre, in see-through white (alpha HANDS_ALPHA, HANDS_ALPHA_LOW always-on) so the rings and
+    // dates stay readable under them. [start, end] of the centre line as fractions of r (the
+    // round ends reach half the width past them), then the width in px at r = 195. Each hand is
+    // a thick line: the watch draws lines smooth with round ends, where filled polygons came out
     // fuzzy with faceted ends.
     const HOUR_HAND = [0.10, 0.56, 13.0];
-    const MINUTE_HAND = [0.06, 0.90, 9.0];
-    const MINUTE_WALL = 2.5;
+    const MINUTE_HAND = [0.06, 0.90, 7.0];
+    const HANDS_ALPHA = 0x70;
+    const HANDS_ALPHA_LOW = 0x60;
     // How far in from the edge the 5-second marks reach, round end included (lines get round
     // ends half the pen past their endpoints, measured in the simulator).
     const HOUR_MARK_IN = 18;
-    const OUTLINE = 2.0;
     // Always-on burn-in shift, one step per minute, at most 2 px from centre.
     const SHIFTS = [[0, 0], [2, 0], [2, 2], [0, 2], [-2, 2], [-2, 0], [-2, -2], [0, -2], [2, -2]];
 
@@ -68,43 +67,39 @@ module Dial {
         return [at(cx, cy, a, inner, 0), at(cx, cy, a, r - 3 * s, 0)];
     }
 
-    // White hands awake, dim grey always-on; the minute hand is drawn last, on top.
+    // See-through white hands, dimmer always-on; the minute hand is drawn last, on top.
     function drawHands(dc as Dc, cx as Number, cy as Number, r as Number, hour as Number, min as Number,
                        low as Boolean) as Void {
         var ha = (((hour % 12) * 60 + min) * Math.PI / 360).toFloat();
         var ma = (min * Math.PI / 30).toFloat();
-        var parts = handCapsules(r, ha, ma, low ? HANDS_LOW : Graphics.COLOR_WHITE);
+        var parts = handCapsules(r, ha, ma, Graphics.createColor(low ? HANDS_ALPHA_LOW : HANDS_ALPHA, 255, 255, 255));
         for (var i = 0; i < parts.size(); i++) {
             var c = parts[i] as Array;
             capsule(dc, cx, cy, c[0], c[1], c[2], c[3], c[4]);
         }
     }
 
-    // The capsules to draw, in order, as [angle, from, to, width, color]: each hand's outline,
-    // then the hand, then the minute hand's hollow. They share each hand's centre line and differ
-    // only in width, so the outline and the walls are even all the way round.
+    // The capsules to draw, in order, as [angle, from, to, width, color]: the hour hand, then the
+    // minute hand. color is 0xAARRGGBB.
     function handCapsules(r as Number, ha as Float, ma as Float, color as Number) as Array<Array> {
         var s = r / 195.0;
-        var o = OUTLINE * s;
-        var hFrom = HOUR_HAND[0] * r;
-        var hTo = HOUR_HAND[1] * r;
-        var mFrom = MINUTE_HAND[0] * r;
-        var mTo = MINUTE_HAND[1] * r;
         return [
-            [ha, hFrom, hTo, HOUR_HAND[2] * s + 2 * o, Graphics.COLOR_BLACK],
-            [ha, hFrom, hTo, HOUR_HAND[2] * s, color],
-            [ma, mFrom, mTo, MINUTE_HAND[2] * s + 2 * o, Graphics.COLOR_BLACK],
-            [ma, mFrom, mTo, MINUTE_HAND[2] * s, color],
-            [ma, mFrom, mTo, (MINUTE_HAND[2] - 2 * MINUTE_WALL) * s, Graphics.COLOR_BLACK]
+            [ha, HOUR_HAND[0] * r, HOUR_HAND[1] * r, HOUR_HAND[2] * s, color],
+            [ma, MINUTE_HAND[0] * r, MINUTE_HAND[1] * r, MINUTE_HAND[2] * s, color]
         ];
     }
 
     // A capsule along a clock angle (0 = 12 o'clock, clockwise): a line `width` px thick between
     // `from` and `to` px out from the centre, whose round ends reach half the width past them.
+    // color is 0xAARRGGBB: setStroke blends it (setColor would ignore the alpha), and the next
+    // setColor takes over again (checked in the simulator).
     function capsule(dc as Dc, cx as Number, cy as Number, angle as Float, from as Float, to as Float,
                      width as Float, color as Number) as Void {
         var ends = capsuleEnds(cx, cy, angle, from, to);
-        dc.setColor(color, Graphics.COLOR_TRANSPARENT);
+        dc.setColor(color & 0xFFFFFF, Graphics.COLOR_TRANSPARENT);
+        if (dc has :setStroke) {
+            dc.setStroke(color);
+        }
         dc.setPenWidth(Math.round(width).toNumber());
         dc.drawLine(ends[0][0], ends[0][1], ends[1][0], ends[1][1]);
         dc.setPenWidth(1);

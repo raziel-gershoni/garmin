@@ -33,8 +33,9 @@ Revised 2026-10-19 after the user compared it with the Venu's own faces: capsule
   - Colours: heart rate red, battery green, steps blue, altitude grey, sunrise yellow, sunset orange.
   - The battery icon shows its level (20/50/80/full) and turns red at ≤ 20%.
 - **Hands**, after the Venu's own numbered face:
-  - Hour: a solid capsule 13 px wide whose centre line runs from 10% to 56% of the radius. Minute: a hollow capsule 9 px wide (2.5 px walls, black inside) from 6% to 90%. The round ends reach half the width past those points. Neither hand reaches the centre, and there is no hub.
-  - Each hand is a thick anti-aliased line, which the watch draws with smooth round ends, over a black line 4 px wider (a 2 px outline); the minute hand's hollow is a black line 5 px narrower drawn over it. All share one centre line, so walls are even all the way round. Filled polygons came out fuzzy with faceted ends, and separate end circles drifted off the hand and looked detached (seen on the watch).
+  - Hour: a capsule 13 px wide whose centre line runs from 10% to 56% of the radius. Minute: a capsule 7 px wide from 6% to 90%. The round ends reach half the width past those points. Neither hand reaches the centre, and there is no hub.
+  - See-through (user's call, 2026-10-20, on trial): white at alpha 0x70 (about 44%), no outline, so the rings and dates stay readable under the hands. The earlier opaque white hands over a black outline, with a hollow minute hand, hid the data. Drawn with `setStroke` (0xAARRGGBB); `setColor` ignores alpha.
+  - Each hand is a thick anti-aliased line, which the watch draws with smooth round ends. Filled polygons came out fuzzy with faceted ends, and separate end circles drifted off the hand and looked detached (seen on the watch).
 - **Seconds, awake only:** the tick at the current second is lit orange, a minute tick or a 5-second mark, so the seconds run round the dial on the ticks themselves. A separate orange dot was tried first: a smoothed circle and a smoothed line never centre on each other alike at every angle, so it looked off-centre on some seconds. The ticks are drawn at sub-pixel precision (float endpoints). The awake face redraws every second for the ~10 s after a wrist raise. In always-on there are no seconds: Garmin allows AMOLED faces only one redraw a minute there (the user chose this on 2026-10-19).
 
 ## Look: always-on (low power)
@@ -44,7 +45,7 @@ Same layout, dimmed. The user wants everything kept in this view.
 - Hour marks only, dim grey. No minute ticks.
 - Rim texts in Noto Sans Hebrew Regular, the thinner weight: date grey `#9A9A9A`, parasha dim orange `#9A7A30`. Gregorian date in dim grey.
 - Rings: 3 px tracks in `#262626`. Arcs and icons at 45% of their colour. Values in Roboto Regular, grey `#8C8C8C`.
-- Hands: the same capsules in dim grey `#7A7A7A`, the minute hand still hollow.
+- Hands: the same see-through capsules at alpha 0x60 (about 38%).
 - **Burn-in protection:** the whole drawing shifts by up to ±2 px, cycling every minute.
 - **Brightness budget:** measured from a simulator screenshot of the four-subdial layout (2026-10-19), about 3.8% mean luminance and 8.7% of pixels lit (above 40/255), against Garmin's 10% limit. If the simulator's always-on checker flags pixel count, drop the ring tracks in low power.
 - **Switching:** chosen by `System.getDisplayMode() == DISPLAY_MODE_LOW_POWER` or `onEnterSleep`/`onExitSleep`. Low power redraws once a minute.

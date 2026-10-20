@@ -100,24 +100,17 @@ function handCapsuleFollowsTheAngle(logger as Logger) as Boolean {
 (:test)
 function handsAreDistinct(logger as Logger) as Boolean {
     return Dial.HOUR_HAND[1] < Dial.MINUTE_HAND[1] * 0.7 && Dial.HOUR_HAND[2] > Dial.MINUTE_HAND[2] * 1.3
-        && Dial.HOUR_HAND[0] > 0 && Dial.MINUTE_HAND[0] > 0
-        && Dial.MINUTE_HAND[2] - 2 * Dial.MINUTE_WALL > 0;
+        && Dial.HOUR_HAND[0] > 0 && Dial.MINUTE_HAND[0] > 0;
 }
 
-// Each hand's outline, fill and (minute) hollow share one centre line and differ only in width,
-// so the outline and the hollow's walls are as thick at the round ends as along the sides.
+// The hands are see-through: two capsules (hour, then minute on top), nothing opaque around them
+// that would hide the data, more transparent than not, awake and always-on.
 (:test)
-function handWallsAreEven(logger as Logger) as Boolean {
-    var parts = Dial.handCapsules(195, 0.0, 1.0, Graphics.COLOR_WHITE);
-    var ok = parts.size() == 5;
-    for (var i = 1; ok && i < parts.size(); i++) {
-        var hand = i < 2 ? parts[0] : parts[2];
-        ok = parts[i][0] == hand[0] && parts[i][1] == hand[1] && parts[i][2] == hand[2];
-    }
-    return ok && (parts[0][3] - parts[1][3] - 2 * Dial.OUTLINE).abs() < 0.01
-        && (parts[2][3] - parts[3][3] - 2 * Dial.OUTLINE).abs() < 0.01
-        && (parts[3][3] - parts[4][3] - 2 * Dial.MINUTE_WALL).abs() < 0.01
-        && parts[4][4] == Graphics.COLOR_BLACK;
+function handsAreSeeThrough(logger as Logger) as Boolean {
+    var parts = Dial.handCapsules(195, 0.0, 1.0, Graphics.createColor(Dial.HANDS_ALPHA, 255, 255, 255));
+    return parts.size() == 2 && parts[0][0] == 0.0 && parts[1][0] == 1.0
+        && (((parts[0][4] as Number) >> 24) & 0xFF) == Dial.HANDS_ALPHA
+        && Dial.HANDS_ALPHA < 0x80 && Dial.HANDS_ALPHA_LOW < 0x80 && Dial.HANDS_ALPHA_LOW > 0;
 }
 
 // While awake the tick at the current second is lit orange, 5-second mark or minute tick, and
