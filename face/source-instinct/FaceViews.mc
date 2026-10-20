@@ -9,6 +9,11 @@ module FaceViews {
         var view = new HebrewFaceView();
         return [view, new BudgetDelegate(view)] as [WatchUi.Views, WatchUi.InputDelegates];
     }
+
+    // The on-watch settings: a list of widgets for each slot, and the background.
+    function settings() as [WatchUi.Views, WatchUi.InputDelegates] or Null {
+        return SettingsMenu.build();
+    }
 }
 
 // Stops the once-a-second seconds in low power if the watch finds onPartialUpdate over budget, and

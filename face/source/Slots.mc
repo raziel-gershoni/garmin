@@ -254,15 +254,6 @@ module Slots {
         return [SUNRISE, (sinceRise - day).toFloat() / (86400 - day)];
     }
 
-    // The next type offered after type, wrapping round to Empty. (Removed in Task 2.)
-    function next(type as Number) as Number {
-        var n = (type + 1) % TYPE_COUNT;
-        while (!available(n)) {
-            n = (n + 1) % TYPE_COUNT;
-        }
-        return n;
-    }
-
     // Battery as days left where the watch estimates them (like the native faces), else percent.
     function battery() as String {
         var stats = System.getSystemStats();

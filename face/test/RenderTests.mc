@@ -47,39 +47,6 @@ function faceRendersEverySlotTypeAndTheme(logger as Logger) as Boolean {
     return true;
 }
 
-(:test)
-function settingsMenuBuildsAndCycles(logger as Logger) as Boolean {
-    var built = SettingsMenu.build();
-    var delegate = built[1] as SettingsDelegate;
-    var item = new WatchUi.MenuItem("Slot 1", "", 1, null);
-    var before = FaceSlots.typeOf(1);
-    delegate.onSelect(item);
-    var ok = FaceSlots.typeOf(1) == Slots.next(before);
-    FaceSlots.setType(1, before);
-    var theme = new WatchUi.MenuItem("Theme", "", :theme, null);
-    delegate.onSelect(theme);
-    ok = ok && SettingsMenu.isLight();
-    delegate.onSelect(theme);
-    return ok && !SettingsMenu.isLight();
-}
-
-// Solar is offered only where there is solar charging (not on AMOLED watches), and cycling
-// the slot setting skips what is not offered.
-(:test)
-function solarSlotOnlyWithSolarCharging(logger as Logger) as Boolean {
-    var amoled = SettingsMenu.amoled();
-    return Slots.available(Slots.SOLAR) == !amoled
-        && Slots.next(Slots.BODY_BATTERY) == (amoled ? Slots.NOTIFICATIONS : Slots.SOLAR)
-        && Slots.next(Slots.SUN) == Slots.NONE;
-}
-
-// The light background is offered only on memory-in-pixel screens; AMOLED faces stay black.
-(:test)
-function themeOnlyWithoutAmoled(logger as Logger) as Boolean {
-    var menu = SettingsMenu.build()[0] as WatchUi.Menu2;
-    return (menu.findItemById(:theme) == -1) == SettingsMenu.amoled();
-}
-
 // Battery shows days left where the watch estimates them, like the native faces; percent otherwise.
 (:test)
 function batteryShowsDaysWhenKnown(logger as Logger) as Boolean {

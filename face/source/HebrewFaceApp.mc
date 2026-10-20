@@ -27,7 +27,7 @@ class HebrewFaceApp extends Application.AppBase {
     }
 
     function getSettingsView() as [WatchUi.Views] or [WatchUi.Views, WatchUi.InputDelegates] or Null {
-        return SettingsMenu.build();
+        return FaceViews.settings();
     }
 
     function onSettingsChanged() as Void {

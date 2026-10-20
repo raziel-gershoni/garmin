@@ -14,11 +14,7 @@ module WatchSun {
     }
 
     function value(type as Complications.Type) as Number? {
-        try {
-            var v = Complications.getComplication(new Complications.Id(type)).value;
-            return v instanceof Number ? v : null;
-        } catch (e) {
-            return null;
-        }
+        var c = Slots.complication(Slots.fromComplication(type as Number));
+        return c != null && c.value instanceof Number ? c.value : null;
     }
 }

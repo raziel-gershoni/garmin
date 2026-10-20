@@ -282,11 +282,10 @@ function holdOnRingTargetsItsComplication(logger as Logger) as Boolean {
     return ok;
 }
 
-// The Venu's settings list its four ring slots.
+// The Venu has no settings menu: its widgets are picked in the watch's own face editor.
 (:test)
-function settingsListTheRingSlots(logger as Logger) as Boolean {
-    var menu = SettingsMenu.build()[0] as WatchUi.Menu2;
-    return FaceSlots.COUNT == 4 && menu.findItemById(4) != -1 && menu.findItemById(5) == -1;
+function venuHasNoSettingsMenu(logger as Logger) as Boolean {
+    return FaceViews.settings() == null;
 }
 
 // Every type has a Venu ring colour.

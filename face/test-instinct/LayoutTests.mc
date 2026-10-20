@@ -130,7 +130,8 @@ function columnLinesFit(logger as Logger) as Boolean {
     var dc = LayoutTestSupport.offscreenDc();
     var small = [["99", "24d"], ["80", "5d"], ["--", "--"]];
     var fitting = [["199", "99d"], ["199", "100"], ["199", "24d"]];
-    var singles = ["88888", "23:59", "12:59", "100%", "8848m", "-430m", "--:--", "9999"];
+    var singles = ["88888", "23:59", "12:59", "100%", "8848m", "-430m", "--:--", "9999",
+                   "-40°", "120°", "28/19", "105/88", "1085", "96h", "23:59", "99.9km", "999km", "62.1mi"];
     var failures = 0;
     for (var i = 0; i < small.size(); i++) {
         failures += LayoutTestSupport.columnLineFails(dc, logger, Layout.PAIR_Y, small[i][0], small[i][1], true);
@@ -152,7 +153,8 @@ function columnLinesFit(logger as Logger) as Boolean {
 (:test)
 function anyPairStaysOnScreen(logger as Logger) as Boolean {
     var dc = LayoutTestSupport.offscreenDc();
-    var values = ["199", "24d", "100%", "88888", "8848m", "-430m", "23:59", "--:--", "100", "99", "9999", "--"];
+    var values = ["199", "24d", "100%", "88888", "8848m", "-430m", "23:59", "--:--", "100", "99", "9999", "--",
+                  "-40°", "105/88", "1085", "96h", "99.9km"];
     var failures = 0;
     var bare = 0;
     var closed = [];
@@ -312,7 +314,8 @@ function bottomRowFits(logger as Logger) as Boolean {
             return false;
         }
     }
-    var values = [null, "88888", "23:59", "12:59", "06:44", "100%", "8848m", "-430m", "--:--", "--", "199"];
+    var values = [null, "88888", "23:59", "12:59", "06:44", "100%", "8848m", "-430m", "--:--", "--", "199",
+                  "-40°", "105/88", "1085", "96h", "99.9km"];
     var failures = 0;
     var bare = 0;
     for (var i = 0; i < values.size(); i++) {
@@ -352,10 +355,11 @@ function bottomRowFits(logger as Logger) as Boolean {
 function windowValuesFit(logger as Logger) as Boolean {
     var dc = LayoutTestSupport.offscreenDc();
     var fonts = Window.VALUE_FONTS;
-    var values = ["88888", "12345", "100%", "100", "--"];
+    var values = ["88888", "12345", "100%", "100", "--", "100", "-40°", "28/19", "1085", "96h", "12.3km"];
     for (var i = 0; i < values.size(); i++) {
-        if (dc.getTextWidthInPixels(values[i], fonts[fonts.size() - 1]) > Window.VALUE_MAX_W) {
-            logger.error(values[i] + " does not fit the window");
+        var w = dc.getTextWidthInPixels(values[i], fonts[fonts.size() - 1]);
+        if (w > Window.VALUE_MAX_W) {
+            logger.error(values[i] + " does not fit the window: " + w + " > " + Window.VALUE_MAX_W);
             return false;
         }
     }
@@ -378,4 +382,28 @@ function savedSlotNumbersKeepTheirMeaning(logger as Logger) as Boolean {
     var text = FaceSlots.typeOf(1) == FaceSlots.DEFAULTS[0];
     TestSlots.restore(saved);
     return bodyBattery && high && low && text && Slots.CALORIES == 10 && Slots.SUN == 24;
+}
+
+// Review focus: every type's icon is in the Icons font (a missing glyph draws nothing), each one
+// glyph as wide as the existing "H" glyph.
+(:test)
+function everyIconGlyphIsInTheFont(logger as Logger) as Boolean {
+    var dc = LayoutTestSupport.offscreenDc();
+    var font = WatchUi.loadResource(Rez.Fonts.Icons) as FontResource;
+    var width = dc.getTextWidthInPixels("H", font);
+    for (var t = 1; t < Slots.TYPE_COUNT; t++) {
+        var glyph = Slots.ICONS[t] as String;
+        if (t != Slots.SUN && (width <= 0 || glyph.length() != 1 || dc.getTextWidthInPixels(glyph, font) != width)) {
+            logger.error("no glyph for type " + t);
+            return false;
+        }
+    }
+    return true;
+}
+
+// Review focus: the temperature's degree sign is in both slot fonts.
+(:test)
+function degreeSignIsInTheFonts(logger as Logger) as Boolean {
+    var dc = LayoutTestSupport.offscreenDc();
+    return dc.getTextWidthInPixels("°", Graphics.FONT_SMALL) > 0 && dc.getTextWidthInPixels("°", Graphics.FONT_XTINY) > 0;
 }

@@ -1,92 +1,176 @@
 <settings>
     <setting propertyKey="@Properties.Slot1" title="@Strings.Slot1Title">
         <settingConfig type="list">
-            <listEntry value="0">@Strings.SlotNone</listEntry>
             <listEntry value="1">@Strings.SlotHeartRate</listEntry>
             <listEntry value="2">@Strings.SlotBattery</listEntry>
+            <listEntry value="7">@Strings.SlotBodyBattery</listEntry>
+            <listEntry value="11">@Strings.SlotStress</listEntry>
             <listEntry value="3">@Strings.SlotSteps</listEntry>
+            <listEntry value="12">@Strings.SlotFloors</listEntry>
+            <listEntry value="13">@Strings.SlotIntensity</listEntry>
+            <listEntry value="10">@Strings.SlotCalories</listEntry>
+            <listEntry value="18">@Strings.SlotSleepScore</listEntry>
+            <listEntry value="16">@Strings.SlotPulseOx</listEntry>
+            <listEntry value="17">@Strings.SlotRespiration</listEntry>
+            <listEntry value="20">@Strings.SlotRecovery</listEntry>
+            <listEntry value="21">@Strings.SlotVo2Max</listEntry>
+            <listEntry value="23">@Strings.SlotRunWeek</listEntry>
             <listEntry value="4">@Strings.SlotAltitude</listEntry>
+            <listEntry value="19">@Strings.SlotPressure</listEntry>
+            <listEntry value="14">@Strings.SlotTemperature</listEntry>
+            <listEntry value="15">@Strings.SlotHighLow</listEntry>
+            <listEntry value="24">@Strings.SlotSun</listEntry>
             <listEntry value="5">@Strings.SlotSunrise</listEntry>
             <listEntry value="6">@Strings.SlotSunset</listEntry>
-            <listEntry value="7">@Strings.SlotBodyBattery</listEntry>
             <listEntry value="8">@Strings.SlotSolar</listEntry>
             <listEntry value="9">@Strings.SlotNotifications</listEntry>
-            <listEntry value="10">@Strings.SlotCalories</listEntry>
+            <listEntry value="22">@Strings.SlotNextEvent</listEntry>
+            <listEntry value="0">@Strings.SlotNone</listEntry>
         </settingConfig>
     </setting>
     <setting propertyKey="@Properties.Slot2" title="@Strings.Slot2Title">
         <settingConfig type="list">
-            <listEntry value="0">@Strings.SlotNone</listEntry>
             <listEntry value="1">@Strings.SlotHeartRate</listEntry>
             <listEntry value="2">@Strings.SlotBattery</listEntry>
+            <listEntry value="7">@Strings.SlotBodyBattery</listEntry>
+            <listEntry value="11">@Strings.SlotStress</listEntry>
             <listEntry value="3">@Strings.SlotSteps</listEntry>
+            <listEntry value="12">@Strings.SlotFloors</listEntry>
+            <listEntry value="13">@Strings.SlotIntensity</listEntry>
+            <listEntry value="10">@Strings.SlotCalories</listEntry>
+            <listEntry value="18">@Strings.SlotSleepScore</listEntry>
+            <listEntry value="16">@Strings.SlotPulseOx</listEntry>
+            <listEntry value="17">@Strings.SlotRespiration</listEntry>
+            <listEntry value="20">@Strings.SlotRecovery</listEntry>
+            <listEntry value="21">@Strings.SlotVo2Max</listEntry>
+            <listEntry value="23">@Strings.SlotRunWeek</listEntry>
             <listEntry value="4">@Strings.SlotAltitude</listEntry>
+            <listEntry value="19">@Strings.SlotPressure</listEntry>
+            <listEntry value="14">@Strings.SlotTemperature</listEntry>
+            <listEntry value="15">@Strings.SlotHighLow</listEntry>
+            <listEntry value="24">@Strings.SlotSun</listEntry>
             <listEntry value="5">@Strings.SlotSunrise</listEntry>
             <listEntry value="6">@Strings.SlotSunset</listEntry>
-            <listEntry value="7">@Strings.SlotBodyBattery</listEntry>
             <listEntry value="8">@Strings.SlotSolar</listEntry>
             <listEntry value="9">@Strings.SlotNotifications</listEntry>
-            <listEntry value="10">@Strings.SlotCalories</listEntry>
+            <listEntry value="22">@Strings.SlotNextEvent</listEntry>
+            <listEntry value="0">@Strings.SlotNone</listEntry>
         </settingConfig>
     </setting>
     <setting propertyKey="@Properties.Slot3" title="@Strings.Slot3Title">
         <settingConfig type="list">
-            <listEntry value="0">@Strings.SlotNone</listEntry>
             <listEntry value="1">@Strings.SlotHeartRate</listEntry>
             <listEntry value="2">@Strings.SlotBattery</listEntry>
+            <listEntry value="7">@Strings.SlotBodyBattery</listEntry>
+            <listEntry value="11">@Strings.SlotStress</listEntry>
             <listEntry value="3">@Strings.SlotSteps</listEntry>
+            <listEntry value="12">@Strings.SlotFloors</listEntry>
+            <listEntry value="13">@Strings.SlotIntensity</listEntry>
+            <listEntry value="10">@Strings.SlotCalories</listEntry>
+            <listEntry value="18">@Strings.SlotSleepScore</listEntry>
+            <listEntry value="16">@Strings.SlotPulseOx</listEntry>
+            <listEntry value="17">@Strings.SlotRespiration</listEntry>
+            <listEntry value="20">@Strings.SlotRecovery</listEntry>
+            <listEntry value="21">@Strings.SlotVo2Max</listEntry>
+            <listEntry value="23">@Strings.SlotRunWeek</listEntry>
             <listEntry value="4">@Strings.SlotAltitude</listEntry>
+            <listEntry value="19">@Strings.SlotPressure</listEntry>
+            <listEntry value="14">@Strings.SlotTemperature</listEntry>
+            <listEntry value="15">@Strings.SlotHighLow</listEntry>
+            <listEntry value="24">@Strings.SlotSun</listEntry>
             <listEntry value="5">@Strings.SlotSunrise</listEntry>
             <listEntry value="6">@Strings.SlotSunset</listEntry>
-            <listEntry value="7">@Strings.SlotBodyBattery</listEntry>
             <listEntry value="8">@Strings.SlotSolar</listEntry>
             <listEntry value="9">@Strings.SlotNotifications</listEntry>
-            <listEntry value="10">@Strings.SlotCalories</listEntry>
+            <listEntry value="22">@Strings.SlotNextEvent</listEntry>
+            <listEntry value="0">@Strings.SlotNone</listEntry>
         </settingConfig>
     </setting>
     <setting propertyKey="@Properties.Slot4" title="@Strings.Slot4Title">
         <settingConfig type="list">
-            <listEntry value="0">@Strings.SlotNone</listEntry>
             <listEntry value="1">@Strings.SlotHeartRate</listEntry>
             <listEntry value="2">@Strings.SlotBattery</listEntry>
+            <listEntry value="7">@Strings.SlotBodyBattery</listEntry>
+            <listEntry value="11">@Strings.SlotStress</listEntry>
             <listEntry value="3">@Strings.SlotSteps</listEntry>
+            <listEntry value="12">@Strings.SlotFloors</listEntry>
+            <listEntry value="13">@Strings.SlotIntensity</listEntry>
+            <listEntry value="10">@Strings.SlotCalories</listEntry>
+            <listEntry value="18">@Strings.SlotSleepScore</listEntry>
+            <listEntry value="16">@Strings.SlotPulseOx</listEntry>
+            <listEntry value="17">@Strings.SlotRespiration</listEntry>
+            <listEntry value="20">@Strings.SlotRecovery</listEntry>
+            <listEntry value="21">@Strings.SlotVo2Max</listEntry>
+            <listEntry value="23">@Strings.SlotRunWeek</listEntry>
             <listEntry value="4">@Strings.SlotAltitude</listEntry>
+            <listEntry value="19">@Strings.SlotPressure</listEntry>
+            <listEntry value="14">@Strings.SlotTemperature</listEntry>
+            <listEntry value="15">@Strings.SlotHighLow</listEntry>
+            <listEntry value="24">@Strings.SlotSun</listEntry>
             <listEntry value="5">@Strings.SlotSunrise</listEntry>
             <listEntry value="6">@Strings.SlotSunset</listEntry>
-            <listEntry value="7">@Strings.SlotBodyBattery</listEntry>
             <listEntry value="8">@Strings.SlotSolar</listEntry>
             <listEntry value="9">@Strings.SlotNotifications</listEntry>
-            <listEntry value="10">@Strings.SlotCalories</listEntry>
+            <listEntry value="22">@Strings.SlotNextEvent</listEntry>
+            <listEntry value="0">@Strings.SlotNone</listEntry>
         </settingConfig>
     </setting>
     <setting propertyKey="@Properties.Slot5" title="@Strings.Slot5Title">
         <settingConfig type="list">
-            <listEntry value="0">@Strings.SlotNone</listEntry>
             <listEntry value="1">@Strings.SlotHeartRate</listEntry>
             <listEntry value="2">@Strings.SlotBattery</listEntry>
+            <listEntry value="7">@Strings.SlotBodyBattery</listEntry>
+            <listEntry value="11">@Strings.SlotStress</listEntry>
             <listEntry value="3">@Strings.SlotSteps</listEntry>
+            <listEntry value="12">@Strings.SlotFloors</listEntry>
+            <listEntry value="13">@Strings.SlotIntensity</listEntry>
+            <listEntry value="10">@Strings.SlotCalories</listEntry>
+            <listEntry value="18">@Strings.SlotSleepScore</listEntry>
+            <listEntry value="16">@Strings.SlotPulseOx</listEntry>
+            <listEntry value="17">@Strings.SlotRespiration</listEntry>
+            <listEntry value="20">@Strings.SlotRecovery</listEntry>
+            <listEntry value="21">@Strings.SlotVo2Max</listEntry>
+            <listEntry value="23">@Strings.SlotRunWeek</listEntry>
             <listEntry value="4">@Strings.SlotAltitude</listEntry>
+            <listEntry value="19">@Strings.SlotPressure</listEntry>
+            <listEntry value="14">@Strings.SlotTemperature</listEntry>
+            <listEntry value="15">@Strings.SlotHighLow</listEntry>
+            <listEntry value="24">@Strings.SlotSun</listEntry>
             <listEntry value="5">@Strings.SlotSunrise</listEntry>
             <listEntry value="6">@Strings.SlotSunset</listEntry>
-            <listEntry value="7">@Strings.SlotBodyBattery</listEntry>
             <listEntry value="8">@Strings.SlotSolar</listEntry>
             <listEntry value="9">@Strings.SlotNotifications</listEntry>
-            <listEntry value="10">@Strings.SlotCalories</listEntry>
+            <listEntry value="22">@Strings.SlotNextEvent</listEntry>
+            <listEntry value="0">@Strings.SlotNone</listEntry>
         </settingConfig>
     </setting>
     <setting propertyKey="@Properties.Slot6" title="@Strings.Slot6Title">
         <settingConfig type="list">
-            <listEntry value="0">@Strings.SlotNone</listEntry>
             <listEntry value="1">@Strings.SlotHeartRate</listEntry>
             <listEntry value="2">@Strings.SlotBattery</listEntry>
+            <listEntry value="7">@Strings.SlotBodyBattery</listEntry>
+            <listEntry value="11">@Strings.SlotStress</listEntry>
             <listEntry value="3">@Strings.SlotSteps</listEntry>
+            <listEntry value="12">@Strings.SlotFloors</listEntry>
+            <listEntry value="13">@Strings.SlotIntensity</listEntry>
+            <listEntry value="10">@Strings.SlotCalories</listEntry>
+            <listEntry value="18">@Strings.SlotSleepScore</listEntry>
+            <listEntry value="16">@Strings.SlotPulseOx</listEntry>
+            <listEntry value="17">@Strings.SlotRespiration</listEntry>
+            <listEntry value="20">@Strings.SlotRecovery</listEntry>
+            <listEntry value="21">@Strings.SlotVo2Max</listEntry>
+            <listEntry value="23">@Strings.SlotRunWeek</listEntry>
             <listEntry value="4">@Strings.SlotAltitude</listEntry>
+            <listEntry value="19">@Strings.SlotPressure</listEntry>
+            <listEntry value="14">@Strings.SlotTemperature</listEntry>
+            <listEntry value="15">@Strings.SlotHighLow</listEntry>
+            <listEntry value="24">@Strings.SlotSun</listEntry>
             <listEntry value="5">@Strings.SlotSunrise</listEntry>
             <listEntry value="6">@Strings.SlotSunset</listEntry>
-            <listEntry value="7">@Strings.SlotBodyBattery</listEntry>
             <listEntry value="8">@Strings.SlotSolar</listEntry>
             <listEntry value="9">@Strings.SlotNotifications</listEntry>
-            <listEntry value="10">@Strings.SlotCalories</listEntry>
+            <listEntry value="22">@Strings.SlotNextEvent</listEntry>
+            <listEntry value="0">@Strings.SlotNone</listEntry>
         </settingConfig>
     </setting>
     <setting propertyKey="@Properties.Theme" title="@Strings.ThemeTitle">
