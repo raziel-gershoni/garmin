@@ -26,8 +26,8 @@ class RingPressDelegate extends WatchUi.WatchFaceDelegate {
         }
     }
 
-    // Complication to open for a press at (x, y), or -1: the slot shown at that place, or on the
-    // sun ring the next sunrise or sunset.
+    // Complication to open for a press at (x, y), or -1: the slot shown at that place (slot N at
+    // place N), or on the sun ring the next sunrise or sunset.
     static function target(x as Number, y as Number, width as Number) as Number {
         var place = Rings.hit(x, y, width);
         if (place == Rings.SUN) {
@@ -39,6 +39,6 @@ class RingPressDelegate extends WatchUi.WatchFaceDelegate {
         if (place == 0) {
             return -1;
         }
-        return RingData.complicationType(Slots.typeOf(RingData.arrange(HebrewFaceView.slotTypes())[place - 1]));
+        return RingData.complicationType(Slots.typeOf(place));
     }
 }

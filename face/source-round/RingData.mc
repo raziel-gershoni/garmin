@@ -94,23 +94,15 @@ module RingData {
         return [Slots.SUNRISE, (sinceRise - day).toFloat() / (86400 - day)];
     }
 
-    // Gauge types get a ring (a track and a progress arc); the rest show only icon and value.
+    // Types with a natural 0..1 progress (Slots.progress).
     function isGauge(type as Number) as Boolean {
         return type == Slots.BATTERY || type == Slots.STEPS || type == Slots.BODY_BATTERY;
     }
 
-    // Slot numbers in place order (places 1-2 the top row, 3-4 the bottom): plain values on top
-    // and gauges, with their rings, below, each group in slot order.
-    function arrange(types as Array<Number>) as Array<Number> {
-        var order = [];
-        for (var pass = 0; pass < 2; pass++) {
-            for (var i = 0; i < types.size(); i++) {
-                if (isGauge(types[i]) == (pass == 1)) {
-                    order.add(i + 1);
-                }
-            }
-        }
-        return order;
+    // Gauges in the bottom row (places 3-4) get a ring, a track and a progress arc; the top row
+    // has no rings, so a gauge there shows only icon and value, like the other types.
+    function ringed(type as Number, place as Number) as Boolean {
+        return isGauge(type) && place > 2;
     }
 
     function color(type as Number) as Number {

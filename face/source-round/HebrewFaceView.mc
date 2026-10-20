@@ -89,31 +89,22 @@ class HebrewFaceView extends WatchUi.WatchFace {
         Parasha.changed = false;
     }
 
-    // The slot subdials (plain values on top, gauges below), then the sun ring above 6 with the
-    // next sunrise or sunset (now: seconds after midnight).
+    // The slot subdials, slot N at place N (rings only for gauges in the bottom row), then the sun
+    // ring above 6 with the next sunrise or sunset (now: seconds after midnight).
     function drawRings(dc as Dc, sun as Array<Number>?, now as Number, w as Number, off as Array<Number>, low as Boolean) as Void {
-        var order = RingData.arrange(slotTypes());
-        for (var place = 1; place <= order.size(); place++) {
-            var type = Slots.typeOf(order[place - 1]);
+        for (var place = 1; place <= FaceSlots.COUNT; place++) {
+            var type = Slots.typeOf(place);
             var iconId = RingData.icon(type);
             if (type == Slots.NONE || iconId == null) {
                 continue;
             }
             Rings.draw(dc, place, w, off, [bitmap(iconId as ResourceId), RingData.color(type), RingData.value(type, sun),
-                RingData.progress(type), RingData.isGauge(type)], low);
+                RingData.progress(type), RingData.ringed(type, place)], low);
         }
         var next = RingData.nextSun(sun, now);
         var type = next[0] as Number;
         Rings.draw(dc, Rings.SUN, w, off,
             [bitmap(RingData.icon(type) as ResourceId), RingData.color(type), RingData.value(type, sun), next[1], true], low);
-    }
-
-    static function slotTypes() as Array<Number> {
-        var types = [];
-        for (var slot = 1; slot <= FaceSlots.COUNT; slot++) {
-            types.add(Slots.typeOf(slot));
-        }
-        return types;
     }
 
     function bitmap(id as ResourceId) as BitmapResource {

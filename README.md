@@ -20,7 +20,7 @@ Two Connect IQ apps for the Instinct 3 (Tactical) Solar (`instinct3solar45mm`) a
   - Six swappable data slots: heart rate, battery, steps, altitude, sunrise, sunset, Body Battery, solar, notifications, calories.
   - **Venu 4 (41 mm):** an analog dial with a different look, built from the same project.
     - The full Hebrew date curves along the top rim and the parasha or holiday along the bottom rim; the Gregorian date ("ב׳ 19.10") sits under 12.
-    - Four subdials with Material Design icons hold slots 1–4 (no Solar slot, no light theme): plain values on top, gauges with rings (battery, steps) below. A ring above 6 shows the next sunrise or sunset.
+    - Four subdials with Material Design icons hold slots 1–4 (no Solar slot, no light theme), each in its own spot: 1 top-left, 2 top-right, 3 bottom-left, 4 bottom-right. Gauges (battery, steps, Body Battery) get a ring in the bottom row only. A ring above 6 shows the next sunrise or sunset.
     - See-through capsule hands (a short thick hour hand, a long thin minute hand) so the data shows through them, and, while the watch is awake, the current second's tick lit orange.
     - The always-on view is dim, with grey hands, and shifts a few pixels each minute against burn-in.
     - Touch-and-hold on a ring opens the matching native Garmin view (heart rate, steps, battery, sunrise/sunset and so on); checked on the watch.

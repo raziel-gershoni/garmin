@@ -16,7 +16,7 @@ Builds on the Instinct 3 face (`2026-10-18-hebrew-face-design.md`). The data is 
           ⌣  פרשת לך־לך  ⌣            parasha / holiday curved along the bottom rim
                    ╹                  the current second's tick lit orange
 ```
-Revised 2026-10-19 after the user compared it with the Venu's own faces: capsule hands like the native numbered face, the seconds as the current tick lit orange, sunrise/sunset merged into one ring above 6, and the four remaining subdials larger. Only gauges keep a ring (a circle means nothing around a heart rate or an altitude), and they sit in the bottom row.
+Revised 2026-10-19 after the user compared it with the Venu's own faces: capsule hands like the native numbered face, the seconds as the current tick lit orange, sunrise/sunset merged into one ring above 6, and the four remaining subdials larger. Only gauges keep a ring (a circle means nothing around a heart rate or an altitude), and only in the bottom row.
 
 - **Dial:** 60 grey minute ticks; 12 white hour marks, 4 px wide.
 - **Top rim:** the full Hebrew date ("ח׳ חשון תשפ״ז"), white, in the Noto Sans Hebrew Bold vector font (~32 px). It is drawn with `drawRadialText` clockwise, centred on 12 o'clock, at radius `r − 44`.
@@ -25,8 +25,9 @@ Revised 2026-10-19 after the user compared it with the Venu's own faces: capsule
 - **Under 12:** "ב׳ 19.10", grey, drawn as two pieces as on the Instinct: the Hebrew weekday in Noto Sans Hebrew, the digits in Roboto. Straight text does get right-to-left reordering.
 - **Subdials** (slots 1–4):
   - **Layout:** places of radius 48, centred on a circle of radius 124 at +29° (top row) and −23° (bottom row) from 9 and 3 o'clock. Rings end inside the 5-second marks, which reach 18 px in from the edge (round end included).
-  - **Placement:** plain values (heart rate, altitude, notifications, calories) take the top places and gauges the bottom ones, each group in slot order (`RingData.arrange`). The defaults give heart rate and altitude on top, battery and steps below.
-  - **Contents:** a 34 px icon at the top and the value under it in Roboto Condensed Bold, up to 30. Gauges (battery, steps, Body Battery) also get a 7 px dark-grey track with the progress arc.
+  - **Placement:** slot N always sits at place N: 1 top-left, 2 top-right, 3 bottom-left, 4 bottom-right. Changing one slot moves nothing else. Gauges get their ring in the bottom row only (`RingData.ringed`); a gauge picked for the top row shows its icon and value without a ring, like heart rate. The Venu's defaults (`FaceSlots.DEFAULTS`, `resources-round/settings/properties.xml`) give heart rate and altitude on top, battery and steps below.
+  - **Why fixed:** an earlier build sorted plain values to the top and gauges to the bottom on every draw. Switching altitude to Body Battery then moved three of the four subdials and still put a ring on top, because three gauges do not fit in two bottom places (user report, 2026-10-20).
+  - **Contents:** a 34 px icon at the top and the value under it in Roboto Condensed Bold, up to 30. Gauges (battery, steps, Body Battery) in the bottom row also get a 7 px dark-grey track with the progress arc.
   - **Gauge arc:** a coloured progress arc from 12 o'clock clockwise: battery %, Body Battery, and steps against the daily step goal.
 - **Sun ring** above 6: radius 42, 76 px below the centre. It shows the next sunrise or sunset: sunset with its arc filling from sunrise to sunset through the day, sunrise with its arc filling through the night (taken at today's times). Holding it opens that native view.
 - **Icons:** Material Design Icons, rendered by a tools script into white anti-aliased PNGs and drawn with `drawBitmap2` plus `:tintColor`. Bitmaps need `automaticPalette="false"`, or the tint throws. Their edges came out smoother than the icon-font route in the A/B test.

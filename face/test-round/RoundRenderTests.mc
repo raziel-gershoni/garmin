@@ -27,7 +27,7 @@ function roundFaceRendersAwakeAndAlwaysOn(logger as Logger) as Boolean {
     Parasha.changed = true;
     view.onUpdate(dc);
     for (var slot = 1; slot <= Slots.SLOT_COUNT; slot++) {
-        Slots.setType(slot, Slots.DEFAULTS[slot - 1]);
+        Slots.setType(slot, FaceSlots.DEFAULTS[slot - 1]);
     }
     view.setLowPower(null);
     TestCache.restore(saved);

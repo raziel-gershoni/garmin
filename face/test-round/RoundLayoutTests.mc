@@ -232,15 +232,20 @@ function sunRingFlipsAtSunriseAndSunset(logger as Logger) as Boolean {
         && none[0] == Slots.SUNRISE && none[1] == 0.0;
 }
 
-// Only gauges get a ring, and they go to the bottom row: plain values fill the top places first,
-// each group in slot order.
+// Each slot keeps its own place, and only gauges in the bottom row (places 3-4) get a ring: a
+// gauge in the top row shows icon and value only, like a plain value.
 (:test)
-function gaugesGoBelowPlainValues(logger as Logger) as Boolean {
-    var order = RingData.arrange([Slots.HEART_RATE, Slots.BATTERY, Slots.STEPS, Slots.ALTITUDE]);
-    var gauges = RingData.arrange([Slots.BATTERY, Slots.STEPS, Slots.BODY_BATTERY, Slots.NONE]);
-    return RingData.isGauge(Slots.BATTERY) && RingData.isGauge(Slots.STEPS) && RingData.isGauge(Slots.BODY_BATTERY)
-        && !RingData.isGauge(Slots.HEART_RATE) && !RingData.isGauge(Slots.ALTITUDE) && !RingData.isGauge(Slots.SUNSET)
-        && order.toString().equals("[1, 4, 2, 3]") && gauges.toString().equals("[4, 1, 2, 3]");
+function onlyBottomRowGaugesGetRings(logger as Logger) as Boolean {
+    return RingData.ringed(Slots.BATTERY, 3) && RingData.ringed(Slots.STEPS, 4) && RingData.ringed(Slots.BODY_BATTERY, 4)
+        && !RingData.ringed(Slots.BATTERY, 1) && !RingData.ringed(Slots.BODY_BATTERY, 2)
+        && !RingData.ringed(Slots.HEART_RATE, 3) && !RingData.ringed(Slots.ALTITUDE, 4) && !RingData.ringed(Slots.SUNSET, 3);
+}
+
+// The defaults keep the plain values on top and the gauges, with their rings, below.
+(:test)
+function defaultsPutGaugesInTheBottomRow(logger as Logger) as Boolean {
+    var d = FaceSlots.DEFAULTS;
+    return d[0] == Slots.HEART_RATE && d[1] == Slots.ALTITUDE && d[2] == Slots.BATTERY && d[3] == Slots.STEPS;
 }
 
 // Review focus: a missing reading shows text ("--"), never crashes, for every type.
@@ -283,9 +288,8 @@ function fullProgressDrawsACircle(logger as Logger) as Boolean {
         && Rings.isFull(0.999) && Rings.isFull(1.0);
 }
 
-// Holding a place targets the complication of the slot shown there (gauges are moved to the
-// bottom row), and holding the sun ring the next sunrise or sunset; an empty slot or the centre
-// targets nothing.
+// Holding a place targets the complication of the slot shown there (slot N at place N), and
+// holding the sun ring the next sunrise or sunset; an empty slot or the centre targets nothing.
 (:test)
 function holdOnRingTargetsItsComplication(logger as Logger) as Boolean {
     var w = System.getDeviceSettings().screenWidth;
@@ -297,9 +301,9 @@ function holdOnRingTargetsItsComplication(logger as Logger) as Boolean {
     Slots.setType(5, Slots.HEART_RATE);
     var top = Rings.centre(1, w);
     var bottom = Rings.centre(3, w);
-    var ok = RingPressDelegate.target(top[0], top[1], w) == Complications.COMPLICATION_TYPE_HEART_RATE
-        && RingPressDelegate.target(bottom[0], bottom[1], w) == Complications.COMPLICATION_TYPE_BATTERY;
-    Slots.setType(2, Slots.NONE);
+    var ok = RingPressDelegate.target(top[0], top[1], w) == Complications.COMPLICATION_TYPE_BATTERY
+        && RingPressDelegate.target(bottom[0], bottom[1], w) == Complications.COMPLICATION_TYPE_ALTITUDE;
+    Slots.setType(1, Slots.NONE);
     ok = ok && RingPressDelegate.target(top[0], top[1], w) == -1
         && RingPressDelegate.target(w / 2, w / 2, w) == -1;
     var day = Today.at(Time.now(), WatchSun.get());

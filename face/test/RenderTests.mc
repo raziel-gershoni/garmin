@@ -45,7 +45,7 @@ function faceRendersEverySlotTypeAndTheme(logger as Logger) as Boolean {
     view.onUpdate(dc);
     TestCache.restore(saved);
     for (var slot = 1; slot <= Slots.SLOT_COUNT; slot++) {
-        Slots.setType(slot, Slots.DEFAULTS[slot - 1]);
+        Slots.setType(slot, FaceSlots.DEFAULTS[slot - 1]);
     }
     Properties.setValue("Theme", 0);
     return true;

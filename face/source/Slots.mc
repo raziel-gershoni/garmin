@@ -16,7 +16,6 @@ module Slots {
     }
     const TYPE_COUNT = 11;
     const SLOT_COUNT = 6;
-    const DEFAULTS = [HEART_RATE, BATTERY, STEPS, ALTITUDE, SUNRISE, SUNSET];
 
     // Glyphs in the Icons font (tools/make_assets.py), indexed by Type.
     const ICONS = ["", "H", "B", "S", "A", "R", "T", "Y", "O", "N", "C"];
@@ -27,10 +26,10 @@ module Slots {
                 Rez.Strings.SlotSolar, Rez.Strings.SlotNotifications, Rez.Strings.SlotCalories];
     }
 
-    // slot is 1-based.
+    // slot is 1-based; FaceSlots.DEFAULTS holds each watch's defaults.
     function typeOf(slot as Number) as Number {
         var v = Properties.getValue("Slot" + slot);
-        return (v instanceof Number && v >= 0 && v < TYPE_COUNT) ? v : DEFAULTS[slot - 1];
+        return (v instanceof Number && v >= 0 && v < TYPE_COUNT) ? v : FaceSlots.DEFAULTS[slot - 1];
     }
 
     function setType(slot as Number, type as Number) as Void {
