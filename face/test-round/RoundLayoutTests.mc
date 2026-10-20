@@ -212,26 +212,6 @@ function widestValuesFitInsideRings(logger as Logger) as Boolean {
     return true;
 }
 
-// The sun ring shows sunset through the day and sunrise through the night, flipping exactly at
-// each, with how far each has run, also when sunset falls after midnight; without sun times it
-// shows sunrise with an empty arc.
-(:test)
-function sunRingFlipsAtSunriseAndSunset(logger as Logger) as Boolean {
-    var sun = [6 * 3600, 18 * 3600];
-    var dawn = RingData.nextSun(sun, 3 * 3600);
-    var rise = RingData.nextSun(sun, 6 * 3600);
-    var noon = RingData.nextSun(sun, 12 * 3600);
-    var set = RingData.nextSun(sun, 18 * 3600);
-    var late = RingData.nextSun([20 * 3600, 2 * 3600], 23 * 3600);
-    var none = RingData.nextSun(null, 0);
-    return dawn[0] == Slots.SUNRISE && (dawn[1] - 0.75).abs() < 0.001
-        && rise[0] == Slots.SUNSET && rise[1] == 0.0
-        && noon[0] == Slots.SUNSET && (noon[1] - 0.5).abs() < 0.001
-        && set[0] == Slots.SUNRISE && set[1] == 0.0
-        && late[0] == Slots.SUNSET && (late[1] - 0.5).abs() < 0.001
-        && none[0] == Slots.SUNRISE && none[1] == 0.0;
-}
-
 // Each slot keeps its own place, and only gauges in the bottom row (places 3-4) get a ring: a
 // gauge in the top row shows icon and value only, like a plain value.
 (:test)
@@ -248,19 +228,6 @@ function defaultsPutGaugesInTheBottomRow(logger as Logger) as Boolean {
     return d[0] == Slots.HEART_RATE && d[1] == Slots.ALTITUDE && d[2] == Slots.BATTERY && d[3] == Slots.STEPS;
 }
 
-// Review focus: a missing reading shows text ("--"), never crashes, for every type.
-(:test)
-function ringDataGivesTextForEveryType(logger as Logger) as Boolean {
-    for (var type = 1; type < Slots.TYPE_COUNT; type++) {
-        var v = RingData.value(type, null);
-        if (!(v instanceof String) || v.length() == 0) {
-            logger.error("type " + type);
-            return false;
-        }
-    }
-    return true;
-}
-
 // Review focus: the battery icon follows the level and turns red when low.
 (:test)
 function batteryIconAndColorFollowLevel(logger as Logger) as Boolean {
@@ -275,10 +242,10 @@ function batteryIconAndColorFollowLevel(logger as Logger) as Boolean {
 // Review focus: steps above the goal fill the ring and no more.
 (:test)
 function progressIsClamped(logger as Logger) as Boolean {
-    var p = RingData.progress(Slots.STEPS);
+    var p = Slots.progress(Slots.STEPS, null);
     return Slots.clamp(1.7) == 1.0 && Slots.clamp(-0.2) == 0.0 && Slots.clamp(0.5) == 0.5
         && (p == -1.0 || (p >= 0.0 && p <= 1.0))
-        && RingData.progress(Slots.HEART_RATE) == -1.0;
+        && Slots.progress(Slots.HEART_RATE, null) == -1.0;
 }
 
 // A full gauge is drawn as a circle, because a 360 degree arc is ambiguous.
@@ -293,17 +260,16 @@ function fullProgressDrawsACircle(logger as Logger) as Boolean {
 (:test)
 function holdOnRingTargetsItsComplication(logger as Logger) as Boolean {
     var w = System.getDeviceSettings().screenWidth;
-    var saved = [Slots.typeOf(1), Slots.typeOf(2), Slots.typeOf(3), Slots.typeOf(4), Slots.typeOf(5)];
-    Slots.setType(1, Slots.BATTERY);
-    Slots.setType(2, Slots.HEART_RATE);
-    Slots.setType(3, Slots.ALTITUDE);
-    Slots.setType(4, Slots.STEPS);
-    Slots.setType(5, Slots.HEART_RATE);
+    var saved = TestSlots.save();
+    TestSlots.set(1, Slots.BATTERY);
+    TestSlots.set(2, Slots.HEART_RATE);
+    TestSlots.set(3, Slots.ALTITUDE);
+    TestSlots.set(4, Slots.STEPS);
     var top = Rings.centre(1, w);
     var bottom = Rings.centre(3, w);
     var ok = RingPressDelegate.target(top[0], top[1], w) == Complications.COMPLICATION_TYPE_BATTERY
         && RingPressDelegate.target(bottom[0], bottom[1], w) == Complications.COMPLICATION_TYPE_ALTITUDE;
-    Slots.setType(1, Slots.NONE);
+    TestSlots.set(1, Slots.NONE);
     ok = ok && RingPressDelegate.target(top[0], top[1], w) == -1
         && RingPressDelegate.target(w / 2, w / 2, w) == -1;
     var day = Today.at(Time.now(), WatchSun.get());
@@ -311,10 +277,8 @@ function holdOnRingTargetsItsComplication(logger as Logger) as Boolean {
     var now = (t.hour as Number) * 3600 + (t.min as Number) * 60 + (t.sec as Number);
     var sun = Rings.centre(Rings.SUN, w);
     ok = ok && RingPressDelegate.target(sun[0], sun[1], w)
-        == RingData.complicationType(RingData.nextSun(day[2] as Array<Number>?, now)[0] as Number);
-    for (var i = 0; i < saved.size(); i++) {
-        Slots.setType(i + 1, saved[i]);
-    }
+        == Slots.complicationType(Slots.nextSun(day[2] as Array<Number>?, now)[0] as Number);
+    TestSlots.restore(saved);
     return ok;
 }
 
@@ -325,9 +289,8 @@ function settingsListTheRingSlots(logger as Logger) as Boolean {
     return FaceSlots.COUNT == 4 && menu.findItemById(4) != -1 && menu.findItemById(5) == -1;
 }
 
-
-// The battery ring shows the same days-left text as the Instinct slot.
+// Every type has a Venu ring colour.
 (:test)
-function batteryRingShowsDays(logger as Logger) as Boolean {
-    return RingData.value(Slots.BATTERY, null).equals(Slots.value(Slots.BATTERY, null));
+function everyTypeHasAColour(logger as Logger) as Boolean {
+    return RingData.COLORS.size() == Slots.TYPE_COUNT;
 }

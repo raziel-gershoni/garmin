@@ -1,4 +1,3 @@
-import Toybox.Complications;
 import Toybox.Lang;
 import Toybox.System;
 import Toybox.WatchUi;
@@ -8,58 +7,15 @@ import Toybox.WatchUi;
 module RingData {
 
     // Indexed by Slots.Type: none, HR, battery, steps, altitude, sunrise, sunset, Body Battery,
-    // solar, notifications, calories.
+    // solar, notifications, calories, stress, floors, intensity minutes, temperature, high/low,
+    // pulse ox, respiration, sleep score, pressure, recovery, VO2 max, next event, weekly run,
+    // sun (unused: SUN takes the colour of the next sunrise or sunset).
     const COLORS = [0x000000, 0xFF4D5E, 0x4CD964, 0x3FA9F5, 0xB8C2CC, 0xFFC83D, 0xFF8A3D, 0x4FD8FF,
-                    0xFFD000, 0xC79BFF, 0xFF7A45];
+                    0xFFD000, 0xC79BFF, 0xFF7A45,
+                    0xF5A623, 0x34C3A0, 0xFF6B9A, 0xFFA07A, 0xFFA07A, 0x7FA7FF, 0x7FE0D0, 0x9C8CFF,
+                    0xB8C2CC, 0x8CD47E, 0xFF7AA2, 0x6FC3FF, 0x5AC8FA, 0x000000];
     const LOW_BATTERY = 20;
     const LOW_COLOR = 0xFF3B30;
-
-    // The native complication behind a slot type, or -1. Also what a press on the ring opens.
-    function complicationType(type as Number) as Number {
-        switch (type) {
-            case Slots.HEART_RATE: return Complications.COMPLICATION_TYPE_HEART_RATE as Number;
-            case Slots.BATTERY: return Complications.COMPLICATION_TYPE_BATTERY as Number;
-            case Slots.STEPS: return Complications.COMPLICATION_TYPE_STEPS as Number;
-            case Slots.ALTITUDE: return Complications.COMPLICATION_TYPE_ALTITUDE as Number;
-            case Slots.SUNRISE: return Complications.COMPLICATION_TYPE_SUNRISE as Number;
-            case Slots.SUNSET: return Complications.COMPLICATION_TYPE_SUNSET as Number;
-            case Slots.BODY_BATTERY: return Complications.COMPLICATION_TYPE_BODY_BATTERY as Number;
-            case Slots.NOTIFICATIONS: return Complications.COMPLICATION_TYPE_NOTIFICATION_COUNT as Number;
-            case Slots.CALORIES: return Complications.COMPLICATION_TYPE_CALORIES as Number;
-        }
-        return -1;
-    }
-
-    function complicationValue(type as Number) {
-        var ct = complicationType(type);
-        if (ct < 0 || !(Toybox has :Complications)) {
-            return null;
-        }
-        try {
-            return Complications.getComplication(new Complications.Id(ct as Complications.Type)).value;
-        } catch (e) {
-            return null;
-        }
-    }
-
-    // Ring text; "--" when the watch has no reading. Sunrise/sunset come from the view's sun
-    // times, which already prefer the watch's own; battery shows days left (Slots.battery), while
-    // its ring and icon follow the charge.
-    function value(type as Number, sun as Array<Number>?) as String {
-        if (type != Slots.SUNRISE && type != Slots.SUNSET && type != Slots.BATTERY) {
-            var v = complicationValue(type);
-            if (v instanceof Number || v instanceof Float || v instanceof Long || v instanceof Double) {
-                return Slots.whole(v) + (type == Slots.ALTITUDE ? "m" : "");
-            }
-        }
-        return Slots.value(type, sun);
-    }
-
-    // 0..1 for gauge types (Slots.progress), with Body Battery from its complication where it has one.
-    function progress(type as Number) as Float {
-        var v = type == Slots.BODY_BATTERY ? complicationValue(type) : null;
-        return Slots.progress(type, v instanceof Number ? v : null);
-    }
 
     // Icon for a slot type; the battery icon follows the charge. Null for types without one
     // (Solar, which the Venu does not offer).
@@ -78,31 +34,10 @@ module RingData {
         return null;
     }
 
-    // The sun ring: [Slots.SUNSET or SUNRISE, progress] for the next of the two, with how far
-    // the day (sunrise to sunset) or the night (sunset to the next sunrise, taken at today's
-    // times) has run. sun is [sunrise, sunset] in seconds after midnight, either way round past
-    // midnight; without it, sunrise and an empty arc.
-    function nextSun(sun as Array<Number>?, now as Number) as Array {
-        if (sun == null) {
-            return [Slots.SUNRISE, 0.0];
-        }
-        var day = (sun[1] - sun[0] + 86400) % 86400;
-        var sinceRise = (now - sun[0] + 86400) % 86400;
-        if (sinceRise < day) {
-            return [Slots.SUNSET, sinceRise.toFloat() / day];
-        }
-        return [Slots.SUNRISE, (sinceRise - day).toFloat() / (86400 - day)];
-    }
-
-    // Types with a natural 0..1 progress (Slots.progress).
-    function isGauge(type as Number) as Boolean {
-        return type == Slots.BATTERY || type == Slots.STEPS || type == Slots.BODY_BATTERY;
-    }
-
     // Gauges in the bottom row (places 3-4) get a ring, a track and a progress arc; the top row
     // has no rings, so a gauge there shows only icon and value, like the other types.
     function ringed(type as Number, place as Number) as Boolean {
-        return isGauge(type) && place > 2;
+        return Slots.isGauge(type) && place > 2;
     }
 
     function color(type as Number) as Number {

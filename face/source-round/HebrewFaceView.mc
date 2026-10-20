@@ -93,18 +93,19 @@ class HebrewFaceView extends WatchUi.WatchFace {
     // ring above 6 with the next sunrise or sunset (now: seconds after midnight).
     function drawRings(dc as Dc, sun as Array<Number>?, now as Number, w as Number, off as Array<Number>, low as Boolean) as Void {
         for (var place = 1; place <= FaceSlots.COUNT; place++) {
-            var type = Slots.typeOf(place);
-            var iconId = RingData.icon(type);
+            var type = FaceSlots.typeOf(place);
+            var shown = Slots.resolve(type, sun);
+            var iconId = RingData.icon(shown);
             if (type == Slots.NONE || iconId == null) {
                 continue;
             }
-            Rings.draw(dc, place, w, off, [bitmap(iconId as ResourceId), RingData.color(type), RingData.value(type, sun),
-                RingData.progress(type), RingData.ringed(type, place)], low);
+            Rings.draw(dc, place, w, off, [bitmap(iconId as ResourceId), RingData.color(shown), Slots.value(type, sun),
+                Slots.progress(type, sun), RingData.ringed(type, place)], low);
         }
-        var next = RingData.nextSun(sun, now);
+        var next = Slots.nextSun(sun, now);
         var type = next[0] as Number;
         Rings.draw(dc, Rings.SUN, w, off,
-            [bitmap(RingData.icon(type) as ResourceId), RingData.color(type), RingData.value(type, sun), next[1], true], low);
+            [bitmap(RingData.icon(type) as ResourceId), RingData.color(type), Slots.value(type, sun), next[1], true], low);
     }
 
     function bitmap(id as ResourceId) as BitmapResource {

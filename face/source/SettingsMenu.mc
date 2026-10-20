@@ -13,7 +13,7 @@ module SettingsMenu {
                       Rez.Strings.Slot4Title, Rez.Strings.Slot5Title, Rez.Strings.Slot6Title];
         var names = Slots.names();
         for (var slot = 1; slot <= FaceSlots.COUNT; slot++) {
-            menu.addItem(new WatchUi.MenuItem(titles[slot - 1], names[Slots.typeOf(slot)], slot, null));
+            menu.addItem(new WatchUi.MenuItem(titles[slot - 1], names[FaceSlots.typeOf(slot)], slot, null));
         }
         if (!amoled()) {
             menu.addItem(new WatchUi.MenuItem(Rez.Strings.ThemeTitle, themeName(), :theme, null));
@@ -48,8 +48,8 @@ class SettingsDelegate extends WatchUi.Menu2InputDelegate {
             item.setSubLabel(SettingsMenu.themeName());
         } else {
             var slot = id as Number;
-            var next = Slots.next(Slots.typeOf(slot));
-            Slots.setType(slot, next);
+            var next = Slots.next(FaceSlots.typeOf(slot));
+            FaceSlots.setType(slot, next);
             item.setSubLabel(Slots.names()[next]);
         }
         WatchUi.requestUpdate();

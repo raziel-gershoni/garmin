@@ -123,10 +123,11 @@ class HebrewFaceView extends WatchUi.WatchFace {
     // Slots 1-2 and 4 in the column and 5-6 along the bottom, with a transparent text background
     // so they never cut into their neighbours.
     function drawSlots(dc as Dc, sun as Array<Number>?) as Void {
-        var types = [Slots.typeOf(1), Slots.typeOf(2), Slots.typeOf(4), Slots.typeOf(5), Slots.typeOf(6)];
+        var types = [FaceSlots.typeOf(1), FaceSlots.typeOf(2), FaceSlots.typeOf(4), FaceSlots.typeOf(5), FaceSlots.typeOf(6)];
         var texts = [null, null, null, null, null] as Array<String?>;
         for (var i = 0; i < types.size(); i++) {
             texts[i] = types[i] == Slots.NONE ? null : Slots.value(types[i], sun);
+            types[i] = Slots.resolve(types[i], sun);
         }
         dc.setColor(_fg, Graphics.COLOR_TRANSPARENT);
         var pair = Layout.line(dc, Layout.PAIR_Y, texts[0], texts[1]);
@@ -175,10 +176,10 @@ class HebrewFaceView extends WatchUi.WatchFace {
 
     // Slot 3 in the subscreen; an empty slot leaves it in the background colour.
     function drawWindow(dc as Dc, sun as Array<Number>?) as Void {
-        var type = Slots.typeOf(3);
+        var type = FaceSlots.typeOf(3);
         if (type != Slots.NONE) {
-            Window.draw(dc, _windowX, _windowY, _windowR, type, Slots.value(type, sun), Slots.progress(type, null),
-                _iconFont as FontResource, _fg, _bg);
+            Window.draw(dc, _windowX, _windowY, _windowR, Slots.resolve(type, sun), Slots.value(type, sun),
+                Slots.progress(type, sun), _iconFont as FontResource, _fg, _bg);
         }
     }
 

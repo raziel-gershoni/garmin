@@ -34,9 +34,7 @@ function faceRendersEverySlotTypeAndTheme(logger as Logger) as Boolean {
     for (var theme = 0; theme <= 1; theme++) {
         Properties.setValue("Theme", theme);
         for (var type = 0; type < Slots.TYPE_COUNT; type++) {
-            for (var slot = 1; slot <= Slots.SLOT_COUNT; slot++) {
-                Slots.setType(slot, type);
-            }
+            TestSlots.setAll(type);
             view.onUpdate(dc);
         }
     }
@@ -44,9 +42,7 @@ function faceRendersEverySlotTypeAndTheme(logger as Logger) as Boolean {
     Parasha.changed = true;
     view.onUpdate(dc);
     TestCache.restore(saved);
-    for (var slot = 1; slot <= Slots.SLOT_COUNT; slot++) {
-        Slots.setType(slot, FaceSlots.DEFAULTS[slot - 1]);
-    }
+    TestSlots.reset();
     Properties.setValue("Theme", 0);
     return true;
 }
@@ -56,10 +52,10 @@ function settingsMenuBuildsAndCycles(logger as Logger) as Boolean {
     var built = SettingsMenu.build();
     var delegate = built[1] as SettingsDelegate;
     var item = new WatchUi.MenuItem("Slot 1", "", 1, null);
-    var before = Slots.typeOf(1);
+    var before = FaceSlots.typeOf(1);
     delegate.onSelect(item);
-    var ok = Slots.typeOf(1) == Slots.next(before);
-    Slots.setType(1, before);
+    var ok = FaceSlots.typeOf(1) == Slots.next(before);
+    FaceSlots.setType(1, before);
     var theme = new WatchUi.MenuItem("Theme", "", :theme, null);
     delegate.onSelect(theme);
     ok = ok && SettingsMenu.isLight();
@@ -74,7 +70,7 @@ function solarSlotOnlyWithSolarCharging(logger as Logger) as Boolean {
     var amoled = SettingsMenu.amoled();
     return Slots.available(Slots.SOLAR) == !amoled
         && Slots.next(Slots.BODY_BATTERY) == (amoled ? Slots.NOTIFICATIONS : Slots.SOLAR)
-        && Slots.next(Slots.CALORIES) == Slots.NONE;
+        && Slots.next(Slots.SUN) == Slots.NONE;
 }
 
 // The light background is offered only on memory-in-pixel screens; AMOLED faces stay black.

@@ -21,4 +21,18 @@
     <string id="SlotSolar">Solar intensity</string>
     <string id="SlotNotifications">Notifications</string>
     <string id="SlotCalories">Calories</string>
+    <string id="SlotStress">Stress</string>
+    <string id="SlotFloors">Floors climbed</string>
+    <string id="SlotIntensity">Intensity minutes</string>
+    <string id="SlotTemperature">Temperature</string>
+    <string id="SlotHighLow">High/low temperature</string>
+    <string id="SlotPulseOx">Pulse ox</string>
+    <string id="SlotRespiration">Respiration</string>
+    <string id="SlotSleepScore">Sleep score</string>
+    <string id="SlotPressure">Pressure</string>
+    <string id="SlotRecovery">Recovery time</string>
+    <string id="SlotVo2Max">VO2 max</string>
+    <string id="SlotNextEvent">Next event</string>
+    <string id="SlotRunWeek">Weekly run distance</string>
+    <string id="SlotSun">Sunrise/sunset</string>
 </strings>

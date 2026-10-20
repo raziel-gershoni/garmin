@@ -17,18 +17,14 @@ function roundFaceRendersAwakeAndAlwaysOn(logger as Logger) as Boolean {
     for (var low = 0; low <= 1; low++) {
         view.setLowPower(low == 1);
         for (var type = 0; type < Slots.TYPE_COUNT; type++) {
-            for (var slot = 1; slot <= Slots.SLOT_COUNT; slot++) {
-                Slots.setType(slot, type);
-            }
+            TestSlots.setAll(type);
             view.onUpdate(dc);
         }
     }
     Storage.deleteValue(Parasha.ITEMS_KEY);
     Parasha.changed = true;
     view.onUpdate(dc);
-    for (var slot = 1; slot <= Slots.SLOT_COUNT; slot++) {
-        Slots.setType(slot, FaceSlots.DEFAULTS[slot - 1]);
-    }
+    TestSlots.reset();
     view.setLowPower(null);
     TestCache.restore(saved);
     return true;

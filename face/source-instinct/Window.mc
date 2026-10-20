@@ -4,8 +4,8 @@ import Toybox.WatchUi;
 
 // Slot 3 in the round subscreen, as a gauge drawn in the background colour on a disk of the
 // foreground colour: a thin 270° track open at the bottom, a thick progress arc over it for gauge
-// types (Slots.progress: steps to the daily goal, battery, Body Battery), the value in the middle
-// and the slot's icon in the track's gap.
+// types (Slots.progress), the value in the middle and the icon of the type in the track's gap
+// (the type to show, from Slots.resolve).
 module Window {
 
     const ARC_R = 26;

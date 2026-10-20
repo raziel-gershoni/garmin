@@ -1,3 +1,4 @@
+import Toybox.Application;
 import Toybox.Graphics;
 import Toybox.Lang;
 import Toybox.Math;
@@ -360,4 +361,21 @@ function windowValuesFit(logger as Logger) as Boolean {
     }
     var inner = Window.ARC_R - Window.ARC_W / 2;
     return Window.VALUE_MAX_W <= 2 * Math.sqrt(inner * inner - 6 * 6);
+}
+
+// Review focus: the Instinct's saved choices (Slots.Type numbers 0-10 from before this change)
+// keep their meaning, and a saved value out of range or of the wrong kind falls back to the default.
+(:test)
+function savedSlotNumbersKeepTheirMeaning(logger as Logger) as Boolean {
+    var saved = TestSlots.save();
+    Properties.setValue("Slot1", 7);
+    var bodyBattery = FaceSlots.typeOf(1) == Slots.BODY_BATTERY;
+    Properties.setValue("Slot1", 99);
+    var high = FaceSlots.typeOf(1) == FaceSlots.DEFAULTS[0];
+    Properties.setValue("Slot1", -1);
+    var low = FaceSlots.typeOf(1) == FaceSlots.DEFAULTS[0];
+    Properties.setValue("Slot1", "7");
+    var text = FaceSlots.typeOf(1) == FaceSlots.DEFAULTS[0];
+    TestSlots.restore(saved);
+    return bodyBattery && high && low && text && Slots.CALORIES == 10 && Slots.SUN == 24;
 }
