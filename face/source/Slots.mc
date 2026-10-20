@@ -254,6 +254,21 @@ module Slots {
         return [SUNRISE, (sinceRise - day).toFloat() / (86400 - day)];
     }
 
+    // One log line per complication the watch publishes (its type number and the watch's own
+    // label), so the real list can be read off the face's log file. Returns how many it logged.
+    function logComplications() as Number {
+        if (!(Toybox has :Complications)) {
+            return 0;
+        }
+        var count = 0;
+        var it = Complications.getComplications();
+        for (var c = it.next(); c != null; c = it.next()) {
+            Parasha.log("comp " + c.getType() + " " + c.longLabel);
+            count++;
+        }
+        return count;
+    }
+
     // Battery as days left where the watch estimates them (like the native faces), else percent.
     function battery() as String {
         var stats = System.getSystemStats();

@@ -63,6 +63,7 @@ class HebrewFaceView extends WatchUi.WatchFace {
         if (!_loggedMemory) {
             var stats = System.getSystemStats();
             Parasha.log("face mem " + stats.usedMemory + "/" + stats.totalMemory + " sun " + sun);
+            Slots.logComplications();
             _loggedMemory = true;
         }
     }

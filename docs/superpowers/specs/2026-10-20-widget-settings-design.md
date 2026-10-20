@@ -87,6 +87,7 @@ The `Slots.Type` enum stays the widget identity on both watches. New types are a
   - Picking an item saves it, ticks only that item, closes the list and shows the new choice under the slot's name.
   - Back leaves the slot unchanged.
 - **Tap-to-cycle** (`Slots.next`) goes away.
+- **Order:** the lists follow `Slots.ORDER`, which is grouped by kind (heart and energy, activity, health, place and weather, sun, other), with Empty last.
 - **Icons:** each new type gets a 13×13 hand-drawn glyph in the Icons font (`tools/make_assets.py`, then regenerate `icons.png`/`icons.fnt`). SUN shows the sunrise or sunset glyph of the next event.
 - **Slot 3:** the round window fills its arc for any gauge type, so the new gauges work there unchanged.
 - **Width:** a new value too wide for its slot falls back through the existing chain: SMALL, then XTINY, then no icon, then clamp. Layout tests get each new type's widest value.

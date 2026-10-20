@@ -23,13 +23,13 @@ Revised 2026-10-19 after the user compared it with the Venu's own faces: capsule
 - **Bottom rim:** the parasha or holiday, orange, same font. It is drawn counter-clockwise, centred on 6 o'clock, so it reads upright. If the title is too long for the arc, "פרשת " is dropped first, then the font steps down.
 - **Curved text order:** on the Venu 4 itself, curved text is laid out right-to-left like straight text, so rim strings stay in logical order. The simulator does not reorder curved text and shows rim lines backwards; an earlier build reversed them to suit the simulator, which made them read backwards on the watch (found on the user's Venu, 2026-10-19).
 - **Under 12:** "ב׳ 19.10", grey, drawn as two pieces as on the Instinct: the Hebrew weekday in Noto Sans Hebrew, the digits in Roboto. Straight text does get right-to-left reordering.
-- **Subdials** (slots 1–4):
+- **Subdials** (spots 1–4; spot 5 is the sun ring below). The watch's own face editor picks what each spot shows (see the widget settings spec):
   - **Layout:** places of radius 48, centred on a circle of radius 124 at +29° (top row) and −23° (bottom row) from 9 and 3 o'clock. Rings end inside the 5-second marks, which reach 18 px in from the edge (round end included).
-  - **Placement:** slot N always sits at place N: 1 top-left, 2 top-right, 3 bottom-left, 4 bottom-right. Changing one slot moves nothing else. Gauges get their ring in the bottom row only (`RingData.ringed`); a gauge picked for the top row shows its icon and value without a ring, like heart rate. The Venu's defaults (`FaceSlots.DEFAULTS`, `resources-round/settings/properties.xml`) give heart rate and altitude on top, battery and steps below.
+  - **Placement:** slot N always sits at place N: 1 top-left, 2 top-right, 3 bottom-left, 4 bottom-right. Changing one slot moves nothing else. Gauges get their ring in the bottom row and in spot 5 only (`RingData.ringed`); a gauge picked for the top row shows its icon and value without a ring, like heart rate. The defaults (`FaceSlots.DEFAULTS` and the editor's `watchface.xml`) give heart rate and altitude on top, battery and steps below, and sunrise in spot 5.
   - **Why fixed:** an earlier build sorted plain values to the top and gauges to the bottom on every draw. Switching altitude to Body Battery then moved three of the four subdials and still put a ring on top, because three gauges do not fit in two bottom places (user report, 2026-10-20).
   - **Contents:** a 34 px icon at the top and the value under it in Roboto Condensed Bold, up to 30. Gauges (battery, steps, Body Battery) in the bottom row also get a 7 px dark-grey track with the progress arc.
   - **Gauge arc:** a coloured progress arc from 12 o'clock clockwise: battery %, Body Battery, and steps against the daily step goal.
-- **Sun ring** above 6: radius 42, 76 px below the centre. It shows the next sunrise or sunset: sunset with its arc filling from sunrise to sunset through the day, sunrise with its arc filling through the night (taken at today's times). Holding it opens that native view.
+- **Sun ring** above 6 (spot 5 in the editor): radius 42, 76 px below the centre. It shows the next sunrise or sunset: sunset with its arc filling from sunrise to sunset through the day, sunrise with its arc filling through the night (taken at today's times). Holding it opens that native view. Picking Sunrise or Sunset for spot 5 gives this ring; any other widget shows in place 5 instead, with a ring if it is a gauge.
 - **Icons:** Material Design Icons, rendered by a tools script into white anti-aliased PNGs and drawn with `drawBitmap2` plus `:tintColor`. Bitmaps need `automaticPalette="false"`, or the tint throws. Their edges came out smoother than the icon-font route in the A/B test.
   - Colours: heart rate red, battery green, steps blue, altitude grey, sunrise yellow, sunset orange.
   - The battery icon shows its level (20/50/80/full) and turns red at ≤ 20%.
@@ -54,10 +54,10 @@ Same layout, dimmed. The user wants everything kept in this view.
 ## Data
 
 - **Slot values:** from the Complications API where the type exists. The Venu simulator publishes all 42 types with values, including HR, steps, battery, Body Battery, altitude, sunrise, sunset, notifications and calories. Fallback is the existing `Slots` code (ActivityMonitor / SensorHistory).
-- **Slot options:** the Instinct list minus Solar (no solar on the Venu), for slots 1–4 (`FaceSlots.COUNT`). Defaults: 1 HR, 2 battery, 3 steps, 4 altitude. Slots 5–6 exist in the settings store but the Venu does not show them; the sun ring replaces them.
+- **Slot options:** the shared widget set minus Solar (no solar on the Venu), for the editor's five spots. Defaults: 1 HR, 2 altitude, 3 battery, 4 steps, 5 sunrise.
 - **Hebrew date, parasha and sunset rollover:** the shared `common/` code, unchanged. Sunrise/sunset come from complications, then NOAA, then Jerusalem.
 - **Hold-to-open:** touch-and-hold on a ring opens the matching native view via `WatchFaceDelegate.onPress` + `Complications.exitTo`, where the type supports it. Faces get no plain taps.
-- **Settings:** the same on-watch Menu2, listing the four ring slots. The light theme is not offered on the Venu: AMOLED faces should stay black.
+- **Settings:** the Venu has no settings menu any more; widgets are picked in the watch's face editor (Watch Face → Hebrew Face → Data). The light theme is not offered on the Venu: AMOLED faces should stay black.
 
 ## Glance app
 
@@ -84,7 +84,7 @@ Same layout, dimmed. The user wants everything kept in this view.
   - the widest slot values fit inside a ring;
   - rings don't overlap each other or the rim texts.
 - **Simulator:** screenshots of awake and always-on, from the user. The simulator's always-on checker (low-power warnings in the log) must stay silent.
-- **On the watch:** the always-on look and brightness, hold-to-open, the settings entry, and battery over a day.
+- **On the watch:** the always-on look and brightness, hold-to-open, the face editor's Data entry, and battery over a day.
 
 ## Out of scope for now
 

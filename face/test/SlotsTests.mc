@@ -189,3 +189,12 @@ function readingsRoundToNearest(logger as Logger) as Boolean {
     return Slots.whole(2.8).equals("3") && Slots.whole(2.5).equals("3") && Slots.whole(2.2).equals("2")
         && Slots.whole(-17.6).equals("-18") && Slots.whole(80).equals("80") && Slots.whole(2124.4d).equals("2124");
 }
+
+// The face can list what the watch publishes into its log without failing, and both simulators
+// publish some complications.
+(:test)
+function complicationListLogs(logger as Logger) as Boolean {
+    var count = Slots.logComplications();
+    logger.debug("complications logged " + count);
+    return count > 0;
+}

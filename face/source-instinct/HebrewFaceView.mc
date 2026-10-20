@@ -66,6 +66,7 @@ class HebrewFaceView extends WatchUi.WatchFace {
                 var stats = System.getSystemStats();
                 Parasha.log("face mem " + stats.usedMemory + "/" + stats.totalMemory + " sun " + sun + " phone "
                     + System.getDeviceSettings().phoneConnected + " cached " + (Storage.getValue(Parasha.ITEMS_KEY) != null));
+                Slots.logComplications();
             }
             _hebrewLine = Layout.hebrewDate(dc, HebrewCalendar.fromFixed(hebrewRd));
             _hebrewRd = hebrewRd;
