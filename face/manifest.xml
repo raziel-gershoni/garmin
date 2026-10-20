@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <iq:manifest version="3" xmlns:iq="http://www.garmin.com/xml/connectiq">
     <iq:application id="8cd0536226f146079a60ee9d38841be0" type="watchface" name="@Strings.AppName"
-                    entry="HebrewFaceApp" launcherIcon="@Drawables.LauncherIcon" minApiLevel="4.2.0">
+                    entry="HebrewFaceApp" launcherIcon="@Drawables.LauncherIcon" minApiLevel="5.1.0">
         <iq:products>
             <iq:product id="instinct3solar45mm"/>
             <iq:product id="venu441mm"/>

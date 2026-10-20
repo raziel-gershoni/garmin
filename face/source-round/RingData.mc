@@ -2,8 +2,8 @@ import Toybox.Lang;
 import Toybox.System;
 import Toybox.WatchUi;
 
-// What a ring shows for each slot type on the Venu: value text, progress, icon and colour.
-// Values come from the watch's own complications where they exist, else from Slots.
+// How each widget type looks in a Venu subdial: its icon and colour (the battery's follow the
+// charge), and which spots get a ring. The values and progress come from Slots.
 module RingData {
 
     // Indexed by Slots.Type: none, HR, battery, steps, altitude, sunrise, sunset, Body Battery,
@@ -18,7 +18,8 @@ module RingData {
     const LOW_COLOR = 0xFF3B30;
 
     // Icon for a slot type; the battery icon follows the charge. Null for types without one
-    // (Solar, which the Venu does not offer).
+    // (Solar, which the Venu does not offer, and SUN, which shows the icon of the next sunrise or
+    // sunset).
     function icon(type as Number) as ResourceId? {
         switch (type) {
             case Slots.HEART_RATE: return Rez.Drawables.IconHeart;
@@ -30,12 +31,25 @@ module RingData {
             case Slots.BODY_BATTERY: return Rez.Drawables.IconBodyBattery;
             case Slots.NOTIFICATIONS: return Rez.Drawables.IconNotifications;
             case Slots.CALORIES: return Rez.Drawables.IconCalories;
+            case Slots.STRESS: return Rez.Drawables.IconStress;
+            case Slots.FLOORS: return Rez.Drawables.IconFloors;
+            case Slots.INTENSITY: return Rez.Drawables.IconIntensity;
+            case Slots.TEMPERATURE: return Rez.Drawables.IconTemperature;
+            case Slots.HIGH_LOW: return Rez.Drawables.IconHighLow;
+            case Slots.PULSE_OX: return Rez.Drawables.IconPulseOx;
+            case Slots.RESPIRATION: return Rez.Drawables.IconRespiration;
+            case Slots.SLEEP_SCORE: return Rez.Drawables.IconSleep;
+            case Slots.PRESSURE: return Rez.Drawables.IconPressure;
+            case Slots.RECOVERY: return Rez.Drawables.IconRecovery;
+            case Slots.VO2_MAX: return Rez.Drawables.IconVo2Max;
+            case Slots.NEXT_EVENT: return Rez.Drawables.IconNextEvent;
+            case Slots.RUN_WEEK: return Rez.Drawables.IconRunWeek;
         }
         return null;
     }
 
-    // Gauges in the bottom row (places 3-4) get a ring, a track and a progress arc; the top row
-    // has no rings, so a gauge there shows only icon and value, like the other types.
+    // Gauges in the bottom row (places 3-4) and spot 5 get a ring, a track and a progress arc; the
+    // top row has no rings, so a gauge there shows only icon and value, like the other types.
     function ringed(type as Number, place as Number) as Boolean {
         return Slots.isGauge(type) && place > 2;
     }

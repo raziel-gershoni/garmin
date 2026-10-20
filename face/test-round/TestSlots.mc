@@ -1,12 +1,15 @@
 import Toybox.Lang;
 import Toybox.Test;
 
-// Sets slot choices for tests through this watch's own FaceSlots, and puts them back.
+// Sets the Venu's spots for tests through FaceSlots.forced (the editor's settings cannot be
+// written from a test), and puts them back.
 (:test)
 module TestSlots {
 
     function set(slot as Number, type as Number) as Void {
-        FaceSlots.setType(slot, type);
+        var types = save();
+        types[slot - 1] = type;
+        FaceSlots.forced = types;
     }
 
     function setAll(type as Number) as Void {
@@ -24,12 +27,10 @@ module TestSlots {
     }
 
     function restore(saved as Array<Number>) as Void {
-        for (var slot = 1; slot <= saved.size(); slot++) {
-            set(slot, saved[slot - 1]);
-        }
+        FaceSlots.forced = saved;
     }
 
     function reset() as Void {
-        restore(FaceSlots.DEFAULTS.slice(0, FaceSlots.COUNT) as Array<Number>);
+        FaceSlots.forced = null;
     }
 }

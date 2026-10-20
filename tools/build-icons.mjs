@@ -24,6 +24,19 @@ const ICONS = {
   icon_bodybattery: 'lightning-bolt',
   icon_notifications: 'bell',
   icon_calories: 'fire',
+  icon_stress: 'head-flash',
+  icon_floors: 'stairs',
+  icon_intensity: 'run-fast',
+  icon_temperature: 'thermometer',
+  icon_highlow: 'thermometer-lines',
+  icon_pulseox: 'water-percent',
+  icon_respiration: 'lungs',
+  icon_sleep: 'sleep',
+  icon_pressure: 'gauge',
+  icon_recovery: 'timer-sand',
+  icon_vo2max: 'heart-pulse',
+  icon_nextevent: 'calendar',
+  icon_runweek: 'run',
 };
 
 fs.mkdirSync(out, { recursive: true });

@@ -1,0 +1,129 @@
+<resources>
+    <!-- The Venu's five spots for the watch's own face editor (FaceSlots): subdials 1-4 and spot 5,
+         the ring above 6. Same widgets and order as Slots.ORDER, without Solar and SUN; defaults as
+         FaceSlots.DEFAULTS (Sunrise in spot 5 shows whichever of sunrise and sunset comes next). -->
+    <watchface-config>
+        <data>
+            <complication id="1">
+                <type default="true">Complications.COMPLICATION_TYPE_HEART_RATE</type>
+                <type>Complications.COMPLICATION_TYPE_BATTERY</type>
+                <type>Complications.COMPLICATION_TYPE_BODY_BATTERY</type>
+                <type>Complications.COMPLICATION_TYPE_STRESS</type>
+                <type>Complications.COMPLICATION_TYPE_STEPS</type>
+                <type>Complications.COMPLICATION_TYPE_FLOORS_CLIMBED</type>
+                <type>Complications.COMPLICATION_TYPE_INTENSITY_MINUTES</type>
+                <type>Complications.COMPLICATION_TYPE_CALORIES</type>
+                <type>Complications.COMPLICATION_TYPE_SLEEP_SCORE</type>
+                <type>Complications.COMPLICATION_TYPE_PULSE_OX</type>
+                <type>Complications.COMPLICATION_TYPE_RESPIRATION_RATE</type>
+                <type>Complications.COMPLICATION_TYPE_RECOVERY_TIME</type>
+                <type>Complications.COMPLICATION_TYPE_VO2MAX_RUN</type>
+                <type>Complications.COMPLICATION_TYPE_WEEKLY_RUN_DISTANCE</type>
+                <type>Complications.COMPLICATION_TYPE_ALTITUDE</type>
+                <type>Complications.COMPLICATION_TYPE_SEA_LEVEL_PRESSURE</type>
+                <type>Complications.COMPLICATION_TYPE_CURRENT_TEMPERATURE</type>
+                <type>Complications.COMPLICATION_TYPE_HIGH_LOW_TEMPERATURE</type>
+                <type>Complications.COMPLICATION_TYPE_SUNRISE</type>
+                <type>Complications.COMPLICATION_TYPE_SUNSET</type>
+                <type>Complications.COMPLICATION_TYPE_NOTIFICATION_COUNT</type>
+                <type>Complications.COMPLICATION_TYPE_CALENDAR_EVENTS</type>
+            </complication>
+            <complication id="2">
+                <type>Complications.COMPLICATION_TYPE_HEART_RATE</type>
+                <type>Complications.COMPLICATION_TYPE_BATTERY</type>
+                <type>Complications.COMPLICATION_TYPE_BODY_BATTERY</type>
+                <type>Complications.COMPLICATION_TYPE_STRESS</type>
+                <type>Complications.COMPLICATION_TYPE_STEPS</type>
+                <type>Complications.COMPLICATION_TYPE_FLOORS_CLIMBED</type>
+                <type>Complications.COMPLICATION_TYPE_INTENSITY_MINUTES</type>
+                <type>Complications.COMPLICATION_TYPE_CALORIES</type>
+                <type>Complications.COMPLICATION_TYPE_SLEEP_SCORE</type>
+                <type>Complications.COMPLICATION_TYPE_PULSE_OX</type>
+                <type>Complications.COMPLICATION_TYPE_RESPIRATION_RATE</type>
+                <type>Complications.COMPLICATION_TYPE_RECOVERY_TIME</type>
+                <type>Complications.COMPLICATION_TYPE_VO2MAX_RUN</type>
+                <type>Complications.COMPLICATION_TYPE_WEEKLY_RUN_DISTANCE</type>
+                <type default="true">Complications.COMPLICATION_TYPE_ALTITUDE</type>
+                <type>Complications.COMPLICATION_TYPE_SEA_LEVEL_PRESSURE</type>
+                <type>Complications.COMPLICATION_TYPE_CURRENT_TEMPERATURE</type>
+                <type>Complications.COMPLICATION_TYPE_HIGH_LOW_TEMPERATURE</type>
+                <type>Complications.COMPLICATION_TYPE_SUNRISE</type>
+                <type>Complications.COMPLICATION_TYPE_SUNSET</type>
+                <type>Complications.COMPLICATION_TYPE_NOTIFICATION_COUNT</type>
+                <type>Complications.COMPLICATION_TYPE_CALENDAR_EVENTS</type>
+            </complication>
+            <complication id="3">
+                <type>Complications.COMPLICATION_TYPE_HEART_RATE</type>
+                <type default="true">Complications.COMPLICATION_TYPE_BATTERY</type>
+                <type>Complications.COMPLICATION_TYPE_BODY_BATTERY</type>
+                <type>Complications.COMPLICATION_TYPE_STRESS</type>
+                <type>Complications.COMPLICATION_TYPE_STEPS</type>
+                <type>Complications.COMPLICATION_TYPE_FLOORS_CLIMBED</type>
+                <type>Complications.COMPLICATION_TYPE_INTENSITY_MINUTES</type>
+                <type>Complications.COMPLICATION_TYPE_CALORIES</type>
+                <type>Complications.COMPLICATION_TYPE_SLEEP_SCORE</type>
+                <type>Complications.COMPLICATION_TYPE_PULSE_OX</type>
+                <type>Complications.COMPLICATION_TYPE_RESPIRATION_RATE</type>
+                <type>Complications.COMPLICATION_TYPE_RECOVERY_TIME</type>
+                <type>Complications.COMPLICATION_TYPE_VO2MAX_RUN</type>
+                <type>Complications.COMPLICATION_TYPE_WEEKLY_RUN_DISTANCE</type>
+                <type>Complications.COMPLICATION_TYPE_ALTITUDE</type>
+                <type>Complications.COMPLICATION_TYPE_SEA_LEVEL_PRESSURE</type>
+                <type>Complications.COMPLICATION_TYPE_CURRENT_TEMPERATURE</type>
+                <type>Complications.COMPLICATION_TYPE_HIGH_LOW_TEMPERATURE</type>
+                <type>Complications.COMPLICATION_TYPE_SUNRISE</type>
+                <type>Complications.COMPLICATION_TYPE_SUNSET</type>
+                <type>Complications.COMPLICATION_TYPE_NOTIFICATION_COUNT</type>
+                <type>Complications.COMPLICATION_TYPE_CALENDAR_EVENTS</type>
+            </complication>
+            <complication id="4">
+                <type>Complications.COMPLICATION_TYPE_HEART_RATE</type>
+                <type>Complications.COMPLICATION_TYPE_BATTERY</type>
+                <type>Complications.COMPLICATION_TYPE_BODY_BATTERY</type>
+                <type>Complications.COMPLICATION_TYPE_STRESS</type>
+                <type default="true">Complications.COMPLICATION_TYPE_STEPS</type>
+                <type>Complications.COMPLICATION_TYPE_FLOORS_CLIMBED</type>
+                <type>Complications.COMPLICATION_TYPE_INTENSITY_MINUTES</type>
+                <type>Complications.COMPLICATION_TYPE_CALORIES</type>
+                <type>Complications.COMPLICATION_TYPE_SLEEP_SCORE</type>
+                <type>Complications.COMPLICATION_TYPE_PULSE_OX</type>
+                <type>Complications.COMPLICATION_TYPE_RESPIRATION_RATE</type>
+                <type>Complications.COMPLICATION_TYPE_RECOVERY_TIME</type>
+                <type>Complications.COMPLICATION_TYPE_VO2MAX_RUN</type>
+                <type>Complications.COMPLICATION_TYPE_WEEKLY_RUN_DISTANCE</type>
+                <type>Complications.COMPLICATION_TYPE_ALTITUDE</type>
+                <type>Complications.COMPLICATION_TYPE_SEA_LEVEL_PRESSURE</type>
+                <type>Complications.COMPLICATION_TYPE_CURRENT_TEMPERATURE</type>
+                <type>Complications.COMPLICATION_TYPE_HIGH_LOW_TEMPERATURE</type>
+                <type>Complications.COMPLICATION_TYPE_SUNRISE</type>
+                <type>Complications.COMPLICATION_TYPE_SUNSET</type>
+                <type>Complications.COMPLICATION_TYPE_NOTIFICATION_COUNT</type>
+                <type>Complications.COMPLICATION_TYPE_CALENDAR_EVENTS</type>
+            </complication>
+            <complication id="5">
+                <type>Complications.COMPLICATION_TYPE_HEART_RATE</type>
+                <type>Complications.COMPLICATION_TYPE_BATTERY</type>
+                <type>Complications.COMPLICATION_TYPE_BODY_BATTERY</type>
+                <type>Complications.COMPLICATION_TYPE_STRESS</type>
+                <type>Complications.COMPLICATION_TYPE_STEPS</type>
+                <type>Complications.COMPLICATION_TYPE_FLOORS_CLIMBED</type>
+                <type>Complications.COMPLICATION_TYPE_INTENSITY_MINUTES</type>
+                <type>Complications.COMPLICATION_TYPE_CALORIES</type>
+                <type>Complications.COMPLICATION_TYPE_SLEEP_SCORE</type>
+                <type>Complications.COMPLICATION_TYPE_PULSE_OX</type>
+                <type>Complications.COMPLICATION_TYPE_RESPIRATION_RATE</type>
+                <type>Complications.COMPLICATION_TYPE_RECOVERY_TIME</type>
+                <type>Complications.COMPLICATION_TYPE_VO2MAX_RUN</type>
+                <type>Complications.COMPLICATION_TYPE_WEEKLY_RUN_DISTANCE</type>
+                <type>Complications.COMPLICATION_TYPE_ALTITUDE</type>
+                <type>Complications.COMPLICATION_TYPE_SEA_LEVEL_PRESSURE</type>
+                <type>Complications.COMPLICATION_TYPE_CURRENT_TEMPERATURE</type>
+                <type>Complications.COMPLICATION_TYPE_HIGH_LOW_TEMPERATURE</type>
+                <type default="true">Complications.COMPLICATION_TYPE_SUNRISE</type>
+                <type>Complications.COMPLICATION_TYPE_SUNSET</type>
+                <type>Complications.COMPLICATION_TYPE_NOTIFICATION_COUNT</type>
+                <type>Complications.COMPLICATION_TYPE_CALENDAR_EVENTS</type>
+            </complication>
+        </data>
+    </watchface-config>
+</resources>

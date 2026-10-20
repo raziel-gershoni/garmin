@@ -74,3 +74,26 @@ function rimLinesFollowTheDayAndTheMode(logger as Logger) as Boolean {
     return hasParasha && reused && refitted && parashaGone
         && !(awake[0] as String).equals(nextDay[0] as String) && dim[1] != nextDay[1];
 }
+
+// The editor's pulsing copy of each spot (RingDrawable) takes the spot's highlight box as its
+// bounds and draws every widget type, Empty included.
+(:test)
+function editorCopyDrawsEverySpot(logger as Logger) as Boolean {
+    var dc = FaceTestSupport.screenDc();
+    var w = dc.getWidth();
+    var view = new HebrewFaceView();
+    view.onLayout(dc);
+    view.onUpdate(dc);
+    var ok = true;
+    for (var type = 0; type < Slots.TYPE_COUNT; type++) {
+        TestSlots.setAll(type);
+        for (var place = 1; place <= FaceSlots.COUNT; place++) {
+            var box = Rings.box(place, w);
+            var copy = new RingDrawable(view, place, box);
+            copy.draw(dc);
+            ok = ok && copy.locX == box[0] && copy.locY == box[1] && copy.width == box[2] && copy.height == box[3];
+        }
+    }
+    TestSlots.reset();
+    return ok;
+}

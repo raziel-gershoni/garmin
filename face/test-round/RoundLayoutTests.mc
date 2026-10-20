@@ -1,3 +1,4 @@
+import Toybox.Application.WatchFaceConfig;
 import Toybox.Complications;
 import Toybox.Graphics;
 import Toybox.Lang;
@@ -225,7 +226,8 @@ function onlyBottomRowGaugesGetRings(logger as Logger) as Boolean {
 (:test)
 function defaultsPutGaugesInTheBottomRow(logger as Logger) as Boolean {
     var d = FaceSlots.DEFAULTS;
-    return d[0] == Slots.HEART_RATE && d[1] == Slots.ALTITUDE && d[2] == Slots.BATTERY && d[3] == Slots.STEPS;
+    return d[0] == Slots.HEART_RATE && d[1] == Slots.ALTITUDE && d[2] == Slots.BATTERY && d[3] == Slots.STEPS
+        && d[4] == Slots.SUN;
 }
 
 // Review focus: the battery icon follows the level and turns red when low.
@@ -255,8 +257,8 @@ function fullProgressDrawsACircle(logger as Logger) as Boolean {
         && Rings.isFull(0.999) && Rings.isFull(1.0);
 }
 
-// Holding a place targets the complication of the slot shown there (slot N at place N), and
-// holding the sun ring the next sunrise or sunset; an empty slot or the centre targets nothing.
+// Holding a spot targets the complication of the widget shown there (slot N at place N), SUN in
+// spot 5 the next sunrise or sunset; an empty slot or the centre targets nothing.
 (:test)
 function holdOnRingTargetsItsComplication(logger as Logger) as Boolean {
     var w = System.getDeviceSettings().screenWidth;
@@ -272,12 +274,12 @@ function holdOnRingTargetsItsComplication(logger as Logger) as Boolean {
     TestSlots.set(1, Slots.NONE);
     ok = ok && RingPressDelegate.target(top[0], top[1], w) == -1
         && RingPressDelegate.target(w / 2, w / 2, w) == -1;
-    var day = Today.at(Time.now(), WatchSun.get());
-    var t = day[0] as Gregorian.Info;
-    var now = (t.hour as Number) * 3600 + (t.min as Number) * 60 + (t.sec as Number);
+    TestSlots.set(5, Slots.SUN);
+    var day = Today.at(Time.now(), WatchSun.get())[2] as Array<Number>?;
     var sun = Rings.centre(Rings.SUN, w);
-    ok = ok && RingPressDelegate.target(sun[0], sun[1], w)
-        == Slots.complicationType(Slots.nextSun(day[2] as Array<Number>?, now)[0] as Number);
+    ok = ok && RingPressDelegate.target(sun[0], sun[1], w) == Slots.complicationType(Slots.resolve(Slots.SUN, day));
+    TestSlots.set(5, Slots.STEPS);
+    ok = ok && RingPressDelegate.target(sun[0], sun[1], w) == Complications.COMPLICATION_TYPE_STEPS;
     TestSlots.restore(saved);
     return ok;
 }
@@ -292,4 +294,95 @@ function venuHasNoSettingsMenu(logger as Logger) as Boolean {
 (:test)
 function everyTypeHasAColour(logger as Logger) as Boolean {
     return RingData.COLORS.size() == Slots.TYPE_COUNT;
+}
+
+// The editor's choices fill the five spots; a missing spot, an unknown or missing type, or a spot
+// outside 1-5 keeps the default; Sunrise or Sunset in spot 5 is the flipping sun, elsewhere just
+// that time.
+// Review focus: odd editor settings never crash and never leave a spot unset.
+(:test)
+function editorChoicesMapToSpots(logger as Logger) as Boolean {
+    var d = FaceSlots.DEFAULTS;
+    var none = FaceSlots.fromPairs([]);
+    var some = FaceSlots.fromPairs([[1, Complications.COMPLICATION_TYPE_STRESS],
+                                    [3, Complications.COMPLICATION_TYPE_SLEEP_SCORE]]);
+    var sunset5 = FaceSlots.fromPairs([[5, Complications.COMPLICATION_TYPE_SUNSET]]);
+    var sunrise5 = FaceSlots.fromPairs([[5, Complications.COMPLICATION_TYPE_SUNRISE]]);
+    var steps5 = FaceSlots.fromPairs([[5, Complications.COMPLICATION_TYPE_STEPS]]);
+    var sunset2 = FaceSlots.fromPairs([[2, Complications.COMPLICATION_TYPE_SUNSET]]);
+    var odd = FaceSlots.fromPairs([[1, Complications.COMPLICATION_TYPE_DATE], [9, Complications.COMPLICATION_TYPE_STEPS],
+                                   [null, Complications.COMPLICATION_TYPE_STEPS], [2, null]]);
+    return none.toString().equals(d.toString())
+        && some[0] == Slots.STRESS && some[2] == Slots.SLEEP_SCORE && some[1] == d[1] && some[4] == d[4]
+        && sunset5[4] == Slots.SUN && sunrise5[4] == Slots.SUN && steps5[4] == Slots.STEPS
+        && sunset2[1] == Slots.SUNSET && odd.toString().equals(d.toString())
+        && d.size() == FaceSlots.COUNT && d[4] == Slots.SUN;
+}
+
+// The editor's highlight box holds its subdial with the stroke, inside the screen.
+(:test)
+function highlightBoxCoversItsSubdial(logger as Logger) as Boolean {
+    var w = System.getDeviceSettings().screenWidth;
+    for (var place = 1; place <= FaceSlots.COUNT; place++) {
+        var p = Rings.centre(place, w);
+        var reach = Rings.radius(place, w) + Rings.PEN * w / 390 / 2;
+        var b = Rings.box(place, w);
+        if (b[0] > p[0] - reach || b[1] > p[1] - reach || b[0] + b[2] < p[0] + reach || b[1] + b[3] < p[1] + reach
+                || b[0] < 0 || b[1] < 0 || b[0] + b[2] > w || b[1] + b[3] > w) {
+            logger.error("box " + place + " " + b);
+            return false;
+        }
+    }
+    return true;
+}
+
+// While a spot is being edited the face leaves it out, so only the editor's pulsing copy shows.
+(:test)
+function editedSpotIsLeftOut(logger as Logger) as Boolean {
+    var view = new HebrewFaceView();
+    var all = view.places().toString();
+    view.editing = 3;
+    var three = view.places().toString();
+    view.editing = 0;
+    return all.equals("[1, 2, 3, 4, 5]") && three.equals("[1, 2, 4, 5]");
+}
+
+// Spot 5 counts as the bottom row: gauges and the sun get a ring there, plain values do not.
+(:test)
+function spotFiveRingsItsGauges(logger as Logger) as Boolean {
+    return RingData.ringed(Slots.STEPS, 5) && RingData.ringed(Slots.SUN, 5) && !RingData.ringed(Slots.HEART_RATE, 5);
+}
+
+// Every widget the editor offers has a Venu icon (Solar is not offered; SUN shows the sunrise or
+// sunset icon).
+(:test)
+function everyOfferedTypeHasAnIcon(logger as Logger) as Boolean {
+    for (var t = 1; t < Slots.TYPE_COUNT; t++) {
+        if (t != Slots.SOLAR && t != Slots.SUN && RingData.icon(t) == null) {
+            logger.error("no icon for " + t);
+            return false;
+        }
+    }
+    return true;
+}
+
+// Where the simulator has editor settings, its defaults (resources-round/configs/watchface.xml)
+// match FaceSlots.DEFAULTS. The simulator saves the settings on the face's first run and keeps
+// them across installs, so a changed default shows here only once its saved config is deleted.
+(:test)
+function editorDefaultsMatchTheFace(logger as Logger) as Boolean {
+    var settings = WatchFaceConfig.getSettings(null);
+    if (settings == null || settings.complicationSettings == null) {
+        logger.debug("simulator has no editor settings");
+        return true;
+    }
+    var saved = FaceSlots.forced;
+    FaceSlots.forced = null;
+    FaceSlots.load(null);
+    var ok = true;
+    for (var spot = 1; spot <= FaceSlots.COUNT; spot++) {
+        ok = ok && FaceSlots.typeOf(spot) == FaceSlots.DEFAULTS[spot - 1];
+    }
+    FaceSlots.forced = saved;
+    return ok;
 }

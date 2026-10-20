@@ -4,9 +4,9 @@ import Toybox.Math;
 import Toybox.WatchUi;
 
 // Subdials at places 1-5: slots 1 and 3 on the left, 2 and 4 on the right (rows top to bottom,
-// between the rim lines), and the sun place above 6 (SUN), which shows the next sunrise or
-// sunset. Each has an icon on top and the value under it; gauges in the bottom row
-// (RingData.ringed) and the sun ring also get a ring, a track with a progress arc from 12 o'clock,
+// between the rim lines), and spot 5, the ring above 6 (SUN), sunrise/sunset by default. Each
+// has an icon on top and the value under it; gauges in the bottom row and spot 5
+// (RingData.ringed) also get a ring, a track with a progress arc from 12 o'clock,
 // since a circle means nothing around a heart rate or an altitude. Geometry is for 390 px and scales with the width; the icon
 // and value offsets and the value sizes scale with each place's radius. Rings end inside the
 // 5-second marks.
@@ -42,6 +42,13 @@ module Rings {
 
     function radius(place as Number, width as Number) as Number {
         return (place == SUN ? SUN_RADIUS : RADIUS) * width / 390;
+    }
+
+    // [x, y, width, height] around place's ring and its stroke, for the editor's highlight.
+    function box(place as Number, width as Number) as Array<Number> {
+        var p = centre(place, width);
+        var r = radius(place, width) + PEN * width / 390 / 2 + 1;
+        return [p[0] - r, p[1] - r, 2 * r, 2 * r];
     }
 
     // Place (1-5) whose ring contains (x, y), or 0.

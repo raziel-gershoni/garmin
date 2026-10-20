@@ -13,4 +13,17 @@
     <bitmap id="IconBodyBattery" filename="icon_bodybattery.png" automaticPalette="false"/>
     <bitmap id="IconNotifications" filename="icon_notifications.png" automaticPalette="false"/>
     <bitmap id="IconCalories" filename="icon_calories.png" automaticPalette="false"/>
+    <bitmap id="IconStress" filename="icon_stress.png" automaticPalette="false"/>
+    <bitmap id="IconFloors" filename="icon_floors.png" automaticPalette="false"/>
+    <bitmap id="IconIntensity" filename="icon_intensity.png" automaticPalette="false"/>
+    <bitmap id="IconTemperature" filename="icon_temperature.png" automaticPalette="false"/>
+    <bitmap id="IconHighLow" filename="icon_highlow.png" automaticPalette="false"/>
+    <bitmap id="IconPulseOx" filename="icon_pulseox.png" automaticPalette="false"/>
+    <bitmap id="IconRespiration" filename="icon_respiration.png" automaticPalette="false"/>
+    <bitmap id="IconSleep" filename="icon_sleep.png" automaticPalette="false"/>
+    <bitmap id="IconPressure" filename="icon_pressure.png" automaticPalette="false"/>
+    <bitmap id="IconRecovery" filename="icon_recovery.png" automaticPalette="false"/>
+    <bitmap id="IconVo2Max" filename="icon_vo2max.png" automaticPalette="false"/>
+    <bitmap id="IconNextEvent" filename="icon_nextevent.png" automaticPalette="false"/>
+    <bitmap id="IconRunWeek" filename="icon_runweek.png" automaticPalette="false"/>
 </drawables>
