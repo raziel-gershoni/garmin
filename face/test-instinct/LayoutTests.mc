@@ -359,6 +359,9 @@ function windowValuesFit(logger as Logger) as Boolean {
     for (var i = 0; i < values.size(); i++) {
         var w = dc.getTextWidthInPixels(values[i], fonts[fonts.size() - 1]);
         if (w > Window.VALUE_MAX_W) {
+            w = dc.getTextWidthInPixels(Window.unitless(values[i]), fonts[fonts.size() - 1]);
+        }
+        if (w > Window.VALUE_MAX_W) {
             logger.error(values[i] + " does not fit the window: " + w + " > " + Window.VALUE_MAX_W);
             return false;
         }
@@ -406,4 +409,13 @@ function everyIconGlyphIsInTheFont(logger as Logger) as Boolean {
 function degreeSignIsInTheFonts(logger as Logger) as Boolean {
     var dc = LayoutTestSupport.offscreenDc();
     return dc.getTextWidthInPixels("°", Graphics.FONT_SMALL) > 0 && dc.getTextWidthInPixels("°", Graphics.FONT_XTINY) > 0;
+}
+
+// The window's last resort drops only a value's trailing unit letters.
+(:test)
+function unitlessDropsOnlyUnitLetters(logger as Logger) as Boolean {
+    return Window.unitless("12.3km").equals("12.3") && Window.unitless("62.1mi").equals("62.1")
+        && Window.unitless("96h").equals("96") && Window.unitless("100%").equals("100%")
+        && Window.unitless("-40°").equals("-40°") && Window.unitless("28/19").equals("28/19")
+        && Window.unitless("--").equals("--");
 }

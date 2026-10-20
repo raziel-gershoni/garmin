@@ -5,7 +5,8 @@ import Toybox.WatchUi;
 // Slot 3 in the round subscreen, as a gauge drawn in the background colour on a disk of the
 // foreground colour: a thin 270° track open at the bottom, a thick progress arc over it for gauge
 // types (Slots.progress), the value in the middle and the icon of the type in the track's gap
-// (the type to show, from Slots.resolve).
+// (the type to show, from Slots.resolve). A value too wide even in the smallest font drops its
+// unit letters (unitless) as a last resort; the number is never cut.
 module Window {
 
     const ARC_R = 26;
@@ -36,7 +37,22 @@ module Window {
         while (f < VALUE_FONTS.size() - 1 && dc.getTextWidthInPixels(text, VALUE_FONTS[f]) > VALUE_MAX_W) {
             f++;
         }
-        dc.drawText(cx, cy + VALUE_DY[f], VALUE_FONTS[f], text, Graphics.TEXT_JUSTIFY_CENTER);
+        var shown = dc.getTextWidthInPixels(text, VALUE_FONTS[f]) > VALUE_MAX_W ? unitless(text) : text;
+        dc.drawText(cx, cy + VALUE_DY[f], VALUE_FONTS[f], shown, Graphics.TEXT_JUSTIFY_CENTER);
         dc.drawText(cx, cy + ICON_DY, iconFont, Slots.ICONS[type], Graphics.TEXT_JUSTIFY_CENTER);
+    }
+
+    // text without its trailing ASCII letters (the unit): "12.3km" is "12.3"; "%", "°" and digits stay.
+    function unitless(text as String) as String {
+        var chars = text.toCharArray();
+        var n = chars.size();
+        while (n > 0) {
+            var c = chars[n - 1].toNumber();
+            if (!((c >= 65 && c <= 90) || (c >= 97 && c <= 122))) {
+                break;
+            }
+            n--;
+        }
+        return text.substring(0, n) as String;
     }
 }
