@@ -14,14 +14,14 @@ Two Connect IQ apps for the Instinct 3 (Tactical) Solar (`instinct3solar45mm`) a
       פרשת לך־לך      ← or the holiday when that Shabbat has none
    ☀ 06:44  ☀ 18:03  ← slots 5–6
   ```
-  - Gregorian date in Hebrew (weekday letter, day.month) beside the round window, which shows slot 3 as a gauge (steps against the daily goal, battery or Body Battery).
+  - Gregorian date in Hebrew (weekday letter, day.month) beside the round window, which shows slot 3 with an arc for gauges: battery, Body Battery, stress and sleep score fill out of 100; steps, floors and this week's intensity minutes against the watch's goals; Sunrise/sunset over the day or night so far.
   - The time sits on a grey band, like the native faces' time band. It follows the watch's 12/24-hour setting and never shifts sideways; the seconds keep ticking in low power unless the watch finds that over its power budget.
   - Full Hebrew date and the week's parasha under the band; long dates and titles step down a font size, and nothing is abbreviated.
-  - Six swappable data slots. Widgets: heart rate, battery, steps, altitude, sunrise, sunset, Body Battery, solar, notifications, calories, stress, floors climbed, intensity minutes, temperature, high/low temperature, pulse ox, respiration, sleep score, pressure, recovery time, VO2 max, next calendar event, weekly run distance, and sunrise/sunset (whichever of the two comes next).
+  - Six swappable data slots. Widgets: heart rate, battery, steps, altitude, sunrise, sunset, Body Battery, solar, notifications, calories, stress, floors climbed, intensity minutes, temperature, high/low temperature, pulse ox, respiration, sleep score, pressure, recovery time, VO2 max, next calendar event, weekly run distance, and "Sunrise/sunset" (the next of the two).
   - The Instinct's on-watch settings show a list of widgets for each slot.
   - **Venu 4 (41 mm):** an analog dial with a different look, built from the same project.
     - The full Hebrew date curves along the top rim and the parasha or holiday along the bottom rim; the Gregorian date ("ב׳ 19.10") sits under 12.
-    - Its widgets are picked in the watch's own face editor (Watch Face → Hebrew Face → Data), not in a settings menu. It has five spots (no Solar widget, no light theme): four subdials with Material Design icons, 1 top-left, 2 top-right, 3 bottom-left, 4 bottom-right, and spot 5, the ring above 6. Gauges (battery, steps, Body Battery) get a ring in the bottom row and in spot 5. Sunrise or Sunset in spot 5 shows whichever comes next.
+    - Its widgets are picked in the watch's own face editor (Watch Face → Hebrew Face → Data), not in a settings menu (not yet confirmed on the watch for a sideloaded face). It has five spots (no Solar widget, no light theme): four subdials with Material Design icons, 1 top-left, 2 top-right, 3 bottom-left, 4 bottom-right, and spot 5, the ring above 6. Gauges get a ring in the bottom row and in spot 5, filling as on the Instinct (battery, Body Battery, stress and sleep score out of 100; steps, floors and this week's intensity minutes against the watch's goals; the sun ring over the day or night so far). The editor has no combined "Sunrise/sunset": picking Sunrise or Sunset in spot 5 gives it, the next of the two.
     - See-through capsule hands (a short thick hour hand, a long thin minute hand) so the data shows through them, and, while the watch is awake, the current second's tick lit orange.
     - The always-on view is dim, with grey hands, and shifts a few pixels each minute against burn-in.
     - Touch-and-hold on a ring opens the matching native Garmin view (heart rate, steps, battery, sunrise/sunset and so on); checked on the watch.
@@ -43,7 +43,7 @@ Design: `docs/superpowers/specs/2026-10-18-hebrew-face-design.md`.
 6. Instinct: add the glance with hold **MENU** › Appearance › Glances › Add › **Hebrew Date**.
 7. Instinct: settings (slots, dark/light): hold **MENU** › Watch Face, then choose Hebrew Face's settings entry.
 
-Venu 4: copy `HebrewFace-venu.prg` and `HebrewDate-venu.prg` the same way (steps 3-4), then choose the face from the watch-face list on the watch. Its widgets are picked in the watch's own editor (Watch Face → Hebrew Face → Data); dark/light is Instinct-only.
+Venu 4: copy `HebrewFace-venu.prg` and `HebrewDate-venu.prg` the same way (steps 3-4), then choose the face from the watch-face list on the watch. Its widgets are picked in the watch's own editor (Watch Face → Hebrew Face → Data; not yet confirmed on the watch for a sideloaded face); dark/light is Instinct-only.
 
 The parasha line fills in after the first background sync, which runs right after the face first starts with the phone connected (retries are hourly). To read logs, create an empty `/GARMIN/APPS/LOGS/HEBREWFACE.TXT` (or `HEBREWDATE.TXT`); crashes go to `/GARMIN/APPS/LOGS/CIQ_LOG.YAML`.
 

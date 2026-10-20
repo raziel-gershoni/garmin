@@ -1,8 +1,8 @@
 import Toybox.Lang;
 import Toybox.Test;
 
-// Sets the Venu's spots for tests through FaceSlots.forced (the editor's settings cannot be
-// written from a test), and puts them back.
+// Sets the Venu's spots for tests through FaceSlots.forced, which leaves the simulator's saved
+// editor settings untouched (WatchFaceConfig.setSettings would overwrite them), and puts them back.
 (:test)
 module TestSlots {
 

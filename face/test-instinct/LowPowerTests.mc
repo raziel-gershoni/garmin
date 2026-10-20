@@ -9,7 +9,7 @@ import Toybox.WatchUi;
 (:test)
 function powerBudgetSwitchesSecondsOff(logger as Logger) as Boolean {
     var dc = FaceTestSupport.screenDc();
-    var views = FaceViews.initial() as Array;
+    var views = FaceViews.initial(null) as Array;
     var view = views[0] as HebrewFaceView;
     var delegate = views[1] as BudgetDelegate;
     view.onLayout(dc);

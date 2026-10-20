@@ -334,7 +334,6 @@ ICONS = {
 .............
 .............
 .............""",  # weekly run distance (a runner)
-
 }
 SIZE = 13
 ADVANCE = 14

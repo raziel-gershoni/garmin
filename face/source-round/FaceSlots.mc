@@ -1,4 +1,3 @@
-import Toybox.Application;
 import Toybox.Application.WatchFaceConfig;
 import Toybox.Lang;
 
@@ -12,6 +11,9 @@ module FaceSlots {
 
     // Test hook: the spots' types, or null to follow the editor.
     var forced as Array<Number>? = null;
+    // The editor settings to read: the ones the watch launched the face with or last edited, null
+    // for the active ones.
+    var configId as WatchFaceConfig.Id? = null;
     var _types as Array<Number>? = null;
 
     // slot is 1-based.
@@ -20,17 +22,22 @@ module FaceSlots {
             return (forced as Array<Number>)[slot - 1];
         }
         if (_types == null) {
-            load(null);
+            load(configId);
         }
         return (_types as Array<Number>)[slot - 1];
     }
 
-    // Reads the editor's choices for configuration id (null: the active one).
+    // Reads the editor's choices for configuration id (null: the active one), and logs what it
+    // found, which shows whether the watch offers its editor for this face.
     function load(id as WatchFaceConfig.Id?) as Void {
         var pairs = [];
+        var found = "no settings";
         try {
             var settings = WatchFaceConfig.getSettings(id);
             var refs = settings == null ? null : settings.complicationSettings;
+            if (settings != null) {
+                found = refs == null ? "no refs" : refs.size() + " refs";
+            }
             if (refs != null) {
                 for (var i = 0; i < refs.size(); i++) {
                     var ref = refs[i];
@@ -41,6 +48,7 @@ module FaceSlots {
             Parasha.log("face config: " + e.getErrorMessage());
         }
         _types = fromPairs(pairs);
+        Parasha.log("face config " + id + ": " + found + " -> " + _types);
     }
 
     // [[spot, complication type], ...] -> each spot's Slots type: DEFAULTS where a spot is missing,
@@ -51,7 +59,7 @@ module FaceSlots {
             var spot = (pairs[i] as Array)[0];
             var type = Slots.fromComplication((pairs[i] as Array)[1] as Number?);
             if (spot instanceof Number && spot >= 1 && spot <= COUNT && type != Slots.NONE) {
-                types[spot - 1] = spot == COUNT && (type == Slots.SUNRISE || type == Slots.SUNSET) ? Slots.SUN : type;
+                types[spot - 1] = spot == Rings.SUN && (type == Slots.SUNRISE || type == Slots.SUNSET) ? Slots.SUN : type;
             }
         }
         return types;

@@ -28,9 +28,9 @@ class HebrewFaceView extends WatchUi.WatchFace {
         WatchFace.initialize();
     }
 
-    // A fresh start reads the editor's choices once.
+    // A fresh start reads the editor's choices once, from the settings the watch launched it with.
     function onLayout(dc as Dc) as Void {
-        FaceSlots.load(null);
+        FaceSlots.load(FaceSlots.configId);
     }
 
     function onUpdate(dc as Dc) as Void {

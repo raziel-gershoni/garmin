@@ -108,9 +108,11 @@ function handsAreDistinct(logger as Logger) as Boolean {
 // that would hide the data, more transparent than not, awake and always-on.
 (:test)
 function handsAreSeeThrough(logger as Logger) as Boolean {
-    var parts = Dial.handCapsules(195, 0.0, 1.0, Graphics.createColor(Dial.HANDS_ALPHA, 255, 255, 255));
+    var parts = Dial.handCapsules(195, 0.0, 1.0, Dial.handsColor(false));
     return parts.size() == 2 && parts[0][0] == 0.0 && parts[1][0] == 1.0
         && (((parts[0][4] as Number) >> 24) & 0xFF) == Dial.HANDS_ALPHA
+        && ((Dial.handsColor(true) >> 24) & 0xFF) == Dial.HANDS_ALPHA_LOW
+        && (Dial.handsColor(false) & 0xFFFFFF) == 0xFFFFFF && (Dial.handsColor(true) & 0xFFFFFF) == 0xFFFFFF
         && Dial.HANDS_ALPHA < 0x80 && Dial.HANDS_ALPHA_LOW < 0x80 && Dial.HANDS_ALPHA_LOW > 0;
 }
 
@@ -345,6 +347,23 @@ function editedSpotIsLeftOut(logger as Logger) as Boolean {
     var three = view.places().toString();
     view.editing = 0;
     return all.equals("[1, 2, 3, 4, 5]") && three.equals("[1, 2, 4, 5]");
+}
+
+// A change while a spot is being edited keeps that spot left out; the end of editing (no type)
+// shows every spot again. An edit without a config id keeps the one the face launched with.
+(:test)
+function editorEditsKeepOrEndTheEditedSpot(logger as Logger) as Boolean {
+    var savedId = FaceSlots.configId;
+    var view = new HebrewFaceView();
+    var delegate = new RingPressDelegate(view);
+    view.editing = 3;
+    delegate.onWatchFaceConfigEdited({:type => WatchUi.WATCH_FACE_CONFIG_TYPE_COMPLICATION});
+    var during = view.editing;
+    delegate.onWatchFaceConfigEdited({:type => null});
+    var after = view.editing;
+    var kept = FaceSlots.configId == savedId;
+    FaceSlots.configId = savedId;
+    return during == 3 && after == 0 && kept;
 }
 
 // Spot 5 counts as the bottom row: gauges and the sun get a ring there, plain values do not.

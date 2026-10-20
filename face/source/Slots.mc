@@ -20,7 +20,6 @@ module Slots {
         PRESSURE, RECOVERY, VO2_MAX, NEXT_EVENT, RUN_WEEK, SUN
     }
     const TYPE_COUNT = 25;
-    const SLOT_COUNT = 6;
 
     // The order lists offer the types in (the Instinct's slot lists, the Venu's editor), Empty last.
     const ORDER = [HEART_RATE, BATTERY, BODY_BATTERY, STRESS, STEPS, FLOORS, INTENSITY, CALORIES,
@@ -44,6 +43,10 @@ module Slots {
     // Types with a natural 0..1 progress (progress).
     const GAUGES = [BATTERY, STEPS, BODY_BATTERY, STRESS, FLOORS, INTENSITY, SLEEP_SCORE, SUN];
 
+    // Complication types already logged as missing, so each is logged once, not every frame.
+    var _missing = [] as Array<Number>;
+
+    // Each type's name in the lists, indexed by Type.
     function names() as Array<ResourceId> {
         return [Rez.Strings.SlotNone, Rez.Strings.SlotHeartRate, Rez.Strings.SlotBattery, Rez.Strings.SlotSteps,
                 Rez.Strings.SlotAltitude, Rez.Strings.SlotSunrise, Rez.Strings.SlotSunset, Rez.Strings.SlotBodyBattery,
@@ -54,6 +57,7 @@ module Slots {
                 Rez.Strings.SlotRunWeek, Rez.Strings.SlotSun];
     }
 
+    // The watch's complication type behind type (COMPLICATIONS), or -1 for none.
     function complicationType(type as Number) as Number {
         return COMPLICATIONS[type] as Number;
     }
@@ -67,6 +71,7 @@ module Slots {
         return t < 0 ? NONE : t;
     }
 
+    // Whether type fills a ring or arc (GAUGES).
     function isGauge(type as Number) as Boolean {
         return GAUGES.indexOf(type) >= 0;
     }
@@ -101,7 +106,10 @@ module Slots {
         try {
             return Complications.getComplication(new Complications.Id(ct as Complications.Type));
         } catch (e) {
-            Parasha.log("no complication " + ct + ": " + e.getErrorMessage());
+            if (_missing.indexOf(ct) < 0) {
+                _missing.add(ct);
+                Parasha.log("no complication " + ct + ": " + e.getErrorMessage());
+            }
             return null;
         }
     }
@@ -164,14 +172,14 @@ module Slots {
     }
 
     // How a reading reads: whole numbers rounded to the nearest, with a unit where the native faces
-    // show one; the watch's own strings as they are; "--" without a reading. imperial: °F for
-    // temperature, miles for distance.
+    // show one; the watch's own strings as they are, except high/low as "<high>/<low>" (highLow);
+    // "--" without a reading. imperial: °F for temperature, miles for distance.
     function format(type as Number, v, imperial as Boolean) as String {
         if (v == null) {
             return "--";
         }
         if (v instanceof String) {
-            return v;
+            return type == HIGH_LOW ? highLow(v) : v;
         }
         if (!(v instanceof Number || v instanceof Float || v instanceof Long || v instanceof Double)) {
             return "--";
@@ -192,6 +200,36 @@ module Slots {
                 return (d < 99.95 ? d.format("%.1f") : whole(d)) + (imperial ? "mi" : "km");
         }
         return whole(v);
+    }
+
+    // The watch's high/low text ("in a format similar to 'H <high> / L <low>'", the SDK says) as
+    // "<high>/<low>" from its first two signed whole numbers: "H 28 / L 19" is "28/19", "H -3° /
+    // L -12°" is "-3/-12". Text without two numbers stays as it is.
+    function highLow(text as String) as String {
+        var chars = text.toCharArray();
+        var found = [] as Array<String>;
+        var i = 0;
+        while (i < chars.size() && found.size() < 2) {
+            var start = i;
+            if (chars[i].toNumber() == 45 && i + 1 < chars.size() && isDigit(chars[i + 1])) {
+                i++;
+            }
+            if (isDigit(chars[i])) {
+                while (i < chars.size() && isDigit(chars[i])) {
+                    i++;
+                }
+                found.add(text.substring(start, i) as String);
+            } else {
+                i = start + 1;
+            }
+        }
+        return found.size() < 2 ? text : found[0] + "/" + found[1];
+    }
+
+    // Whether c is one of 0-9.
+    function isDigit(c as Char) as Boolean {
+        var n = c.toNumber();
+        return n >= 48 && n <= 57;
     }
 
     // A reading as a whole number, rounded to the nearest like the watch's own screens (format("%d")
@@ -234,6 +272,7 @@ module Slots {
         return clamp(v.toFloat() / goal);
     }
 
+    // p held within 0..1.
     function clamp(p as Float) as Float {
         return p < 0.0 ? 0.0 : (p > 1.0 ? 1.0 : p);
     }
@@ -254,17 +293,23 @@ module Slots {
         return [SUNRISE, (sinceRise - day).toFloat() / (86400 - day)];
     }
 
-    // One log line per complication the watch publishes (its type number and the watch's own
-    // label), so the real list can be read off the face's log file. Returns how many it logged.
+    // One log line per complication the watch publishes (its type number, the watch's own label
+    // and its current value), so the real list and formats can be read off the face's log file.
+    // Returns how many it logged; a failure is logged and ends the list, so the caller still marks
+    // it done and it never repeats every frame.
     function logComplications() as Number {
         if (!(Toybox has :Complications)) {
             return 0;
         }
         var count = 0;
-        var it = Complications.getComplications();
-        for (var c = it.next(); c != null; c = it.next()) {
-            Parasha.log("comp " + c.getType() + " " + c.longLabel);
-            count++;
+        try {
+            var it = Complications.getComplications();
+            for (var c = it.next(); c != null; c = it.next()) {
+                Parasha.log("comp " + c.getType() + " " + c.longLabel + " = " + c.value);
+                count++;
+            }
+        } catch (e) {
+            Parasha.log("complication list: " + e.getErrorMessage());
         }
         return count;
     }

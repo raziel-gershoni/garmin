@@ -5,7 +5,8 @@ import Toybox.WatchUi;
 // (no touch, so nothing else to handle).
 module FaceViews {
 
-    function initial() as [WatchUi.Views] or [WatchUi.Views, WatchUi.InputDelegates] {
+    // The face and its delegate; configId (the Venu's editor settings) means nothing here.
+    function initial(configId) as [WatchUi.Views] or [WatchUi.Views, WatchUi.InputDelegates] {
         var view = new HebrewFaceView();
         return [view, new BudgetDelegate(view)] as [WatchUi.Views, WatchUi.InputDelegates];
     }

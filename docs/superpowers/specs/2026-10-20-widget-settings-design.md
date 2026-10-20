@@ -29,7 +29,7 @@ The `Slots.Type` enum stays the widget identity on both watches. New types are a
 | 12 | FLOORS | FLOORS_CLIMBED | `8` | floors / `floorsClimbedGoal` |
 | 13 | INTENSITY | INTENSITY_MINUTES (this week) | `95` | minutes / `activeMinutesWeekGoal` |
 | 14 | TEMPERATURE | CURRENT_TEMPERATURE | `23°`, °C or °F per the watch's units | – |
-| 15 | HIGH_LOW | HIGH_LOW_TEMPERATURE | `28/19`, as the watch formats it | – |
+| 15 | HIGH_LOW | HIGH_LOW_TEMPERATURE | `28/19`: the watch's "H 28 / L 19" as its first two numbers, high/low; text without two numbers as it is | – |
 | 16 | PULSE_OX | PULSE_OX | `96%` | – |
 | 17 | RESPIRATION | RESPIRATION_RATE | `14` | – |
 | 18 | SLEEP_SCORE | SLEEP_SCORE | `77` | value / 100 |
@@ -55,19 +55,18 @@ The `Slots.Type` enum stays the widget identity on both watches. New types are a
 
 - **The `<watchface-config>` resource** lives in `resources-round` only. It declares data spots 1–5:
   - Spots 1–4 are the subdials, in the fixed places of `cc585a5`. Spot 5 is the ring above 6.
-  - Every spot offers the same curated list: types 1–23 that have a complication, minus Solar, in the table's order.
+  - Every spot offers the same curated list: types 1–23 that have a complication, minus Solar, in `Slots.ORDER`.
   - Defaults: 1 heart rate, 2 altitude, 3 battery, 4 steps, 5 sunrise.
   - No styles and no colour pickers.
 - **Reading the choice:**
-  - `FaceSlots.typeOf(slot)` reads `WatchFaceConfig.getSettings(null).complicationSettings`. It maps each spot's complication type back to our `Slots.Type`, and falls back to `FaceSlots.DEFAULTS` when the settings are missing or a type is unknown.
-  - It caches the result and refreshes it on start and on `onWatchFaceConfigEdited`.
+  - `FaceSlots.typeOf(slot)` reads `WatchFaceConfig.getSettings(FaceSlots.configId).complicationSettings`. The face reads `:configId` from `onStart` (the settings the watch launches it with; null means the active ones), and an edit's `:configId` replaces it. It maps each spot's complication type back to our `Slots.Type`, and falls back to `FaceSlots.DEFAULTS` when the settings are missing or a type is unknown.
+  - It caches the result, loading it in `onLayout` and again on `onWatchFaceConfigEdited`.
   - The Instinct's `FaceSlots.typeOf` keeps reading the `SlotN` properties.
   - `Slots.typeOf` goes away, and every caller uses `FaceSlots.typeOf`.
 - **Spot 5:** Sunrise or Sunset there becomes SUN. That is today's ring, which flips to whichever comes next and arcs over the day or night. Any other choice shows that widget in place 5 instead.
 - **Rings:** place 5 counts as the bottom row, so a gauge there gets its ring. `RingData.ringed` already returns true for places above 2, so it needs no change.
 - **What the editor can't offer:** it lists only the watch's data types. So a Venu spot can't be left empty, and the combined SUN can't be picked in spots 1–4. Sunrise or Sunset there shows that one time only.
-- **Editing mode:**
-  - `onStart` sees `:launchedFromWatchFaceSettingsEditor`.
+- **Editing mode:** the face keeps no editor-mode flag; the watch calls the editor handlers only while editing.
   - The face's `WatchFaceDelegate` gains three handlers:
     - `onTap` maps a tap to its place with `Rings.hit` and calls `setSelectedComplication(place)`.
     - `getComplicationDrawable` returns a `ComplicationDrawableRef` for that place: a small Drawable that draws the one subdial, with its bounding box.
@@ -82,7 +81,7 @@ The `Slots.Type` enum stays the widget identity on both watches. New types are a
 
 - **Main menu:** the settings menu keeps its main list: Slot 1 (top left) … Slot 6 (bottom right), then Background.
 - **Picking a slot:** this opens a `CheckboxMenu` titled with the slot's name.
-  - It lists every available widget in the table's order, plus Empty.
+  - It lists every available widget in `Slots.ORDER`, with Empty last.
   - Only the current one is ticked, and the list opens on it.
   - Picking an item saves it, ticks only that item, closes the list and shows the new choice under the slot's name.
   - Back leaves the slot unchanged.
@@ -91,6 +90,7 @@ The `Slots.Type` enum stays the widget identity on both watches. New types are a
 - **Icons:** each new type gets a 13×13 hand-drawn glyph in the Icons font (`tools/make_assets.py`, then regenerate `icons.png`/`icons.fnt`). SUN shows the sunrise or sunset glyph of the next event.
 - **Slot 3:** the round window fills its arc for any gauge type, so the new gauges work there unchanged.
 - **Width:** a new value too wide for its slot falls back through the existing chain: SMALL, then XTINY, then no icon, then clamp. Layout tests get each new type's widest value.
+  - In the round window only, a value too wide in the smallest font drops its unit suffix ("12.3km" → "12.3"); times and strings never do.
 - **Phone settings:** `resources-instinct/settings/settings.xml` (the phone-settings mirror) lists the new types.
 
 ### 4. Venu icons and colours

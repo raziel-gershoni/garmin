@@ -14,6 +14,7 @@ module FaceSlots {
         return (v instanceof Number && v >= 0 && v < Slots.TYPE_COUNT) ? v : DEFAULTS[slot - 1];
     }
 
+    // Saves type as slot's widget (slot is 1-based).
     function setType(slot as Number, type as Number) as Void {
         Properties.setValue("Slot" + slot, type);
     }

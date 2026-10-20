@@ -355,7 +355,7 @@ function bottomRowFits(logger as Logger) as Boolean {
 function windowValuesFit(logger as Logger) as Boolean {
     var dc = LayoutTestSupport.offscreenDc();
     var fonts = Window.VALUE_FONTS;
-    var values = ["88888", "12345", "100%", "100", "--", "100", "-40°", "28/19", "1085", "96h", "12.3km"];
+    var values = ["88888", "12345", "100%", "100", "--", "-40°", "28/19", "1085", "96h", "12.3km"];
     for (var i = 0; i < values.size(); i++) {
         var w = dc.getTextWidthInPixels(values[i], fonts[fonts.size() - 1]);
         if (w > Window.VALUE_MAX_W) {
@@ -404,18 +404,28 @@ function everyIconGlyphIsInTheFont(logger as Logger) as Boolean {
     return true;
 }
 
-// Review focus: the temperature's degree sign is in both slot fonts.
+// Review focus: the temperature's degree sign is in both slot fonts and the window's first font.
 (:test)
 function degreeSignIsInTheFonts(logger as Logger) as Boolean {
     var dc = LayoutTestSupport.offscreenDc();
-    return dc.getTextWidthInPixels("°", Graphics.FONT_SMALL) > 0 && dc.getTextWidthInPixels("°", Graphics.FONT_XTINY) > 0;
+    return dc.getTextWidthInPixels("°", Graphics.FONT_SMALL) > 0 && dc.getTextWidthInPixels("°", Graphics.FONT_XTINY) > 0
+        && dc.getTextWidthInPixels("°", Graphics.FONT_MEDIUM) > 0;
 }
 
-// The window's last resort drops only a value's trailing unit letters.
+// The window's last resort drops only a unit suffix (km, mi, m, h, d) right after a digit; times,
+// percentages, degrees and the high/low pair stay as they are.
 (:test)
 function unitlessDropsOnlyUnitLetters(logger as Logger) as Boolean {
-    return Window.unitless("12.3km").equals("12.3") && Window.unitless("62.1mi").equals("62.1")
-        && Window.unitless("96h").equals("96") && Window.unitless("100%").equals("100%")
-        && Window.unitless("-40°").equals("-40°") && Window.unitless("28/19").equals("28/19")
-        && Window.unitless("--").equals("--");
+    var cases = [["12.3km", "12.3"], ["62.1mi", "62.1"], ["96h", "96"], ["12:00a", "12:00a"],
+                 ["10:30p", "10:30p"], ["2:30 PM", "2:30 PM"], ["100%", "100%"], ["-40°", "-40°"],
+                 ["28/19", "28/19"], ["--", "--"]];
+    var failures = 0;
+    for (var i = 0; i < cases.size(); i++) {
+        var got = Window.unitless(cases[i][0] as String);
+        if (!got.equals(cases[i][1])) {
+            logger.error("unitless " + cases[i][0] + " gave " + got);
+            failures++;
+        }
+    }
+    return failures == 0;
 }

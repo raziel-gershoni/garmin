@@ -1,4 +1,5 @@
 import Toybox.Application;
+import Toybox.Application.WatchFaceConfig;
 import Toybox.Lang;
 import Toybox.System;
 import Toybox.WatchUi;
@@ -6,13 +7,22 @@ import Toybox.WatchUi;
 (:background)
 class HebrewFaceApp extends Application.AppBase {
 
+    // The face settings the watch launched the face with (onStart's :configId; the Venu's editor
+    // passes one), or null for the active ones.
+    var _configId as WatchFaceConfig.Id? = null;
+
     function initialize() {
         AppBase.initialize();
     }
 
+    // Keeps the settings the watch asks the face to launch with, for the initial view.
+    function onStart(state as Dictionary?) as Void {
+        _configId = state == null ? null : state[:configId] as WatchFaceConfig.Id?;
+    }
+
     function getInitialView() as [WatchUi.Views] or [WatchUi.Views, WatchUi.InputDelegates] {
         Parasha.scheduleSync(true);
-        return FaceViews.initial();
+        return FaceViews.initial(_configId);
     }
 
     function getServiceDelegate() as [System.ServiceDelegate] {

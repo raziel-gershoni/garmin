@@ -1,3 +1,4 @@
+import Toybox.Application.WatchFaceConfig;
 import Toybox.Lang;
 import Toybox.WatchUi;
 
@@ -5,7 +6,10 @@ import Toybox.WatchUi;
 // in the watch's own face editor, taps selecting a spot and the edited spot pulsing.
 module FaceViews {
 
-    function initial() as [WatchUi.Views] or [WatchUi.Views, WatchUi.InputDelegates] {
+    // The face and its delegate, reading the editor settings the watch launched it with (configId,
+    // null for the active ones).
+    function initial(configId as WatchFaceConfig.Id?) as [WatchUi.Views] or [WatchUi.Views, WatchUi.InputDelegates] {
+        FaceSlots.configId = configId;
         var view = new HebrewFaceView();
         return [view, new RingPressDelegate(view)] as [WatchUi.Views, WatchUi.InputDelegates];
     }

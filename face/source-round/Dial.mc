@@ -72,11 +72,16 @@ module Dial {
                        low as Boolean) as Void {
         var ha = (((hour % 12) * 60 + min) * Math.PI / 360).toFloat();
         var ma = (min * Math.PI / 30).toFloat();
-        var parts = handCapsules(r, ha, ma, Graphics.createColor(low ? HANDS_ALPHA_LOW : HANDS_ALPHA, 255, 255, 255));
+        var parts = handCapsules(r, ha, ma, handsColor(low));
         for (var i = 0; i < parts.size(); i++) {
             var c = parts[i] as Array;
             capsule(dc, cx, cy, c[0], c[1], c[2], c[3], c[4]);
         }
+    }
+
+    // The hands' see-through white as 0xAARRGGBB: alpha HANDS_ALPHA awake, HANDS_ALPHA_LOW always-on.
+    function handsColor(low as Boolean) as Number {
+        return Graphics.createColor(low ? HANDS_ALPHA_LOW : HANDS_ALPHA, 255, 255, 255);
     }
 
     // The capsules to draw, in order, as [angle, from, to, width, color]: the hour hand, then the

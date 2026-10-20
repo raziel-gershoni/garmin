@@ -95,6 +95,22 @@ function readingsFormatLikeTheNativeFaces(logger as Logger) as Boolean {
     return failures == 0;
 }
 
+// The watch's high/low text reads as "<high>/<low>" whatever its own wording ("H 28 / L 19" is
+// "28/19"); text without two numbers shows as it is, and no other string widget is changed.
+(:test)
+function highLowReadsAsHighSlashLow(logger as Logger) as Boolean {
+    var cases = [["H 28 / L 19", "28/19"], ["H -3° / L -12°", "-3/-12"], ["55/45", "55/45"], ["abc", "abc"]];
+    var failures = 0;
+    for (var i = 0; i < cases.size(); i++) {
+        var got = Slots.format(Slots.HIGH_LOW, cases[i][0], false);
+        if (!got.equals(cases[i][1])) {
+            logger.error("high/low " + cases[i][0] + " gave " + got);
+            failures++;
+        }
+    }
+    return failures == 0 && Slots.format(Slots.NEXT_EVENT, "H 28 / L 19", false).equals("H 28 / L 19");
+}
+
 // Gauges fill against 100 or the watch's goal, clamped, and show no arc without a reading or a
 // goal; only the gauge types are gauges.
 (:test)

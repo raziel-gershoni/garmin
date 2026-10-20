@@ -51,8 +51,13 @@ class RingPressDelegate extends WatchUi.WatchFaceDelegate {
         if (place == 0) {
             return false;
         }
-        setSelectedComplication(place);
-        return true;
+        try {
+            setSelectedComplication(place);
+            return true;
+        } catch (e) {
+            Parasha.log("select spot " + place + ": " + e.getErrorMessage());
+            return false;
+        }
     }
 
     // Editor only: the spot being edited, drawn on its own for the editor to pulse; the face
@@ -61,6 +66,7 @@ class RingPressDelegate extends WatchUi.WatchFaceDelegate {
         var place = ref.uniqueIdentifier;
         if (place == null || place < 1 || place > FaceSlots.COUNT) {
             Parasha.log("editor asked for spot " + place);
+            _view.editing = 0;
             return null;
         }
         _view.editing = place;
@@ -71,10 +77,14 @@ class RingPressDelegate extends WatchUi.WatchFaceDelegate {
         return new WatchUi.ComplicationDrawableRef({:drawable => new RingDrawable(_view, place, box), :boundingBox => bounds});
     }
 
-    // Editor only: a changed choice is drawn at once; every spot shows again once a spot is no
-    // longer being edited.
+    // Editor only: a changed choice is drawn at once, from the settings being edited (kept for
+    // later loads); every spot shows again once a spot is no longer being edited.
     function onWatchFaceConfigEdited(options as {:configId as WatchFaceConfig.Id, :type as WatchUi.WatchFaceConfigType or Null, :committed as Boolean}) as Void {
-        FaceSlots.load(options[:configId] as WatchFaceConfig.Id?);
+        var id = options[:configId] as WatchFaceConfig.Id?;
+        if (id != null) {
+            FaceSlots.configId = id;
+        }
+        FaceSlots.load(FaceSlots.configId);
         if (options[:type] != WatchUi.WATCH_FACE_CONFIG_TYPE_COMPLICATION) {
             _view.editing = 0;
         }
