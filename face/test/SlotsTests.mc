@@ -96,10 +96,12 @@ function readingsFormatLikeTheNativeFaces(logger as Logger) as Boolean {
 }
 
 // The watch's high/low text reads as "<high>/<low>" whatever its own wording ("H 28 / L 19" is
-// "28/19"); text without two numbers shows as it is, and no other string widget is changed.
+// "28/19"), decimals rounded to the nearest whole number; text without two numbers shows as it
+// is, and no other string widget is changed.
 (:test)
 function highLowReadsAsHighSlashLow(logger as Logger) as Boolean {
-    var cases = [["H 28 / L 19", "28/19"], ["H -3° / L -12°", "-3/-12"], ["55/45", "55/45"], ["abc", "abc"]];
+    var cases = [["H 28 / L 19", "28/19"], ["H -3° / L -12°", "-3/-12"], ["55/45", "55/45"], ["abc", "abc"],
+                 ["H 28.5 / L 19.2", "29/19"], ["28.5/19.2", "29/19"], ["H -3.4 / L -12.6", "-3/-13"]];
     var failures = 0;
     for (var i = 0; i < cases.size(); i++) {
         var got = Slots.format(Slots.HIGH_LOW, cases[i][0], false);

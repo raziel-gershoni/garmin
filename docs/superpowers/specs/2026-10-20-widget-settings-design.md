@@ -101,7 +101,7 @@ The `Slots.Type` enum stays the widget identity on both watches. New types are a
 
 ### 5. Diagnostics: what each watch really publishes
 
-- On its first draw, each face writes one line per complication the watch publishes: type number and the watch's own label. It goes to the face's log file, next to the existing "face mem" line.
+- On its first draw, each face writes one line per complication the watch publishes: type number, the watch's own label and its current value (`comp <type> <label> = <value>`), which shows the real formats of values such as high/low, next event and recovery time. It goes to the face's log file, next to the existing "face mem" line.
 - The user copies the log back once. It shows whether the real watches publish a combined sunrise/sunset, or other types the simulator doesn't know.
 - Steps, for the user's report:
   1. The file `GARMIN/APPS/LOGS/HEBREWFACE.TXT` must exist on the watch; create it empty if it's missing.

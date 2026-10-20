@@ -203,8 +203,9 @@ module Slots {
     }
 
     // The watch's high/low text ("in a format similar to 'H <high> / L <low>'", the SDK says) as
-    // "<high>/<low>" from its first two signed whole numbers: "H 28 / L 19" is "28/19", "H -3° /
-    // L -12°" is "-3/-12". Text without two numbers stays as it is.
+    // "<high>/<low>" from its first two signed numbers, each rounded to the nearest whole number
+    // (whole): "H 28 / L 19" is "28/19", "H -3° / L -12°" is "-3/-12", "28.5/19.2" is "29/19". A
+    // "." is part of a number only with a digit after it. Text without two numbers stays as it is.
     function highLow(text as String) as String {
         var chars = text.toCharArray();
         var found = [] as Array<String>;
@@ -218,7 +219,13 @@ module Slots {
                 while (i < chars.size() && isDigit(chars[i])) {
                     i++;
                 }
-                found.add(text.substring(start, i) as String);
+                if (i + 1 < chars.size() && chars[i].toNumber() == 46 && isDigit(chars[i + 1])) {
+                    i++;
+                    while (i < chars.size() && isDigit(chars[i])) {
+                        i++;
+                    }
+                }
+                found.add(whole((text.substring(start, i) as String).toFloat() as Float));
             } else {
                 i = start + 1;
             }
