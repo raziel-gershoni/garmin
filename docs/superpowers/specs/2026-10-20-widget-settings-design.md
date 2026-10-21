@@ -12,7 +12,8 @@ Date: 2026-10-20. Branch: `instinct-digital`. Builds on the Venu face spec (`202
 
 - **Venu 4 41 mm:** it supports the watch's own face editor for Connect IQ faces (Watch Face Configuration API, API 5.1.0). The face declares a `<watchface-config>` resource listing its data spots and the choices for each. The watch's Watch Face menu then offers **Data** for our face, as it does for native faces: you tap a spot, it pulses, and you swipe through the list. The list labels come from the watch, in the watch's language. The user can save up to four versions of the face.
   - Evidence: `doc/docs/Core_Topics/Editing_Watch_Faces_On_Device.html`; `WatchFaceConfig` and `WatchFaceDelegate.setSelectedComplication/getComplicationDrawable/onWatchFaceConfigEdited` list "Venu 4 41mm"; `samples/ConfigurableWatchFace` builds for `venu441mm`; the simulator has a "Watch Face Editor".
-  - Not yet checked: that the watch offers it for a sideloaded face.
+  - Checked on the watch 2026-10-21: the editor works for the sideloaded face. A choice is saved only once the user confirms it (the watch then reports `committed`); leaving the editor without confirming drops it.
+  - The Venu's real list (face log, 2026-10-21): types 1–36 and 38–42, with no Solar Input and no combined sunrise/sunset. High/low arrives in the watch's language ("גבוה 28 / נמוך 19"); pulse ox, respiration and stress are sometimes empty.
 - **Instinct 3 Solar 45 mm:** it has no such API, since none of those classes list it. Its settings stay our own on-watch menu (`getSettingsView`). The list classes we need exist there: `Menu2` and `CheckboxMenu`, API 3.0.
 - **Data sources:** both simulated watches publish 41–42 complications, the watch's own data feeds that a face can read by type. Sunrise and Sunset are two separate entries; there is no combined one. The simulator lists every type the SDK knows (it even gives the Venu "Solar Input"), so the real watches' lists may differ. The face logs the real lists once (see Diagnostics).
 
@@ -63,9 +64,9 @@ The `Slots.Type` enum stays the widget identity on both watches. New types are a
   - It caches the result, loading it in `onLayout` and again on `onWatchFaceConfigEdited`.
   - The Instinct's `FaceSlots.typeOf` keeps reading the `SlotN` properties.
   - `Slots.typeOf` goes away, and every caller uses `FaceSlots.typeOf`.
-- **Spot 5:** Sunrise or Sunset there becomes SUN. That is today's ring, which flips to whichever comes next and arcs over the day or night. Any other choice shows that widget in place 5 instead.
+- **Sunrise or Sunset, in any spot,** becomes SUN: it flips to whichever comes next, and arcs over the day or night where the spot has a ring (the bottom row and spot 5). Any other choice in spot 5 shows that widget there instead. (Until 2026-10-21 this held for spot 5 only; the user asked for it in every spot after trying the editor on the watch.)
 - **Rings:** place 5 counts as the bottom row, so a gauge there gets its ring. `RingData.ringed` already returns true for places above 2, so it needs no change.
-- **What the editor can't offer:** it lists only the watch's data types. So a Venu spot can't be left empty, and the combined SUN can't be picked in spots 1–4. Sunrise or Sunset there shows that one time only.
+- **What the editor can't offer:** it lists only the watch's data types. So a Venu spot can't be left empty, and no spot can show only sunrise or only sunset (both picks give SUN).
 - **Editing mode:** the face keeps no editor-mode flag; the watch calls the editor handlers only while editing.
   - The face's `WatchFaceDelegate` gains three handlers:
     - `onTap` maps a tap to its place with `Rings.hit` and calls `setSelectedComplication(place)`.
@@ -117,7 +118,7 @@ The `Slots.Type` enum stays the widget identity on both watches. New types are a
   - the new gauges' progress, including clamping and missing goals;
   - every type renders in every place without crashing.
 - **Venu:**
-  - editor settings map to slot types, including Sunrise or Sunset in spot 5 becoming SUN, and missing or unknown settings falling back to the defaults;
+  - editor settings map to slot types, including Sunrise or Sunset in any spot becoming SUN, and missing or unknown settings falling back to the defaults;
   - a tap on each place selects that spot, and the centre selects nothing;
   - the highlight drawable's box covers its subdial;
   - the edited spot is left out of the face;

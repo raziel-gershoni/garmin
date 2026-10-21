@@ -4,7 +4,7 @@ import Toybox.Lang;
 // The Venu's five spots: subdials 1-4 (slot N at place N, 1-2 the top row, 3-4 the bottom) and
 // spot 5, the ring above 6. The user picks each spot's widget in the watch's own face editor
 // (resources-round/configs/watchface.xml, with the same defaults as DEFAULTS); Sunrise or Sunset in
-// spot 5 shows whichever comes next (Slots.SUN), as the native faces' sunrise/sunset does.
+// any spot shows whichever comes next (Slots.SUN), as the native faces' sunrise/sunset does.
 module FaceSlots {
     const COUNT = 5;
     const DEFAULTS = [Slots.HEART_RATE, Slots.ALTITUDE, Slots.BATTERY, Slots.STEPS, Slots.SUN];
@@ -88,14 +88,14 @@ module FaceSlots {
     }
 
     // [[spot, complication type], ...] -> each spot's Slots type: DEFAULTS where a spot is missing,
-    // outside 1-5 or of a type the face does not show, and SUN for Sunrise or Sunset in spot 5.
+    // outside 1-5 or of a type the face does not show, and SUN for Sunrise or Sunset.
     function fromPairs(pairs as Array) as Array<Number> {
         var types = DEFAULTS.slice(0, null) as Array<Number>;
         for (var i = 0; i < pairs.size(); i++) {
             var spot = (pairs[i] as Array)[0];
             var type = Slots.fromComplication((pairs[i] as Array)[1] as Number?);
             if (spot instanceof Number && spot >= 1 && spot <= COUNT && type != Slots.NONE) {
-                types[spot - 1] = spot == Rings.SUN && (type == Slots.SUNRISE || type == Slots.SUNSET) ? Slots.SUN : type;
+                types[spot - 1] = type == Slots.SUNRISE || type == Slots.SUNSET ? Slots.SUN : type;
             }
         }
         return types;

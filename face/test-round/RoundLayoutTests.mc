@@ -299,8 +299,7 @@ function everyTypeHasAColour(logger as Logger) as Boolean {
 }
 
 // The editor's choices fill the five spots; a missing spot, an unknown or missing type, or a spot
-// outside 1-5 keeps the default; Sunrise or Sunset in spot 5 is the flipping sun, elsewhere just
-// that time.
+// outside 1-5 keeps the default; Sunrise or Sunset in any spot is the flipping sun.
 // Review focus: odd editor settings never crash and never leave a spot unset.
 (:test)
 function editorChoicesMapToSpots(logger as Logger) as Boolean {
@@ -312,12 +311,15 @@ function editorChoicesMapToSpots(logger as Logger) as Boolean {
     var sunrise5 = FaceSlots.fromPairs([[5, Complications.COMPLICATION_TYPE_SUNRISE]]);
     var steps5 = FaceSlots.fromPairs([[5, Complications.COMPLICATION_TYPE_STEPS]]);
     var sunset2 = FaceSlots.fromPairs([[2, Complications.COMPLICATION_TYPE_SUNSET]]);
+    var sunrise1 = FaceSlots.fromPairs([[1, Complications.COMPLICATION_TYPE_SUNRISE]]);
+    var sunset4 = FaceSlots.fromPairs([[4, Complications.COMPLICATION_TYPE_SUNSET]]);
     var odd = FaceSlots.fromPairs([[1, Complications.COMPLICATION_TYPE_DATE], [9, Complications.COMPLICATION_TYPE_STEPS],
                                    [null, Complications.COMPLICATION_TYPE_STEPS], [2, null]]);
     return none.toString().equals(d.toString())
         && some[0] == Slots.STRESS && some[2] == Slots.SLEEP_SCORE && some[1] == d[1] && some[4] == d[4]
         && sunset5[4] == Slots.SUN && sunrise5[4] == Slots.SUN && steps5[4] == Slots.STEPS
-        && sunset2[1] == Slots.SUNSET && odd.toString().equals(d.toString())
+        && sunset2[1] == Slots.SUN && sunrise1[0] == Slots.SUN && sunset4[3] == Slots.SUN
+        && odd.toString().equals(d.toString())
         && d.size() == FaceSlots.COUNT && d[4] == Slots.SUN;
 }
 

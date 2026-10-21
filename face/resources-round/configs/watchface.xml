@@ -1,7 +1,7 @@
 <resources>
     <!-- The Venu's five spots for the watch's own face editor (FaceSlots): subdials 1-4 and spot 5,
          the ring above 6. Same widgets and order as Slots.ORDER, without Solar and SUN; defaults as
-         FaceSlots.DEFAULTS (Sunrise in spot 5 shows whichever of sunrise and sunset comes next). -->
+         FaceSlots.DEFAULTS (Sunrise or Sunset in any spot shows whichever of the two comes next). -->
     <watchface-config>
         <data>
             <complication id="1">
