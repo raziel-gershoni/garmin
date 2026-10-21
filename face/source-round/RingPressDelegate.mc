@@ -48,6 +48,7 @@ class RingPressDelegate extends WatchUi.WatchFaceDelegate {
     function onTap(event as WatchUi.ClickEvent) as Boolean {
         var xy = event.getCoordinates();
         var place = Rings.hit(xy[0], xy[1], System.getDeviceSettings().screenWidth);
+        Parasha.log("editor tap " + xy + " -> spot " + place);
         if (place == 0) {
             return false;
         }
@@ -64,6 +65,7 @@ class RingPressDelegate extends WatchUi.WatchFaceDelegate {
     // leaves it out meanwhile.
     function getComplicationDrawable(ref as WatchFaceConfig.ComplicationRef) as WatchUi.Drawable or WatchUi.ComplicationDrawableRef or Null {
         var place = ref.uniqueIdentifier;
+        Parasha.log("editor pulses spot " + place);
         if (place == null || place < 1 || place > FaceSlots.COUNT) {
             Parasha.log("editor asked for spot " + place);
             _view.editing = 0;
@@ -81,6 +83,7 @@ class RingPressDelegate extends WatchUi.WatchFaceDelegate {
     // later loads); every spot shows again once a spot is no longer being edited.
     function onWatchFaceConfigEdited(options as {:configId as WatchFaceConfig.Id, :type as WatchUi.WatchFaceConfigType or Null, :committed as Boolean}) as Void {
         var id = options[:configId] as WatchFaceConfig.Id?;
+        Parasha.log("editor edit type " + options[:type] + ", committed " + options[:committed]);
         if (id != null) {
             FaceSlots.configId = id;
         }

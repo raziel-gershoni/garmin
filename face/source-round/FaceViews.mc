@@ -10,6 +10,7 @@ module FaceViews {
     // null for the active ones).
     function initial(configId as WatchFaceConfig.Id?) as [WatchUi.Views] or [WatchUi.Views, WatchUi.InputDelegates] {
         FaceSlots.configId = configId;
+        Parasha.log("face start " + FaceSlots.version(configId) + ", " + FaceSlots.saved());
         var view = new HebrewFaceView();
         return [view, new RingPressDelegate(view)] as [WatchUi.Views, WatchUi.InputDelegates];
     }

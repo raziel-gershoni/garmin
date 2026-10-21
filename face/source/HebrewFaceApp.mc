@@ -18,6 +18,9 @@ class HebrewFaceApp extends Application.AppBase {
     // Keeps the settings the watch asks the face to launch with, for the initial view.
     function onStart(state as Dictionary?) as Void {
         _configId = state == null ? null : state[:configId] as WatchFaceConfig.Id?;
+        if (state != null && state[:launchedFromWatchFaceSettingsEditor] == true) {
+            Parasha.log("face launched by the editor");
+        }
     }
 
     function getInitialView() as [WatchUi.Views] or [WatchUi.Views, WatchUi.InputDelegates] {

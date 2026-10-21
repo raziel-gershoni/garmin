@@ -28,8 +28,15 @@ module FaceSlots {
     }
 
     // Reads the editor's choices for configuration id (null: the active one), and logs what it
-    // found, which shows whether the watch offers its editor for this face.
+    // found and which saved version it is.
     function load(id as WatchFaceConfig.Id?) as Void {
+        var found = read(id);
+        _types = found[1] as Array<Number>;
+        Parasha.log("face config " + version(id) + ": " + found[0] + " -> " + _types);
+    }
+
+    // [what the settings held, each spot's type] for configuration id.
+    function read(id as WatchFaceConfig.Id?) as Array {
         var pairs = [];
         var found = "no settings";
         try {
@@ -47,8 +54,37 @@ module FaceSlots {
         } catch (e) {
             Parasha.log("face config: " + e.getErrorMessage());
         }
-        _types = fromPairs(pairs);
-        Parasha.log("face config " + id + ": " + found + " -> " + _types);
+        return [found, fromPairs(pairs)];
+    }
+
+    // The versions of the face the watch has saved and their spots' types, for the log.
+    function saved() as String {
+        var ids = WatchFaceConfig.getIds();
+        if (ids == null) {
+            return "no saved versions";
+        }
+        var text = ids.size() + " saved:";
+        for (var i = 0; i < ids.size(); i++) {
+            text += " #" + i + " " + read(ids[i])[1];
+        }
+        return text;
+    }
+
+    // Which saved version id is, for the log: "#n" in the watch's list, "active" for null, "?" for
+    // one the list does not hold.
+    function version(id as WatchFaceConfig.Id?) as String {
+        if (id == null) {
+            return "active";
+        }
+        var ids = WatchFaceConfig.getIds();
+        if (ids != null) {
+            for (var i = 0; i < ids.size(); i++) {
+                if (ids[i].equals(id)) {
+                    return "#" + i;
+                }
+            }
+        }
+        return "?";
     }
 
     // [[spot, complication type], ...] -> each spot's Slots type: DEFAULTS where a spot is missing,
