@@ -216,3 +216,21 @@ function complicationListLogs(logger as Logger) as Boolean {
     logger.debug("complications logged " + count);
     return count > 0;
 }
+
+// The face starts many times a day; the list goes into its log only on the first start of each
+// day, so the watch's log file (it keeps only its latest part) is not filled with copies.
+(:test)
+function complicationListLogsOnceADay(logger as Logger) as Boolean {
+    var saved = Storage.getValue(Slots.LISTED_KEY);
+    Storage.deleteValue(Slots.LISTED_KEY);
+    var first = Slots.logComplicationsDaily();
+    var again = Slots.logComplicationsDaily();
+    Storage.setValue(Slots.LISTED_KEY, Parasha.todayRd() - 1);
+    var nextDay = Slots.logComplicationsDaily();
+    if (saved == null) {
+        Storage.deleteValue(Slots.LISTED_KEY);
+    } else {
+        Storage.setValue(Slots.LISTED_KEY, saved);
+    }
+    return first > 0 && again == 0 && nextDay > 0;
+}

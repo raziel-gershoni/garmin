@@ -1,5 +1,6 @@
 import Toybox.Activity;
 import Toybox.ActivityMonitor;
+import Toybox.Application;
 import Toybox.Complications;
 import Toybox.Lang;
 import Toybox.Math;
@@ -42,6 +43,8 @@ module Slots {
 
     // Types with a natural 0..1 progress (progress).
     const GAUGES = [BATTERY, STEPS, BODY_BATTERY, STRESS, FLOORS, INTENSITY, SLEEP_SCORE, SUN];
+    // Storage key: the day (R.D.) the complication list last went into the log.
+    const LISTED_KEY = "cl";
 
     // Complication types already logged as missing, so each is logged once, not every frame.
     var _missing = [] as Array<Number>;
@@ -298,6 +301,17 @@ module Slots {
             return [SUNSET, sinceRise.toFloat() / day];
         }
         return [SUNRISE, (sinceRise - day).toFloat() / (86400 - day)];
+    }
+
+    // logComplications on the face's first start of each day only (returns 0 on the others): the
+    // face starts many times a day, and the watch keeps only the latest part of its log file.
+    function logComplicationsDaily() as Number {
+        var today = Parasha.todayRd();
+        if (Storage.getValue(LISTED_KEY) == today) {
+            return 0;
+        }
+        Storage.setValue(LISTED_KEY, today);
+        return logComplications();
     }
 
     // One log line per complication the watch publishes (its type number, the watch's own label

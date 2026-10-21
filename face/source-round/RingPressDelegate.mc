@@ -65,7 +65,6 @@ class RingPressDelegate extends WatchUi.WatchFaceDelegate {
     // leaves it out meanwhile.
     function getComplicationDrawable(ref as WatchFaceConfig.ComplicationRef) as WatchUi.Drawable or WatchUi.ComplicationDrawableRef or Null {
         var place = ref.uniqueIdentifier;
-        Parasha.log("editor pulses spot " + place);
         if (place == null || place < 1 || place > FaceSlots.COUNT) {
             Parasha.log("editor asked for spot " + place);
             _view.editing = 0;
