@@ -95,6 +95,38 @@ function readingsFormatLikeTheNativeFaces(logger as Logger) as Boolean {
     return failures == 0;
 }
 
+// Past some count the watch's steps complication gives thousands with decimals (a Float, 12.345
+// for 12,345 steps; Garmin bug CIQQA-3781). It reads as the count again, so the value and the
+// ring's progress against the goal stay right; plain counts and other types are left as they are.
+(:test)
+function stepsInThousandsReadAsACount(logger as Logger) as Boolean {
+    var scaled = Slots.unscaled(Slots.STEPS, 10.234);
+    return scaled instanceof Number && scaled == 10234
+        && Slots.unscaled(Slots.STEPS, 12.345) == 12345 && Slots.unscaled(Slots.STEPS, 99.999) == 99999
+        && Slots.unscaled(Slots.STEPS, 1.0) == 1000 && Slots.unscaled(Slots.STEPS, 12.345d) == 12345
+        && Slots.unscaled(Slots.STEPS, 7456) == 7456 && Slots.unscaled(Slots.STEPS, null) == null
+        && Slots.unscaled(Slots.CALORIES, 2.5) == 2.5;
+}
+
+// Steps read in full, or where the face shows them short (the Venu), from 10,000 on as thousands
+// with one decimal, rounded down so "11.0k" never shows before 11,000.
+(:test)
+function stepsReadShortFromTenThousand(logger as Logger) as Boolean {
+    var cases = [[9999, true, "9999"], [10000, true, "10.0k"], [10234, true, "10.2k"],
+                 [10999, true, "10.9k"], [123456, true, "123.4k"], [0, true, "0"],
+                 [10234, false, "10234"], [9999, false, "9999"]];
+    var failures = 0;
+    for (var i = 0; i < cases.size(); i++) {
+        var c = cases[i];
+        var got = Slots.steps(c[0] as Number, c[1] as Boolean);
+        if (!got.equals(c[2])) {
+            logger.error("steps " + c + " gave " + got);
+            failures++;
+        }
+    }
+    return failures == 0;
+}
+
 // The watch's high/low text reads as "<high>/<low>" whatever its own wording ("H 28 / L 19" is
 // "28/19"), decimals rounded to the nearest whole number; text without two numbers shows as it
 // is, and no other string widget is changed.

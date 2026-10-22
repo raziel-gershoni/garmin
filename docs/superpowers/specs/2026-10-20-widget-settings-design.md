@@ -46,6 +46,9 @@ The `Slots.Type` enum stays the widget identity on both watches. New types are a
   - It reads the watch's complication first where the type has one. Today only the Venu does this, in `RingData.value`; that logic moves into the shared code.
   - It then falls back to today's sources: heart-rate history, battery days, the face's own sun times, SensorHistory and ActivityMonitor.
   - With no reading, it shows `--`. Readings are whole numbers rounded to the nearest (`Slots.whole`).
+  - Steps (2026-10-22, after the Venu showed "10" at about 10,000 steps): past some count the watch's steps complication gives thousands with decimals, a Float such as 12.345 (Garmin bug CIQQA-3781). `Slots.unscaled` turns it back into the count, so both the value and the ring's progress are right.
+    - The Venu shows 10,000 and up as thousands with one decimal, rounded down ("10.2k"), the user's choice.
+    - The Instinct keeps full counts ("10234"), since values there are never abbreviated (`FaceSlots.SHORT_STEPS`).
 - **Progress:** `Slots.progress(type)` covers the new gauges. Goals come from `ActivityMonitor.Info`.
 - **Availability:**
   - `Slots.available(type)` hides a type when the watch lacks its data: no complication of that type, or no fallback.
@@ -102,7 +105,7 @@ The `Slots.Type` enum stays the widget identity on both watches. New types are a
 
 ### 5. Diagnostics: what each watch really publishes
 
-- On its first draw of each day (since 2026-10-21; every start filled the watch's log file, which keeps only its latest part), each face writes one line per complication the watch publishes: type number, the watch's own label and its current value (`comp <type> <label> = <value>`), which shows the real formats of values such as high/low, next event and recovery time. It goes to the face's log file, next to the existing "face mem" line.
+- On its first draw of each day (since 2026-10-21; every start filled the watch's log file, which keeps only its latest part), each face writes one line per complication the watch publishes: type number, the watch's own label, its current value and, since 2026-10-22, its unit if any (`comp <type> <label> = <value> <unit>`), which shows the real formats of values such as high/low, next event and recovery time. It goes to the face's log file, next to the existing "face mem" line.
 - The user copies the log back once. It shows whether the real watches publish a combined sunrise/sunset, or other types the simulator doesn't know.
 - Steps, for the user's report:
   1. The file `GARMIN/APPS/LOGS/HEBREWFACE.TXT` must exist on the watch; create it empty if it's missing.

@@ -429,3 +429,9 @@ function unitlessDropsOnlyUnitLetters(logger as Logger) as Boolean {
     }
     return failures == 0;
 }
+
+// Steps read in full on this face, as every value does: 10,234 is "10234", not "10.2k".
+(:test)
+function stepsReadInFull(logger as Logger) as Boolean {
+    return Slots.format(Slots.STEPS, 10234, false).equals("10234");
+}

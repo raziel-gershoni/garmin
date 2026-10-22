@@ -155,7 +155,7 @@ module Slots {
     function reading(type as Number) {
         var c = complication(type);
         if (c != null && c.value != null) {
-            return c.value;
+            return unscaled(type, c.value);
         }
         switch (type) {
             case HEART_RATE:
@@ -174,6 +174,16 @@ module Slots {
         return null;
     }
 
+    // A complication's value as its documentation gives it: past some count the steps complication
+    // gives thousands with decimals instead (a Float, 12.345 for 12,345 steps; Garmin bug
+    // CIQQA-3781), which is the count again here.
+    function unscaled(type as Number, v) {
+        if (type == STEPS && (v instanceof Float || v instanceof Double)) {
+            return Math.round(v * 1000).toNumber();
+        }
+        return v;
+    }
+
     // How a reading reads: whole numbers rounded to the nearest, with a unit where the native faces
     // show one; the watch's own strings as they are, except high/low as "<high>/<low>" (highLow);
     // "--" without a reading. imperial: °F for temperature, miles for distance.
@@ -188,6 +198,8 @@ module Slots {
             return "--";
         }
         switch (type) {
+            case STEPS:
+                return steps(v, FaceSlots.SHORT_STEPS);
             case ALTITUDE:
                 return whole(v) + "m";
             case TEMPERATURE:
@@ -246,6 +258,17 @@ module Slots {
     // would cut 2.8 days down to 2).
     function whole(v as Numeric) as String {
         return (v instanceof Float || v instanceof Double ? Math.round(v) : v).toNumber().format("%d");
+    }
+
+    // Steps in full, or where short, from 10,000 on as thousands with one decimal ("10.2k"), rounded
+    // down so "11.0k" never shows before 11,000.
+    function steps(v as Numeric, short as Boolean) as String {
+        var n = v.toNumber();
+        if (!short || n < 10000) {
+            return whole(v);
+        }
+        var tenths = n / 100;
+        return (tenths / 10).format("%d") + "." + (tenths % 10).format("%d") + "k";
     }
 
     // 0..1 for gauges: battery, Body Battery, stress and sleep score out of 100; steps, floors and
@@ -314,8 +337,9 @@ module Slots {
         return logComplications();
     }
 
-    // One log line per complication the watch publishes (its type number, the watch's own label
-    // and its current value), so the real list and formats can be read off the face's log file.
+    // One log line per complication the watch publishes (its type number, the watch's own label,
+    // its current value and its unit if any), so the real list and formats, including values
+    // scaled like the steps (unscaled), can be read off the face's log file.
     // Returns how many it logged; a failure is logged and ends the list, so the caller still marks
     // it done and it never repeats every frame.
     function logComplications() as Number {
@@ -326,7 +350,8 @@ module Slots {
         try {
             var it = Complications.getComplications();
             for (var c = it.next(); c != null; c = it.next()) {
-                Parasha.log("comp " + c.getType() + " " + c.longLabel + " = " + c.value);
+                Parasha.log("comp " + c.getType() + " " + c.longLabel + " = " + c.value
+                    + (c.unit == null ? "" : " " + c.unit));
                 count++;
             }
         } catch (e) {

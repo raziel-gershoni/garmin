@@ -53,7 +53,7 @@ Same layout, dimmed. The user wants everything kept in this view.
 
 ## Data
 
-- **Slot values:** from the Complications API where the type exists. The Venu simulator publishes all 42 types with values, including HR, steps, battery, Body Battery, altitude, sunrise, sunset, notifications and calories. Fallback is the existing `Slots` code (ActivityMonitor / SensorHistory).
+- **Slot values:** from the Complications API where the type exists. The Venu simulator publishes all 42 types with values, including HR, steps, battery, Body Battery, altitude, sunrise, sunset, notifications and calories. Fallback is the existing `Slots` code (ActivityMonitor / SensorHistory). On the watch, steps arrive in thousands past some count; the face turns them back into a count and shows 10,000 and up as "10.2k" (widget-settings spec, Values).
 - **Slot options:** the shared widget set minus Solar (no solar on the Venu), for the editor's five spots. Defaults: 1 HR, 2 altitude, 3 battery, 4 steps, 5 sunrise.
 - **Hebrew date, parasha and sunset rollover:** the shared `common/` code, unchanged. Sunrise/sunset come from complications, then NOAA, then Jerusalem.
 - **Hold-to-open:** touch-and-hold on a ring opens the matching native view via `WatchFaceDelegate.onPress` + `Complications.exitTo`, where the type supports it. Faces get no plain taps.

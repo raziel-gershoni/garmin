@@ -7,6 +7,8 @@ import Toybox.Lang;
 module FaceSlots {
     const COUNT = 6;
     const DEFAULTS = [Slots.HEART_RATE, Slots.BATTERY, Slots.STEPS, Slots.ALTITUDE, Slots.SUNRISE, Slots.SUNSET];
+    // Steps read in full, like every value on this face (Slots.steps).
+    const SHORT_STEPS = false;
 
     // slot is 1-based.
     function typeOf(slot as Number) as Number {

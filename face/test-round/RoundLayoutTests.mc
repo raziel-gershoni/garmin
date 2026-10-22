@@ -194,7 +194,7 @@ function ringHitTest(logger as Logger) as Boolean {
 function widestValuesFitInsideRings(logger as Logger) as Boolean {
     var dc = FaceTestSupport.screenDc();
     var w = dc.getWidth();
-    var values = ["88888", "23:59", "12:59", "100%", "3999m", "-417m", "--:--", "--"];
+    var values = ["88888", "88.8k", "23:59", "12:59", "100%", "3999m", "-417m", "--:--", "--"];
     for (var place = 1; place <= Rings.PLACES; place++) {
         var r = Rings.radius(place, w);
         var dy = r * Rings.VALUE_DY + 11 * r / Rings.RADIUS;
@@ -213,6 +213,12 @@ function widestValuesFitInsideRings(logger as Logger) as Boolean {
         }
     }
     return true;
+}
+
+// Steps from 10,000 read short in the subdials: 10,234 is "10.2k"; fewer read in full.
+(:test)
+function stepsReadShortInTheSubdials(logger as Logger) as Boolean {
+    return Slots.format(Slots.STEPS, 10234, false).equals("10.2k") && Slots.format(Slots.STEPS, 9999, false).equals("9999");
 }
 
 // Each slot keeps its own place, and only gauges in the bottom row (places 3-4) get a ring: a

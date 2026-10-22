@@ -8,6 +8,8 @@ import Toybox.Lang;
 module FaceSlots {
     const COUNT = 5;
     const DEFAULTS = [Slots.HEART_RATE, Slots.ALTITUDE, Slots.BATTERY, Slots.STEPS, Slots.SUN];
+    // Steps from 10,000 read as thousands, "10.2k" (Slots.steps).
+    const SHORT_STEPS = true;
 
     // Test hook: the spots' types, or null to follow the editor.
     var forced as Array<Number>? = null;
