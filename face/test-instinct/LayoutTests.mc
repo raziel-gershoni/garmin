@@ -265,7 +265,7 @@ function parashaTitlesFit(logger as Logger) as Boolean {
     return failures == 0;
 }
 
-// The time is centred as its template and every time with a two-digit hour is exactly as wide,
+// The time is laid out as its template and every time with a two-digit hour is exactly as wide,
 // so nothing moves (a one-digit hour is one digit narrower and leaves that digit blank).
 (:test)
 function timeKeepsItsPlace(logger as Logger) as Boolean {
@@ -434,4 +434,73 @@ function unitlessDropsOnlyUnitLetters(logger as Logger) as Boolean {
 (:test)
 function stepsReadInFull(logger as Logger) as Boolean {
     return Slots.format(Slots.STEPS, 10234, false).equals("10234");
+}
+
+// The other season's hour reads like the clock, the shift on (summer time) or back (winter time):
+// 24-hour with a leading zero, 12-hour without, across midnight and noon too.
+(:test)
+function seasonHourReadsLikeTheClock(logger as Logger) as Boolean {
+    // [hour, minute, shift in seconds, 24-hour, expected]
+    var cases = [[17, 42, 3600, true, "18"], [23, 30, 3600, true, "00"], [8, 0, 3600, true, "09"],
+                 [17, 42, 1800, true, "18"], [17, 20, 1800, true, "17"], [11, 59, 3600, false, "12"],
+                 [12, 0, 3600, false, "1"], [23, 10, 3600, false, "12"], [0, 10, 3600, false, "1"],
+                 [17, 42, -3600, true, "16"], [0, 10, -3600, true, "23"], [0, 10, -3600, false, "11"],
+                 [1, 0, -3600, false, "12"], [12, 30, -3600, false, "11"], [0, 20, -1800, true, "23"]];
+    var failures = 0;
+    for (var i = 0; i < cases.size(); i++) {
+        var c = cases[i] as Array;
+        var got = Layout.seasonHour(c[0] as Number, c[1] as Number, c[2] as Number, c[3] as Boolean);
+        if (!got.equals(c[4])) {
+            logger.error("season hour " + c + " gave " + got);
+            failures++;
+        }
+    }
+    return failures == 0;
+}
+
+// The time sits TIME_SHIFT right of the centre and ends on screen. The other season's bracketed
+// hour fits the band's left end: every bracket stroke's outline is on screen and inside the band, the
+// strokes run from 2 rows above the digits' ink to 2 below it, the digits (two of them, outline
+// included) sit between the brackets with BRACKET_SPACE px between their ink and each bracket,
+// and the closing bracket's outline ends before the time's.
+(:test)
+function seasonHourFitsBesideTheTime(logger as Logger) as Boolean {
+    var dc = LayoutTestSupport.offscreenDc();
+    var timeFont = WatchUi.loadResource(Rez.Fonts.Time) as FontResource;
+    var font = WatchUi.loadResource(Rez.Fonts.SmallTime) as FontResource;
+    var right = Layout.timeRight(dc, timeFont);
+    var timeWidth = dc.getTextWidthInPixels(Layout.TIME_TEMPLATE, timeFont);
+    var timeLeft = right - timeWidth;
+    if (right != Layout.CENTER_X + timeWidth / 2 + Layout.TIME_SHIFT || right + 1 > 174) {
+        logger.error("time right " + right);
+        return false;
+    }
+    var places = Layout.seasonPlaces(dc, font);
+    var strokes = places[0] as Array<Array<Number>>;
+    var digitsRight = places[1] as Number;
+    var digitsLeft = digitsRight - dc.getTextWidthInPixels("00", font);
+    var inkRight = digitsRight - Layout.DIGIT_GAP;
+    var top = Layout.SEASON_Y + Layout.TIME_INK_DY - 2;
+    var bottom = Layout.SEASON_Y + Layout.TIME_INK_DY + dc.getFontHeight(font) + 2;
+    var openRight = 0;
+    var closeLeft = 999;
+    var failures = 0;
+    for (var i = 0; i < strokes.size(); i++) {
+        var s = strokes[i];
+        if (s[0] - 1 < 1 || s[0] + s[2] + 1 > timeLeft - 1 || s[1] - 1 < DateBand.BAND_TOP
+                || s[1] + s[3] + 1 > DateBand.BAND_TOP + Layout.BAND_HEIGHT || s[1] < top || s[1] + s[3] > bottom) {
+            logger.error("stroke " + s);
+            failures++;
+        }
+        if (s[3] == bottom - top) {
+            if (s[0] < digitsLeft) {
+                openRight = s[0] + s[2];
+            } else {
+                closeLeft = s[0];
+            }
+        }
+    }
+    logger.debug("strokes " + strokes + " digits " + digitsLeft + ".." + digitsRight + " time from " + timeLeft);
+    return failures == 0 && strokes.size() == 6
+        && digitsLeft - openRight == Layout.BRACKET_SPACE && closeLeft - inkRight == Layout.BRACKET_SPACE;
 }

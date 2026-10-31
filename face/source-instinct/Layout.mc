@@ -6,7 +6,8 @@ import Toybox.Lang;
 //   by side, and slot 4 under them;
 // - the subscreen: slot 3 as a gauge (Window.mc);
 // - the grey band (DateBand.BAND_TOP, BAND_HEIGHT rows) with the time and seconds in
-//   seven-segment digits (Rez.Fonts.Time), outlined like the band's text elsewhere;
+//   seven-segment digits (Rez.Fonts.Time), outlined like the band's text elsewhere, and through
+//   the year the other season's hour in brackets at its left end;
 // - the full Hebrew date and the parasha or holiday, on the background below the band;
 // - slots 5-6 along the bottom.
 // Limits were measured against the simulator's fonts and the semi-octagon outline (the corners
@@ -27,11 +28,25 @@ module Layout {
     // The band (shorter than the glance's) and the time on it, outlined, with a grey row above and
     // below the outline. The time's ink starts TIME_INK_DY rows below y (measured in the
     // simulator). It is laid out as TIME_TEMPLATE (every digit has the same advance), so a
-    // one-digit hour leaves its first digit blank and nothing moves.
+    // one-digit hour leaves its first digit blank and nothing moves. It sits TIME_SHIFT right of
+    // the centre all year, leaving the band's left end to the other season's hour.
     const BAND_HEIGHT = 35;
     const TIME_Y = 77;
     const TIME_INK_DY = 1;
     const TIME_TEMPLATE = "00:00:00";
+    const TIME_SHIFT = 14;
+
+    // The other season's hour (SummerTime: summer time through the winter, winter time through the
+    // summer) sits at the band's left end in smaller seven-segment digits (Rez.Fonts.SmallTime),
+    // between square brackets drawn as strokes, outlined like the time. The brackets are BRACKET_PEN px strokes with BRACKET_ARM px arms, from 2 rows
+    // above the digits' ink to 2 below it, BRACKET_SPACE px clear of the ink on each side; the
+    // digits' last DIGIT_GAP columns are each glyph's advance past its ink.
+    const SEASON_X = 2;
+    const SEASON_Y = 81;
+    const BRACKET_PEN = 2;
+    const BRACKET_ARM = 4;
+    const BRACKET_SPACE = 5;
+    const DIGIT_GAP = 2;
 
     // The Hebrew date and the parasha under the band, centred, in SMALL or XTINY (Hebrew is no
     // smaller in XTINY on this watch, only narrower; MEDIUM is too tall). y per font [MEDIUM
@@ -101,9 +116,9 @@ module Layout {
         return DateBand.fit(dc, DateBand.parashaOptions(title, LINE_FONTS), PARASHA_Y, PARASHA_MAX_W);
     }
 
-    // Right edge of the time, which is centred as TIME_TEMPLATE.
+    // Right edge of the time, laid out as TIME_TEMPLATE TIME_SHIFT right of the centre.
     function timeRight(dc as Dc, font as FontType) as Number {
-        return CENTER_X + dc.getTextWidthInPixels(TIME_TEMPLATE, font) / 2;
+        return CENTER_X + dc.getTextWidthInPixels(TIME_TEMPLATE, font) / 2 + TIME_SHIFT;
     }
 
     // [x, y, width, height] that onPartialUpdate redraws: the seconds' two digits with their
@@ -112,6 +127,32 @@ module Layout {
     function secondsBox(dc as Dc, font as FontType) as Array<Number> {
         var w = dc.getTextWidthInPixels("00", font);
         return [timeRight(dc, font) - w - 1, TIME_Y - 1, w + 1, dc.getFontHeight(font) + TIME_INK_DY + 2];
+    }
+
+    // The other season's hour as text: the hour `shift` seconds on from hour:min (back when shift
+    // is negative), read like the clock (24-hour with a leading zero, 12-hour without).
+    function seasonHour(hour as Number, min as Number, shift as Number, h24 as Boolean) as String {
+        var h = (((hour * 60 + min + shift / 60) % 1440 + 1440) % 1440) / 60;
+        return h24 ? h.format("%02d") : (h % 12 == 0 ? 12 : h % 12).toString();
+    }
+
+    // [strokes, digitsRight] for the other season's bracketed hour: the brackets' strokes as
+    // [x, y, width, height] (each bracket's bar, then its top and bottom arms), and the right edge
+    // to right-justify the digits at, so a one-digit hour leaves the first digit blank.
+    function seasonPlaces(dc as Dc, font as FontType) as Array {
+        var top = SEASON_Y + TIME_INK_DY - 2;
+        var height = dc.getFontHeight(font) + 4;
+        var digitsRight = SEASON_X + BRACKET_PEN + BRACKET_SPACE + dc.getTextWidthInPixels("00", font);
+        var close = digitsRight - DIGIT_GAP + BRACKET_SPACE;
+        var closeArm = close + BRACKET_PEN - BRACKET_ARM;
+        return [[
+            [SEASON_X, top, BRACKET_PEN, height],
+            [SEASON_X, top, BRACKET_ARM, BRACKET_PEN],
+            [SEASON_X, top + height - BRACKET_PEN, BRACKET_ARM, BRACKET_PEN],
+            [close, top, BRACKET_PEN, height],
+            [closeArm, top, BRACKET_ARM, BRACKET_PEN],
+            [closeArm, top + height - BRACKET_PEN, BRACKET_ARM, BRACKET_PEN]
+        ], digitsRight];
     }
 
     // Places for slots 5 and 6 as [left, right], each [x, y, font, iconY] or null for an empty

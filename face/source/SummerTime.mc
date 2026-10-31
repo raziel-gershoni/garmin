@@ -12,8 +12,8 @@ import Toybox.Time.Gregorian;
 // offset: a clock off it (a border zone mix-up, or an old position after travel) shows nothing. A
 // zone that happens to share the area's current offset can't be told apart: with an Israeli
 // position, a January clock in Johannesburg (+2 all year) still shows Israel's summer hour until
-// the watch gets a new position. The Venu shows the other season as a barely visible hour hand
-// (Dial.drawPhantom).
+// the watch gets a new position. Each face shows the other season its own way: the Venu as a
+// barely visible hour hand (Dial.drawPhantom), the Instinct as a bracketed hour beside the time.
 module SummerTime {
 
     // Days on from now at which yearOffsets also reads the area's offset: one of them falls in the

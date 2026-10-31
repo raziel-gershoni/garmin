@@ -8,8 +8,8 @@ import Toybox.WatchUi;
 
 // The Instinct face, top to bottom: the Gregorian date, slots 1-2 and slot 4 in the column left
 // of the subscreen, with slot 3 as a gauge in the subscreen; a grey band with the time and
-// seconds; the full Hebrew date and the parasha (or holiday); slots 5-6. All six slots are
-// swappable.
+// seconds, and the other season's hour in brackets at its left end (SummerTime);
+// the full Hebrew date and the parasha (or holiday); slots 5-6. All six slots are swappable.
 // Positions and fonts live in Layout.mc, Window.mc and common/source-instinct/DateBand.mc.
 // In low power the seconds tick through onPartialUpdate until the watch reports the face over
 // its power budget (BudgetDelegate); after that the time shows hours and minutes only while the
@@ -20,6 +20,7 @@ class HebrewFaceView extends WatchUi.WatchFace {
     var _awake = true;
     var _iconFont as FontResource?;
     var _timeFont as FontResource?;
+    var _smallTimeFont as FontResource?;
     var _band as BitmapResource?;
     var _windowX = 144;
     var _windowY = 31;
@@ -39,6 +40,7 @@ class HebrewFaceView extends WatchUi.WatchFace {
     function onLayout(dc as Dc) as Void {
         _iconFont = WatchUi.loadResource(Rez.Fonts.Icons) as FontResource;
         _timeFont = WatchUi.loadResource(Rez.Fonts.Time) as FontResource;
+        _smallTimeFont = WatchUi.loadResource(Rez.Fonts.SmallTime) as FontResource;
         _band = WatchUi.loadResource(Rez.Drawables.Band) as BitmapResource;
         if (WatchUi has :getSubscreen) {
             var box = WatchUi.getSubscreen();
@@ -61,10 +63,11 @@ class HebrewFaceView extends WatchUi.WatchFace {
         var t = day[0] as Gregorian.Info;
         var sun = day[2] as Array<Number>?;
         var hebrewRd = day[3] as Number;
+        var shift = SummerTime.shift();
         if (hebrewRd != _hebrewRd) {
             if (_hebrewRd == -1) {
                 var stats = System.getSystemStats();
-                Parasha.log("face mem " + stats.usedMemory + "/" + stats.totalMemory + " sun " + sun + " phone "
+                Parasha.log("face mem " + stats.usedMemory + "/" + stats.totalMemory + " sun " + sun + " season " + shift + " phone "
                     + System.getDeviceSettings().phoneConnected + " cached " + (Storage.getValue(Parasha.ITEMS_KEY) != null));
                 Slots.logComplicationsDaily();
             }
@@ -83,6 +86,9 @@ class HebrewFaceView extends WatchUi.WatchFace {
         drawBand(dc);
         dc.clearClip();
         drawTime(dc, t.hour as Number, t.min as Number, _awake || partialUpdates ? t.sec as Number : null);
+        if (shift != 0) {
+            drawSeasonHour(dc, t.hour as Number, t.min as Number, shift);
+        }
         drawDates(dc);
         drawSlots(dc, sun);
         drawWindow(dc, sun);
@@ -173,6 +179,27 @@ class HebrewFaceView extends WatchUi.WatchFace {
         var font = _timeFont as FontResource;
         DateBand.drawOutlinedText(dc, Layout.timeRight(dc, font), Layout.TIME_Y, font, sec.format("%02d"),
             Graphics.TEXT_JUSTIFY_RIGHT, _fg, _bg);
+    }
+
+    // The other season's hour, `shift` seconds on from hour:min (back when negative), between
+    // square brackets left of the time (Layout.seasonPlaces), outlined like it: every stroke's
+    // outline first, then the strokes, so the brackets' arms join their bars.
+    function drawSeasonHour(dc as Dc, hour as Number, min as Number, shift as Number) as Void {
+        var font = _smallTimeFont as FontResource;
+        var places = Layout.seasonPlaces(dc, font);
+        var strokes = places[0] as Array<Array<Number>>;
+        dc.setColor(_bg, Graphics.COLOR_TRANSPARENT);
+        for (var i = 0; i < strokes.size(); i++) {
+            var s = strokes[i];
+            dc.fillRectangle(s[0] - 1, s[1] - 1, s[2] + 2, s[3] + 2);
+        }
+        dc.setColor(_fg, Graphics.COLOR_TRANSPARENT);
+        for (var i = 0; i < strokes.size(); i++) {
+            var s = strokes[i];
+            dc.fillRectangle(s[0], s[1], s[2], s[3]);
+        }
+        var text = Layout.seasonHour(hour, min, shift, System.getDeviceSettings().is24Hour);
+        DateBand.drawOutlinedText(dc, places[1] as Number, Layout.SEASON_Y, font, text, Graphics.TEXT_JUSTIFY_RIGHT, _fg, _bg);
     }
 
     // Slot 3 in the subscreen; an empty slot leaves it in the background colour.

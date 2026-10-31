@@ -425,16 +425,25 @@ def segment(x, y, w, h, t):
     return [{side}] if left or right else []
 
 
+def digit_glyphs(w, h, t, gap):
+    """Seven-segment digits, w x h with t-thick strokes, each advancing w + gap."""
+    return {ch: (["".join("#" if any(s <= set(lit) for s in segment(x, y, w, h, t)) else "."
+                          for x in range(w)) for y in range(h)], w + gap)
+            for ch, lit in SEGMENTS.items()}
+
+
 def time_font(out_dir, w=16, h=29, t=4, gap=2):
     """Seven-segment digits and a colon for the time: w x h digits with t-thick strokes, gap
     pixels apart. Every digit has the same advance, so the time never shifts sideways."""
-    glyphs = {}
-    for ch, lit in SEGMENTS.items():
-        glyphs[ch] = (["".join("#" if any(s <= set(lit) for s in segment(x, y, w, h, t)) else "."
-                               for x in range(w)) for y in range(h)], w + gap)
+    glyphs = digit_glyphs(w, h, t, gap)
     dots = {round((t + h / 2) / 2 - t / 2), round(h - (t + h / 2) / 2 - t / 2)}
     glyphs[":"] = (["#" * t if any(d <= y < d + t for d in dots) else "." * t for y in range(h)], t + gap)
     bitmap_font(out_dir, "time", "HebrewFaceTime", glyphs, h)
+
+
+def small_time_font(out_dir, w=11, h=21, t=3, gap=2):
+    """Smaller seven-segment digits for the other season's hour beside the time."""
+    bitmap_font(out_dir, "smalltime", "HebrewFaceSmallTime", digit_glyphs(w, h, t, gap), h)
 
 
 def launcher_icon(path, crescent, n=62):
@@ -467,6 +476,7 @@ def band(path, width=176, height=49):
 if __name__ == "__main__":
     icon_font(ROOT / "face" / "resources-instinct" / "fonts")
     time_font(ROOT / "face" / "resources-instinct" / "fonts")
+    small_time_font(ROOT / "face" / "resources-instinct" / "fonts")
     launcher_icon(ROOT / "face" / "resources" / "drawables" / "launcher_icon.png", True)
     launcher_icon(ROOT / "glance" / "resources" / "drawables" / "launcher_icon.png", False)
     launcher_icon(ROOT / "face" / "resources-round" / "drawables" / "launcher_icon.png", True, 54)

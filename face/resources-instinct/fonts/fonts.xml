@@ -2,4 +2,6 @@
     <font id="Icons" filename="icons.fnt" antialias="false"/>
     <!-- Seven-segment digits for the time line (tools/make_assets.py) -->
     <font id="Time" filename="time.fnt" filter="0123456789:" antialias="false"/>
+    <!-- Smaller seven-segment digits for the other season's hour beside the time (tools/make_assets.py) -->
+    <font id="SmallTime" filename="smalltime.fnt" filter="0123456789" antialias="false"/>
 </fonts>

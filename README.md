@@ -8,7 +8,7 @@ Two Connect IQ apps for the Instinct 3 (Tactical) Solar (`instinct3solar45mm`) a
    ♥ 80  ▭ 5d        ← slots 1–2
    ▲ -17m            ← slot 4
    ░░░░░░░░░░░░░░░░░
-   ░░░░ 8:05:24 ░░░░ ← grey band with the seven-segment time and seconds
+   ░[9]░ 8:05:24 ░░░ ← grey band with the seven-segment time and seconds, the other season's hour
    ░░░░░░░░░░░░░░░░░
      ח׳ חשון תשפ״ז    ← full Hebrew date
       פרשת לך־לך      ← or the holiday when that Shabbat has none
@@ -16,6 +16,7 @@ Two Connect IQ apps for the Instinct 3 (Tactical) Solar (`instinct3solar45mm`) a
   ```
   - Gregorian date in Hebrew (weekday letter, day.month) beside the round window, which shows slot 3 with an arc for gauges: battery, Body Battery, stress and sleep score fill out of 100; steps, floors and this week's intensity minutes against the watch's goals; Sunrise/sunset over the day or night so far.
   - The time sits on a grey band, like the native faces' time band. It follows the watch's 12/24-hour setting and never shifts sideways; the seconds keep ticking in low power unless the watch finds that over its power budget.
+  - The hour the clock would show in the other season sits in square brackets at the band's left end: summer time through the winter, winter time through the summer, worked out from the watch's own time-zone data.
   - Full Hebrew date and the week's parasha under the band; long dates and titles step down a font size, and nothing is abbreviated.
   - Six swappable data slots. Widgets: heart rate, battery, steps, altitude, sunrise, sunset, Body Battery, solar, notifications, calories, stress, floors climbed, intensity minutes, temperature, high/low temperature, pulse ox, respiration, sleep score, pressure, recovery time, VO2 max, next calendar event, weekly run distance, and "Sunrise/sunset" (the next of the two).
   - The Instinct's on-watch settings show a list of widgets for each slot.
