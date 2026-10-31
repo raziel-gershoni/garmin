@@ -18,6 +18,10 @@ module Dial {
     const MINUTE_HAND = [0.06, 0.90, 7.0];
     const HANDS_ALPHA = 0x70;
     const HANDS_ALPHA_LOW = 0x60;
+    // The other season's hand (drawPhantom): the hour hand's shape filled in a barely visible grey
+    // (the user's call), darker always-on.
+    const PHANTOM_GREY = 0x20;
+    const PHANTOM_GREY_LOW = 0x1A;
     // How far in from the edge the 5-second marks reach, round end included (lines get round
     // ends half the pen past their endpoints, measured in the simulator).
     const HOUR_MARK_IN = 18;
@@ -70,9 +74,43 @@ module Dial {
     // See-through white hands, dimmer always-on; the minute hand is drawn last, on top.
     function drawHands(dc as Dc, cx as Number, cy as Number, r as Number, hour as Number, min as Number,
                        low as Boolean) as Void {
-        var ha = (((hour % 12) * 60 + min) * Math.PI / 360).toFloat();
         var ma = (min * Math.PI / 30).toFloat();
-        var parts = handCapsules(r, ha, ma, handsColor(low));
+        drawCapsules(dc, cx, cy, handCapsules(r, hourAngle(hour, min), ma, handsColor(low)));
+    }
+
+    // The other season's hour hand, `shift` seconds on from the clock (summer time in winter) or
+    // back (winter time in summer, shift negative; SummerTime): the hour hand's shape in a barely
+    // visible grey, a ghost of the real one. The face draws it before the data, which stays on top
+    // of it.
+    function drawPhantom(dc as Dc, cx as Number, cy as Number, r as Number, hour as Number, min as Number,
+                         shift as Number, low as Boolean) as Void {
+        drawCapsules(dc, cx, cy, phantomCapsules(r, hour, min, shift, low));
+    }
+
+    // The other season's hand's capsule, as handCapsules: the hour hand's capsule in phantomColor;
+    // none while shift is 0.
+    function phantomCapsules(r as Number, hour as Number, min as Number, shift as Number, low as Boolean) as Array<Array> {
+        if (shift == 0) {
+            return [];
+        }
+        var s = r / 195.0;
+        var a = hourAngle(hour, min + shift / 60);
+        return [[a, HOUR_HAND[0] * r, HOUR_HAND[1] * r, HOUR_HAND[2] * s, phantomColor(low)]];
+    }
+
+    // The other season's hand's grey as 0xAARRGGBB, darker always-on.
+    function phantomColor(low as Boolean) as Number {
+        var v = low ? PHANTOM_GREY_LOW : PHANTOM_GREY;
+        return Graphics.createColor(0xFF, v, v, v);
+    }
+
+    // The hour hand's clock angle (0 to 2 pi) at hour:min; min may run past 60 or below 0 (a later
+    // or an earlier hour).
+    function hourAngle(hour as Number, min as Number) as Float {
+        return (((((hour % 12) * 60 + min) % 720 + 720) % 720) * Math.PI / 360).toFloat();
+    }
+
+    function drawCapsules(dc as Dc, cx as Number, cy as Number, parts as Array<Array>) as Void {
         for (var i = 0; i < parts.size(); i++) {
             var c = parts[i] as Array;
             capsule(dc, cx, cy, c[0], c[1], c[2], c[3], c[4]);

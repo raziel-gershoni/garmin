@@ -97,3 +97,20 @@ function editorCopyDrawsEverySpot(logger as Logger) as Boolean {
     TestSlots.reset();
     return ok;
 }
+
+// Always-on, the face draws the dimmer other-season hand either way and draws without it.
+(:test)
+function alwaysOnDrawsTheSeasonHand(logger as Logger) as Boolean {
+    var dc = FaceTestSupport.screenDc();
+    var view = new HebrewFaceView();
+    view.onLayout(dc);
+    view.setLowPower(true);
+    var shifts = [3600, -3600, 0];
+    for (var i = 0; i < shifts.size(); i++) {
+        SummerTime.override = shifts[i];
+        view.onUpdate(dc);
+    }
+    SummerTime.override = null;
+    view.setLowPower(null);
+    return true;
+}

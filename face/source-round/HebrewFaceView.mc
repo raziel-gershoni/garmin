@@ -8,8 +8,10 @@ import Toybox.WatchUi;
 // Venu face: analog dial, the full Hebrew date along the top rim, the parasha (or holiday) along
 // the bottom rim, the Gregorian date in Hebrew under 12, five spots picked in the watch's face
 // editor: four subdials and the ring above 6, which shows the next sunrise or sunset by default
-// (rings for gauges), and, while awake, the current second's tick lit orange. Always-on draws the
-// same layout thin and dim, without seconds, shifted a few pixels each minute against burn-in.
+// (rings for gauges), and, while awake, the current second's tick lit orange. A barely visible grey
+// hour hand under the data shows the other season's time (SummerTime): summer time through the
+// winter, winter time through the summer. Always-on draws the same layout thin and dim, without
+// seconds, shifted a few pixels each minute against burn-in.
 class HebrewFaceView extends WatchUi.WatchFace {
 
     var _asleep = false;
@@ -49,6 +51,7 @@ class HebrewFaceView extends WatchUi.WatchFace {
         dc.clear();
         dc.setAntiAlias(true);
         Dial.drawTicks(dc, cx, cy, r, low, low ? null : t.sec as Number);
+        Dial.drawPhantom(dc, cx, cy, r, t.hour as Number, t.min as Number, SummerTime.shift(), low);
         refreshLines(dc, day[3] as Number, w);
         dc.setColor(low ? 0x9A9A9A : Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
         RoundText.drawRim(dc, cx, cy, w, _dateLine as Array, true);
@@ -62,7 +65,7 @@ class HebrewFaceView extends WatchUi.WatchFace {
 
         if (!_loggedMemory) {
             var stats = System.getSystemStats();
-            Parasha.log("face mem " + stats.usedMemory + "/" + stats.totalMemory + " sun " + sun);
+            Parasha.log("face mem " + stats.usedMemory + "/" + stats.totalMemory + " sun " + sun + " season " + SummerTime.shift());
             Slots.logComplicationsDaily();
             _loggedMemory = true;
         }

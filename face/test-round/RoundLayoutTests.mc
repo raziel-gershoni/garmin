@@ -413,3 +413,39 @@ function editorDefaultsMatchTheFace(logger as Logger) as Boolean {
     FaceSlots.forced = saved;
     return ok;
 }
+
+// The other season's hand is a copy of the hour hand where the hour hand would be `shift` seconds
+// on (summer time in winter) or back (winter time in summer), filled in a barely visible grey, darker
+// than even the always-on hands and darker still always-on; nothing without a shift. Across
+// midnight it points at the right hour. On a smaller dial it shrinks with the hour hand.
+(:test)
+function phantomHandIsAFaintHourHandShifted(logger as Logger) as Boolean {
+    var r = 195;
+    if (Dial.phantomCapsules(r, 10, 10, 0, false).size() != 0) {
+        logger.error("a hand without summer time");
+        return false;
+    }
+    var awake = Dial.phantomCapsules(r, 10, 10, 3600, false);
+    var low = Dial.phantomCapsules(r, 10, 10, 3600, true);
+    var hand = awake[0] as Array;
+    var grey = Dial.phantomColor(false);
+    var greyLow = Dial.phantomColor(true);
+    var ok = awake.size() == 1 && low.size() == 1 && hand[0] == Dial.hourAngle(11, 10)
+        && hand[1] == Dial.HOUR_HAND[0] * r && hand[2] == Dial.HOUR_HAND[1] * r && hand[3] == Dial.HOUR_HAND[2]
+        && hand[4] == grey && (low[0] as Array)[4] == greyLow
+        && (grey & 0xFF) < Dial.HANDS_ALPHA_LOW && (greyLow & 0xFF) < (grey & 0xFF);
+    var small = Dial.phantomCapsules(180, 10, 10, 3600, false)[0] as Array;
+    var hour = Dial.handCapsules(180, Dial.hourAngle(11, 10), 0.0, grey)[0] as Array;
+    for (var i = 0; i < hour.size(); i++) {
+        ok = ok && small[i] == hour[i];
+    }
+    if (!ok) {
+        logger.error("phantom " + awake + " always-on " + low);
+    }
+    var late = (Dial.phantomCapsules(r, 23, 30, 3600, false)[0] as Array)[0] as Float;
+    var half = (Dial.phantomCapsules(r, 10, 10, 1800, false)[0] as Array)[0] as Float;
+    var back = (Dial.phantomCapsules(r, 10, 10, -3600, false)[0] as Array)[0] as Float;
+    var early = (Dial.phantomCapsules(r, 0, 30, -3600, false)[0] as Array)[0] as Float;
+    return ok && late == Dial.hourAngle(0, 30) && half == Dial.hourAngle(10, 40)
+        && back == Dial.hourAngle(9, 10) && early == Dial.hourAngle(23, 30) && early > 0.0;
+}
